@@ -1,0 +1,21 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true" monitoring="autodetect" dynamicConfig="true">
+	<cache name="ip_add_cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="key-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="auth_cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="300" timeToLiveSeconds="300"/>
+	<cache name="user-id-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="experiment-view-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="sample-view-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="file-view-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="user-type-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="sample-experiment-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	<cache name="sample-fields-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	
+	<cache name="totp-tc-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	
+	
+	<!--  
+	<cache name="user_type_cache" maxEntriesLocalHeap="20">
+		<pinning store="inCache"/>
+	</cache>
+	-->
+</ehcache>

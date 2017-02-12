@@ -18,6 +18,7 @@ import org.abh.common.cryptography.TOTP;
 import org.abh.common.database.DatabaseResultsTable;
 import org.abh.common.database.JDBCConnection;
 import org.abh.common.json.Json;
+import org.abh.common.json.JsonBuilder;
 import org.abh.common.text.TextUtils;
 
 import edu.columbia.rdf.edb.Person;
@@ -997,5 +998,40 @@ public class WebAuthentication {
 		cache.put(new Element(publicId, userId));
 
 		return userId;
-	}	
+	}
+	
+	
+	public static void authError(String reason, JsonBuilder json) {
+		error("auth-fail", reason, json);
+	}
+	
+	public static void error(String error, String reason, JsonBuilder json) {
+		json.startObject();
+		json.add(error, reason);
+		json.endObject();
+	}
+
+	public static void otkAuthError(JsonBuilder json) {
+		authError("otk", json);
+	}
+
+	public static void sampleAuthError(JsonBuilder json) {
+		authError("sample", json);
+	}
+
+	public static void userAuthError(JsonBuilder json) {
+		authError("user", json);
+	}
+
+	public static void expAuthError(JsonBuilder json) {
+		authError("experiment", json);
+	}
+
+	public static void pathAuthError(JsonBuilder json) {
+		authError("path", json);
+	}
+
+	public static void fieldAuthError(JsonBuilder json) {
+		authError("field", json);
+	}
 }

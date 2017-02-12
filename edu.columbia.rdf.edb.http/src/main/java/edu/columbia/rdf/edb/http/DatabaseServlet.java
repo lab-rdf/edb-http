@@ -23,8 +23,8 @@ import org.abh.common.bioinformatics.annotation.Type;
 import org.abh.common.collections.CollectionUtils;
 import org.abh.common.database.DatabaseResultsTable;
 import org.abh.common.database.JDBCConnection;
-import org.abh.common.json.Json;
 import org.abh.common.json.JsonArray;
+import org.abh.common.json.JsonBuilder;
 import org.abh.common.json.JsonObject;
 import org.abh.common.path.Path;
 import org.abh.common.text.TextUtils;
@@ -355,7 +355,7 @@ public abstract class DatabaseServlet  {
 
 	public static void getGeo(Connection connection, 
 			int sampleId, 
-			JsonObject sampleJSON) throws SQLException {
+			JsonBuilder sampleJSON) throws SQLException {
 		String json = getSampleGeoJson(connection, sampleId);
 
 		if (json != null) {
@@ -477,7 +477,7 @@ public abstract class DatabaseServlet  {
 	protected static void processSamples(Connection connection,
 			int userId,
 			DatabaseResultsTable table, 
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 		processSamples(connection,
 				userId,
 				ALL_TAGS,
@@ -489,7 +489,7 @@ public abstract class DatabaseServlet  {
 			int userId,
 			final Set<Integer> tags,
 			DatabaseResultsTable table, 
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 		processSamples(connection,
 				userId,
 				tags,
@@ -503,7 +503,7 @@ public abstract class DatabaseServlet  {
 			Set<Integer> tags,
 			Set<String> views,
 			DatabaseResultsTable table,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		boolean isAdmin = 
 				WebAuthentication.getIsAdminOrSuper(connection, userId);
@@ -539,30 +539,34 @@ public abstract class DatabaseServlet  {
 					userId, 
 					isAdmin);
 
-			JsonObject sampleJSON = new JsonObject();
+			jsonArray.startObject();
 
 			//if (views.contains("all") || views.contains("samples")) {
-			sampleJSON.add(Application.HEADING_ID, 
+			jsonArray.add(Application.HEADING_ID, 
 					sampleId);
-			sampleJSON.add(Application.HEADING_EXPERIMENT_ID, 
+			jsonArray.add(Application.HEADING_EXPERIMENT_ID, 
 					experimentId);
-			sampleJSON.add(Application.HEADING_TYPE, 
+			jsonArray.add(Application.HEADING_TYPE, 
 					table.getDataAsInt(i, 2));
-			sampleJSON.add(Application.HEADING_NAME, 
+			jsonArray.add(Application.HEADING_NAME, 
 					table.getDataAsString(i, 3));
 			//sampleJSON.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
-			sampleJSON.add(Application.HEADING_SPECIES, 
+			jsonArray.add(Application.HEADING_SPECIES, 
 					table.getDataAsInt(i, 4));
-			sampleJSON.add(Application.HEADING_RELEASED, 
+			jsonArray.add(Application.HEADING_RELEASED, 
 					table.getDataAsString(i, 5));
-			sampleJSON.add(Application.HEADING_STATE, 
+			jsonArray.add(Application.HEADING_STATE, 
 					SampleState.shortCode(SampleState.parse(isLocked)));
 
 			//}
 
 			if (tagView) {
-				sampleJSON.add(Application.HEADING_TAGS, 
-						getTagsJson(connection, sampleId, tags));
+				//jsonArray.add(Application.HEADING_TAGS, 
+				//		getTagsJson(connection, sampleId, tags));
+				
+				jsonArray.startArray(Application.HEADING_TAGS);
+				getTagsJson(connection, sampleId, tags, jsonArray);
+				jsonArray.endArray();
 			}
 
 			///if (personView) {
@@ -570,7 +574,7 @@ public abstract class DatabaseServlet  {
 			//}
 
 			if (geoView) {
-				getGeo(connection, sampleId, sampleJSON);
+				getGeo(connection, sampleId, jsonArray);
 			}
 
 			/*
@@ -586,13 +590,13 @@ public abstract class DatabaseServlet  {
 			}
 			 */
 
-			jsonArray.add(sampleJSON);
+			jsonArray.endObject();
 		}
 	}
 
 	private static void getPersonsJson(Connection connection, 
 			int sampleId,
-			JsonObject sampleJSON) throws SQLException {
+			JsonBuilder sampleJSON) throws SQLException {
 		
 		String json = getSamplePersonsJson(connection, sampleId);
 
@@ -660,15 +664,16 @@ public abstract class DatabaseServlet  {
 	protected static void processSamplesPersons(Connection connection,
 			int userId,
 			Collection<Integer> sampleIds,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		for (int sampleId : sampleIds) {
-			JsonObject sampleJSON = JsonObject.create();
-
+			//JsonObject sampleJSON = JsonObject.create();
+			jsonArray.startObject();
+			
 			//if (views.contains("all") || views.contains("samples")) {
-			sampleJSON.add(Application.HEADING_ID, sampleId);
+			jsonArray.add(Application.HEADING_ID, sampleId);
 
-			getPersonsJson(connection, sampleId, sampleJSON);
+			getPersonsJson(connection, sampleId, jsonArray);
 
 			// For testing only
 			//sampleJSON.add("admin", isAdmin);
@@ -679,7 +684,7 @@ public abstract class DatabaseServlet  {
 			//sampleJSON.add("s", sampleId);
 			//sampleJSON.add("can_view", userId);
 
-			jsonArray.add(sampleJSON);
+			jsonArray.endObject(); ////jsonArray.add(sampleJSON);
 		}
 	}
 
@@ -689,7 +694,7 @@ public abstract class DatabaseServlet  {
 			Set<Integer> tags,
 			Set<String> views,
 			DatabaseResultsTable table,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		//boolean isAdmin = 
 		//		WebAuthentication.getIsAdminOrSuper(connection, userId);
@@ -726,21 +731,23 @@ public abstract class DatabaseServlet  {
 			//		userId, 
 			//		isAdmin);
 
-			JsonObject sampleJSON = new JsonObject();
-
+			jsonArray.startObject();
+			
+			//JsonObject sampleJSON = new JsonObject();
+			
 			//if (views.contains("all") || views.contains("samples")) {
-			sampleJSON.add(Application.HEADING_ID, 
+			jsonArray.add(Application.HEADING_ID, 
 					sampleId);
-			sampleJSON.add(Application.HEADING_EXPERIMENT_ID, 
+			jsonArray.add(Application.HEADING_EXPERIMENT_ID, 
 					experimentId);
-			sampleJSON.add(Application.HEADING_TYPE, 
+			jsonArray.add(Application.HEADING_TYPE, 
 					table.getDataAsInt(i, 2));
-			sampleJSON.add(Application.HEADING_NAME, 
+			jsonArray.add(Application.HEADING_NAME, 
 					table.getDataAsString(i, 3));
 			//sampleJSON.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
-			sampleJSON.add(Application.HEADING_SPECIES, 
+			jsonArray.add(Application.HEADING_SPECIES, 
 					table.getDataAsInt(i, 4));
-			sampleJSON.add(Application.HEADING_RELEASED, 
+			jsonArray.add(Application.HEADING_RELEASED, 
 					table.getDataAsString(i, 5));
 			//sampleJSON.add(Application.HEADING_STATE, 
 			//		SampleState.shortCode(SampleState.parse(isLocked)));
@@ -748,7 +755,7 @@ public abstract class DatabaseServlet  {
 			//}
 
 			if (tagView) {
-				sampleJSON.add(Application.HEADING_TAGS, 
+				jsonArray.add(Application.HEADING_TAGS, 
 						getTagsJson(connection, sampleId, tags));
 			}
 
@@ -756,24 +763,29 @@ public abstract class DatabaseServlet  {
 				DatabaseResultsTable personTable = 
 						getPersonTable(connection, sampleId);
 
-				JsonArray personsJSON = new JsonArray();
+				//JsonArray personsJSON = new JsonArray();
+				
+				jsonArray.startArray("persons");
 
 				for (int j = 0; j < personTable.getRowCount(); ++j) {
-					JsonObject personJSON = new JsonObject();
-
-					personJSON.add(Application.HEADING_ID, 
-							personTable.getDataAsInt(j, 1));
+					//JsonObject personJSON = new JsonObject();
+					//jsonArray.startObject("person");
+					
+					jsonArray.add(personTable.getDataAsInt(j, 1));
 					//fileJSON.add(Application.HEADING_NAME, filestable.getDataAsString(j, 1));
 					//fileJSON.add(Application.HEADING_TYPE_ID, new JsonString(filestable.getDataAsString(j, 2)));
 
-					personsJSON.add(personJSON);
+					//jsonArray.add(personJSON);
+					
+					//jsonArray.endObject();
 				}
 
-				sampleJSON.add("persons", personsJSON);
+				//sampleJson.add("persons", personsJSON);
+				jsonArray.endArray();
 			}
 
 			if (geoView) {
-				getGeo(connection, sampleId, sampleJSON);
+				getGeo(connection, sampleId, jsonArray);
 			}
 
 			/*
@@ -789,7 +801,7 @@ public abstract class DatabaseServlet  {
 			}
 			 */
 
-			jsonArray.add(sampleJSON);
+			jsonArray.endObject();
 		}
 	}
 
@@ -808,7 +820,7 @@ public abstract class DatabaseServlet  {
 			ServletContext context,
 			int userId,
 			Collection<Integer> sampleIds,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		boolean isAdmin = 
 				WebAuthentication.getIsAdminOrSuper(connection, userId);
@@ -819,13 +831,14 @@ public abstract class DatabaseServlet  {
 							sampleId, 
 							userId);
 
-			JsonObject sampleJSON = JsonObject.create();
+			//JsonObject sampleJSON = JsonObject.create();
+			jsonArray.startObject();
 
 			//if (views.contains("all") || views.contains("samples")) {
-			sampleJSON.add(Application.HEADING_ID, 
+			jsonArray.add(Application.HEADING_ID, 
 					sampleId);
 
-			sampleJSON.add(Application.HEADING_STATE, 
+			jsonArray.add(Application.HEADING_STATE, 
 					SampleState.shortCode(SampleState.parse(isLocked)));
 
 
@@ -838,35 +851,8 @@ public abstract class DatabaseServlet  {
 			//sampleJSON.add("s", sampleId);
 			//sampleJSON.add("can_view", userId);
 
-			jsonArray.add(sampleJSON);
+			jsonArray.endObject();
 		}
-	}
-
-	/**
-	 * Returns all the tags for a given sample.
-	 * 
-	 * @param connection
-	 * @param sampleId
-	 * @return
-	 * @throws SQLException
-	 */
-	protected static JsonArray getTagsJson(Connection connection, 
-			int sampleId) throws SQLException {
-		JsonArray tagsJson = new JsonArray();
-
-		getTagsJson(connection, sampleId, tagsJson);
-
-		return tagsJson;
-	}
-
-	protected static JsonArray getTagsJson(Connection connection, 
-			int sampleId,
-			final Set<Integer> tags) throws SQLException {
-		JsonArray tagsJson = new JsonArray();
-
-		getTagsJson(connection, sampleId, tags, tagsJson);
-
-		return tagsJson;
 	}
 
 	/**
@@ -875,15 +861,31 @@ public abstract class DatabaseServlet  {
 	 * @param connection
 	 * @param sampleId
 	 * @param array
+	 * @return 
 	 * @return
 	 * @throws SQLException
 	 */
+	public static String getTagsJson(Connection connection, 
+			int sampleId) throws SQLException {
+		return getTagsJson(connection, sampleId, ALL_TAGS);
+	}
+	
 	public static void getTagsJson(Connection connection, 
 			int sampleId,
-			JsonArray array) throws SQLException {
-		getTagsJson(connection, sampleId, ALL_TAGS, array);
-
-		//System.err.println("qqq " + array);
+			JsonBuilder jsonArray) throws SQLException {
+		getTagsJson(connection, sampleId, ALL_TAGS, jsonArray);
+	}
+	
+	protected static String getTagsJson(Connection connection, 
+			int sampleId,
+			final Set<Integer> tags) throws SQLException {
+		JsonBuilder jsonArray = new JsonBuilder().startArray();
+		
+		getTagsJson(connection, sampleId, tags, jsonArray);
+		
+		jsonArray.endArray();
+		
+		return jsonArray.toString();
 	}
 
 	/**
@@ -893,12 +895,13 @@ public abstract class DatabaseServlet  {
 	 * @param sampleId
 	 * @param tags
 	 * @param array
+	 * @return 
 	 * @throws SQLException
 	 */
 	protected static void getTagsJson(Connection connection, 
 			int sampleId,
 			final Set<Integer> tags,
-			JsonArray array) throws SQLException {
+			JsonBuilder jsonArray) throws SQLException {
 
 		//Cache cache = CacheManager.getInstance().getCache("sample-fields-cache");
 
@@ -916,14 +919,16 @@ public abstract class DatabaseServlet  {
 		String json = getSampleFieldsJson(connection, sampleId);
 
 		if (json != null) {
-			//cache.put(new Element(sampleId, json));
-
-			array.setJson(json);
-
-			return;
+			// Clip the array brackets off the string since we don't need
+			// them
+			jsonArray.insert(json.substring(1, json.length() - 1));
 		}
 
-		constructTagsJson(connection, sampleId, array);
+		//JsonBuilder array = new JsonBuilder().startArray();
+		
+		constructTagsJson(connection, sampleId, jsonArray);
+		
+		//array.endArray();
 	}
 
 
@@ -936,50 +941,50 @@ public abstract class DatabaseServlet  {
 	 */
 	public static void constructTagsJson(Connection connection, 
 			int sampleId,
-			JsonArray array) throws SQLException {
+			JsonBuilder array) throws SQLException {
 
 		DatabaseResultsTable tagTable = getTextTagsTable(connection, sampleId);
 
 		for (int j = 0; j < tagTable.getRowCount(); ++j) {
-			JsonObject tagJson = new JsonObject();
+			array.startObject();
 
-			tagJson.add(Application.HEADING_ID, 
+			array.add(Application.HEADING_ID, 
 					tagTable.getDataAsInt(j, 1));
 			//tagJson.add(Application.HEADING_TAG_ID, 
 			//		tagTable.getDataAsInt(j, 1));
-			tagJson.add(Application.HEADING_VALUE, 
+			array.add(Application.HEADING_VALUE, 
 					tagTable.getDataAsString(j, 2));
 
-			array.add(tagJson);
+			array.endObject();
 		}
 
 		tagTable = getIntTagsTable(connection, sampleId);
 
 		for (int j = 0; j < tagTable.getRowCount(); ++j) {
-			JsonObject tagJson = new JsonObject();
+			array.startObject();
 
-			tagJson.add(Application.HEADING_ID, 
+			array.add(Application.HEADING_ID, 
 					tagTable.getDataAsInt(j, 1));
 			
 			//tagJson.add(Application.HEADING_TAG_ID, 
 			//		tagTable.getDataAsInt(j, 1));
 			
-			tagJson.add(Application.HEADING_VALUE, 
+			array.add(Application.HEADING_VALUE, 
 					tagTable.getDataAsInt(j, 2));
 
-			array.add(tagJson);
+			array.endObject();
 		}
 
 		tagTable = getFloatTagsTable(connection, sampleId);
 
 		for (int j = 0; j < tagTable.getRowCount(); ++j) {
-			JsonObject tagJson = new JsonObject();
+			array.startObject();
 
-			tagJson.add(Application.HEADING_ID, tagTable.getDataAsInt(j, 1));
+			array.add(Application.HEADING_ID, tagTable.getDataAsInt(j, 1));
 			//tagJson.add(Application.HEADING_TAG_ID, tagTable.getDataAsInt(j, 1));
-			tagJson.add(Application.HEADING_VALUE, tagTable.getDataAsDouble(j, 2));
+			array.add(Application.HEADING_VALUE, tagTable.getDataAsDouble(j, 2));
 
-			array.add(tagJson);
+			array.endObject();
 		}
 	}
 
@@ -1020,7 +1025,7 @@ public abstract class DatabaseServlet  {
 
 	protected static void processSamples(Connection connection,
 			DatabaseResultsTable table, 
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 		if (table == null) {
 			return;
 		}
@@ -1028,100 +1033,104 @@ public abstract class DatabaseServlet  {
 		for (int i = 0; i < table.getRowCount(); ++i) {
 			int sampleId = table.getDataAsInt(i, 0);
 
-			JsonObject sampleJSON = new JsonObject();
+			//JsonObject sampleJSON = new JsonObject();
+			jsonArray.startObject();
+			
+			jsonArray.add(Application.HEADING_ID, sampleId);
+			jsonArray.add(Application.HEADING_EXPERIMENT_ID, table.getDataAsInt(i, 1));
+			jsonArray.add(Application.HEADING_EXPRESSION_TYPE_ID, table.getDataAsInt(i, 2));
+			jsonArray.add(Application.HEADING_NAME, table.getDataAsString(i, 3));
+			jsonArray.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
+			jsonArray.add(Application.HEADING_SPECIES, table.getDataAsInt(i, 5));
+			jsonArray.add(Application.HEADING_RELEASED, table.getDataAsString(i, 6));
 
-			sampleJSON.add(Application.HEADING_ID, sampleId);
-			sampleJSON.add(Application.HEADING_EXPERIMENT_ID, table.getDataAsInt(i, 1));
-			sampleJSON.add(Application.HEADING_EXPRESSION_TYPE_ID, table.getDataAsInt(i, 2));
-			sampleJSON.add(Application.HEADING_NAME, table.getDataAsString(i, 3));
-			sampleJSON.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
-			sampleJSON.add(Application.HEADING_SPECIES, table.getDataAsInt(i, 5));
-			sampleJSON.add(Application.HEADING_RELEASED, table.getDataAsString(i, 6));
-
-			JsonArray tagsJSON = new JsonArray();
-
+			//JsonArray tagsJSON = new JsonArray();
+			jsonArray.startObject(Application.HEADING_TAGS);
+			
 			DatabaseResultsTable fieldTable = getTextTagsTable(connection, sampleId);
 
 			for (int j = 0; j < fieldTable.getRowCount(); ++j) {
-				JsonObject fieldJSON = new JsonObject();
+				//JsonObject fieldJSON = new JsonObject();
+				jsonArray.startObject();
 
-				fieldJSON.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
-				fieldJSON.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
-				fieldJSON.add(Application.HEADING_VALUE, fieldTable.getDataAsString(j, 2));
+				jsonArray.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
+				jsonArray.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
+				jsonArray.add(Application.HEADING_VALUE, fieldTable.getDataAsString(j, 2));
 
-				tagsJSON.add(fieldJSON);
+				jsonArray.endObject();
 			}
 
 			fieldTable = getIntTagsTable(connection, sampleId);
 
 			for (int j = 0; j < fieldTable.getRowCount(); ++j) {
-				JsonObject fieldJSON = new JsonObject();
+				//JsonObject fieldJSON = new JsonObject();
+				jsonArray.startObject();
+				
+				jsonArray.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
+				jsonArray.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
+				jsonArray.add(Application.HEADING_VALUE, fieldTable.getDataAsInt(j, 2));
 
-				fieldJSON.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
-				fieldJSON.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
-				fieldJSON.add(Application.HEADING_VALUE, fieldTable.getDataAsInt(j, 2));
-
-				tagsJSON.add(fieldJSON);
+				jsonArray.endObject();
 			}
 
 			fieldTable = getFloatTagsTable(connection, sampleId);
 
 			for (int j = 0; j < fieldTable.getRowCount(); ++j) {
-				JsonObject fieldJSON = new JsonObject();
+				//JsonObject fieldJSON = new JsonObject();
+				jsonArray.startObject();
+				
+				jsonArray.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
+				jsonArray.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
+				jsonArray.add(Application.HEADING_VALUE, fieldTable.getDataAsDouble(j, 2));
 
-				fieldJSON.add(Application.HEADING_ID, fieldTable.getDataAsInt(j, 0));
-				fieldJSON.add(Application.HEADING_TAG_ID, fieldTable.getDataAsInt(j, 1));
-				fieldJSON.add(Application.HEADING_VALUE, fieldTable.getDataAsDouble(j, 2));
-
-				tagsJSON.add(fieldJSON);
+				jsonArray.endObject();
 			}
 
-			sampleJSON.add(Application.HEADING_TAGS, tagsJSON);
+			jsonArray.endObject();
 
 			DatabaseResultsTable personTable = 
 					getPersonTable(connection, sampleId);
 
-			JsonArray personsJSON = new JsonArray();
+			jsonArray.startArray("persons");
 
 			for (int j = 0; j < personTable.getRowCount(); ++j) {
-				JsonObject personJSON = new JsonObject();
+				//JsonObject personJSON = new JsonObject();
 
-				personJSON.add(Application.HEADING_ID, personTable.getDataAsInt(j, 1));
+				jsonArray.add(Application.HEADING_ID, personTable.getDataAsInt(j, 1));
 				//fileJSON.add(Application.HEADING_NAME, filestable.getDataAsString(j, 1));
 				//fileJSON.add(Application.HEADING_TYPE_ID, new JsonString(filestable.getDataAsString(j, 2)));
 
-				personsJSON.add(personJSON);
+				//personsJSON.add(personJSON);
 			}
 
-			sampleJSON.add("persons", personsJSON);
+			jsonArray.endArray();
 
-			getGeo(connection, sampleId, sampleJSON);
+			getGeo(connection, sampleId, jsonArray);
 
 			DatabaseResultsTable filesTable = 
 					Vfs.getSampleFilesTable(connection, sampleId);
 
-			JsonArray filesJSON = new JsonArray();
+			jsonArray.startArray(Application.HEADING_FILES);
 
 			for (int j = 0; j < filesTable.getRowCount(); ++j) {
-				JsonObject fileJSON = new JsonObject();
+				//JsonObject fileJSON = new JsonObject();
+				jsonArray.startObject();
+				
+				jsonArray.add(Application.HEADING_ID, filesTable.getDataAsInt(j, 0));
+				jsonArray.add(Application.HEADING_NAME, filesTable.getDataAsString(j, 1));
+				jsonArray.add(Application.HEADING_TYPE_ID, filesTable.getDataAsInt(j, 2));
 
-				fileJSON.add(Application.HEADING_ID, filesTable.getDataAsInt(j, 0));
-				fileJSON.add(Application.HEADING_NAME, filesTable.getDataAsString(j, 1));
-				fileJSON.add(Application.HEADING_TYPE_ID, filesTable.getDataAsInt(j, 2));
-
-				filesJSON.add(fileJSON);
+				jsonArray.endObject();
 			}
 
-			sampleJSON.add(Application.HEADING_FILES, filesJSON);
-
-			jsonArray.add(sampleJSON);
+			jsonArray.endArray();
 		}
 	}
 
 	protected static void processExperiments(Connection connection,
 			int personId,
 			DatabaseResultsTable table,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 		processExperiments(connection,
 				personId,
 				table,
@@ -1133,7 +1142,7 @@ public abstract class DatabaseServlet  {
 			int personId,
 			DatabaseResultsTable table,
 			Set<String> views,
-			JsonArray jsonArray) throws SQLException {
+			JsonBuilder jsonArray) throws SQLException {
 
 		for (int i = 0; i < table.getRowCount(); ++i) {
 			int experimentId = table.getDataAsInt(i, 0);
@@ -1142,16 +1151,16 @@ public abstract class DatabaseServlet  {
 					experimentId, 
 					personId);
 
-			JsonObject json = new JsonObject();
+			jsonArray.startObject(); //JsonObject json = new JsonObject();
 
-			json.add(Application.HEADING_ID, experimentId);
-			json.add(Application.HEADING_PUBLIC_ID, table.getDataAsString(i, 1));
-			json.add(Application.HEADING_NAME, table.getDataAsString(i, 2));
-			json.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 3));
-			json.add(Application.HEADING_RELEASED, table.getDataAsString(i, 4));
-			json.add(Application.HEADING_LOCKED, isLocked);
+			jsonArray.add(Application.HEADING_ID, experimentId);
+			jsonArray.add(Application.HEADING_PUBLIC_ID, table.getDataAsString(i, 1));
+			jsonArray.add(Application.HEADING_NAME, table.getDataAsString(i, 2));
+			jsonArray.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 3));
+			jsonArray.add(Application.HEADING_RELEASED, table.getDataAsString(i, 4));
+			jsonArray.add(Application.HEADING_LOCKED, isLocked);
 
-			jsonArray.add(json);
+			jsonArray.endObject(); //jsonArray.add(json);
 		}
 	}
 
@@ -1171,22 +1180,23 @@ public abstract class DatabaseServlet  {
 	}
 
 	protected static void processTypes(DatabaseResultsTable table,
-			JsonArray jsonArray) {
+			JsonBuilder jsonArray) {
 
 		for (int i = 0; i < table.getRowCount(); ++i) {
-			JsonObject fieldJSON = new JsonObject();
-
+			//JsonObject fieldJSON = new JsonObject();
+			jsonArray.startObject();
+			
 			//attributesJSON.add(Application.HEADING_ID, new JSONInteger(table.getDataAsInt(i, 0)));
-			fieldJSON.add(Application.HEADING_ID, table.getDataAsInt(i, 0));
-			fieldJSON.add(Application.HEADING_NAME, table.getDataAsString(i, 1));
+			jsonArray.add(Application.HEADING_ID, table.getDataAsInt(i, 0));
+			jsonArray.add(Application.HEADING_NAME, table.getDataAsString(i, 1));
 
-			jsonArray.add(fieldJSON);
+			jsonArray.endObject();
 		}
 	}
 
 	protected static void processSampleFiles(Connection connection,
 			int sampleId,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		List<Integer> ids = Vfs.getSampleFiles(connection, sampleId);
 
@@ -1197,7 +1207,7 @@ public abstract class DatabaseServlet  {
 
 	protected static void processExperimentFiles(Connection connection,
 			int experimentId,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		DatabaseResultsTable table = 
 				Vfs.getExperimentFilesTable(connection, experimentId);
@@ -1207,7 +1217,7 @@ public abstract class DatabaseServlet  {
 
 	protected static void processExperimentFilesDir(Connection connection,
 			int experimentId,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		DatabaseResultsTable table = 
 				Vfs.getExperimentFilesDirTable(connection, experimentId);
@@ -1217,23 +1227,24 @@ public abstract class DatabaseServlet  {
 
 	protected static void processFiles(Connection connection,
 			DatabaseResultsTable table, 
-			JsonArray jsonArray) throws ParseException, SQLException {
+			JsonBuilder jsonArray) throws ParseException, SQLException {
 		for (int i = 0; i < table.getRowCount(); ++i) {
 			int vfsId = table.getDataAsInt(i, 0);
 
-			Json fileJson = new JsonObject();
-
-			fileJson.add(Application.HEADING_ID, vfsId);
-			fileJson.add("pid", table.getDataAsInt(i, 1));
-			fileJson.add(Application.HEADING_NAME, table.getDataAsString(i, 2));
-			fileJson.add(Application.HEADING_TYPE, table.getDataAsInt(i, 3));
-			fileJson.add(Application.HEADING_CREATED, table.getDataAsString(i, 5));
+			//Json fileJson = new JsonObject();
+			jsonArray.startObject();
+			
+			jsonArray.add(Application.HEADING_ID, vfsId);
+			jsonArray.add("pid", table.getDataAsInt(i, 1));
+			jsonArray.add(Application.HEADING_NAME, table.getDataAsString(i, 2));
+			jsonArray.add(Application.HEADING_TYPE, table.getDataAsInt(i, 3));
+			jsonArray.add(Application.HEADING_CREATED, table.getDataAsString(i, 5));
 
 			//JsonArray tagsJson = new JsonArray();
 			//processVfsTags(connection, vfsId, tagsJson);
 			//fileJson.add(Application.HEADING_TAGS, tagsJson);
 
-			jsonArray.add(fileJson);
+			jsonArray.endObject();
 		}
 	}
 
@@ -1249,7 +1260,7 @@ public abstract class DatabaseServlet  {
 	 */
 	protected static void processFile(Connection connection,
 			int vfsId,
-			JsonArray jsonArray) throws ParseException, SQLException {
+			JsonBuilder jsonArray) throws ParseException, SQLException {
 		DatabaseResultsTable table = Vfs.getFileTable(connection, vfsId);
 
 		processFiles(connection, table, jsonArray);
@@ -1277,7 +1288,7 @@ public abstract class DatabaseServlet  {
 	}
 
 	protected static void processVfsTags(Connection connection,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		List<Integer> ids = Vfs.getVfsTags(connection);
 
@@ -1288,7 +1299,7 @@ public abstract class DatabaseServlet  {
 
 	protected static void processVfsTags(Connection connection,
 			int vfsId,
-			JsonArray jsonArray) throws SQLException, ParseException {
+			JsonBuilder jsonArray) throws SQLException, ParseException {
 
 		List<Integer> ids = Vfs.getVfsTags(connection, vfsId);
 
@@ -1319,7 +1330,7 @@ public abstract class DatabaseServlet  {
 	}
 
 	protected static void processTags(DatabaseResultsTable table, 
-			JsonArray jsonArray) throws ParseException {
+			JsonBuilder jsonArray) throws ParseException {
 		processTypes(table, jsonArray);
 	}
 

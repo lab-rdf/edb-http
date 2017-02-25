@@ -630,12 +630,24 @@ public abstract class DatabaseServlet  {
 		return ret;
 	}
 	
-	public static JsonArray constructPersonsJson(Connection connection, 
+	public static String constructPersonsJson(Connection connection, 
 			int sampleId) throws SQLException {
+		JsonBuilder jsonArray = JsonBuilder.create().startArray();
+		
+		constructPersonsJson(connection, sampleId, jsonArray);
+		
+		jsonArray.endArray();
+		
+		return jsonArray.toString();
+	}
+	
+	public static void constructPersonsJson(Connection connection, 
+			int sampleId,
+			JsonBuilder jsonArray) throws SQLException {
 		List<Integer> ids = 
 				getPersonIds(connection, sampleId);
 
-		JsonArray personsJSON = new JsonArray();
+		//JsonArray personsJSON = new JsonArray();
 
 		for (int id : ids) {
 			//JsonObject personJSON = new JsonObject();
@@ -645,10 +657,10 @@ public abstract class DatabaseServlet  {
 			//fileJSON.add(Application.HEADING_NAME, filestable.getDataAsString(j, 1));
 			//fileJSON.add(Application.HEADING_TYPE_ID, new JsonString(filestable.getDataAsString(j, 2)));
 
-			personsJSON.add(id);
+			jsonArray.add(id);
 		}
 
-		return personsJSON;
+		//return personsJSON;
 	}
 	
 	/**
@@ -879,7 +891,7 @@ public abstract class DatabaseServlet  {
 	protected static String getTagsJson(Connection connection, 
 			int sampleId,
 			final Set<Integer> tags) throws SQLException {
-		JsonBuilder jsonArray = new JsonBuilder().startArray();
+		JsonBuilder jsonArray = JsonBuilder.create().startArray();
 		
 		getTagsJson(connection, sampleId, tags, jsonArray);
 		

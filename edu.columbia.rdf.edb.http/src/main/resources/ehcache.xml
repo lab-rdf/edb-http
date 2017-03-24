@@ -13,6 +13,8 @@
 	<cache name="totp-tc-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
 	
 	
+	<cache name="user-groups-cache" maxEntriesLocalHeap="1000" timeToIdleSeconds="600" timeToLiveSeconds="600"/>
+	
 	<!--  
 	<cache name="user_type_cache" maxEntriesLocalHeap="20">
 		<pinning store="inCache"/>

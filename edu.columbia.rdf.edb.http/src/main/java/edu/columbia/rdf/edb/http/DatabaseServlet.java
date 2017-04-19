@@ -162,6 +162,7 @@ public abstract class DatabaseServlet  {
 	/** The Constant ALL_TAGS. */
 	private static final Set<Integer> ALL_TAGS = Collections.emptySet();
 
+	/** The Constant ALL_ORGANISMS. */
 	private static final Set<Integer> ALL_ORGANISMS = Collections.emptySet();
 
 	/** The ds. */
@@ -517,11 +518,26 @@ public abstract class DatabaseServlet  {
 	 */
 	public static void getGeo(Connection connection, 
 			int sampleId, 
-			JsonBuilder sampleJSON) throws SQLException {
+			JsonBuilder json) throws SQLException {
+		/*
 		String json = getSampleGeoJson(connection, sampleId);
 
 		if (json != null) {
 			sampleJSON.insert("geo", json);
+		}
+		*/
+		
+		ResultsSetTable table = Database.getTable(connection, 
+				Database.SAMPLE_GEO_SQL, 
+				sampleId);
+
+		if (table.next()) {
+			json.startObject();
+			json.add(EDB.HEADING_ID, table.getInt(0));
+			json.add("geo_series_accession", table.getString(1));
+			json.add("geo_accession", table.getString(2));
+			json.add("geo_platform", table.getString(3));
+			json.endObject();
 		}
 	}
 
@@ -677,6 +693,7 @@ public abstract class DatabaseServlet  {
 	 * @param connection the connection
 	 * @param userId the user id
 	 * @param types the types
+	 * @param organisms the organisms
 	 * @param table the table
 	 * @param jsonArray the json array
 	 * @throws SQLException the SQL exception

@@ -29,7 +29,8 @@ import java.util.Map;
 public class ConcurrentAuthenticationStore implements ConcurrentStore {
 	
 	/** The map. */
-	private Map<String, Map<String, Integer>> map = new HashMap<String, Map<String, Integer>>();
+	private Map<String, Map<String, Integer>> map = 
+			new HashMap<String, Map<String, Integer>>();
 	
 	/**
 	 * Put.

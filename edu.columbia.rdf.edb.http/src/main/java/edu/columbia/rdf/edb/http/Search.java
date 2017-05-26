@@ -17,6 +17,7 @@ package edu.columbia.rdf.edb.http;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -29,6 +30,8 @@ import org.abh.common.collections.CollectionUtils;
 import org.abh.common.database.JDBCConnection;
 import org.abh.common.database.ResultsSetTable;
 import org.abh.common.search.SearchStackElement;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -197,6 +200,77 @@ public class Search {
 
 		return Database.getSamplesTable(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
 	}
+	
+	public static List<SampleBean> search(JdbcTemplate connection, 
+			int tagId,
+			List<SearchStackElement<Integer>> searchQueue,
+			int maxCount) throws SQLException {
+
+		if (searchQueue.size() == 0) {
+			//return Database.getSamplesTable(connection);
+
+			// Get all the key word ids for the tag
+			//List<Integer> tagKeywordIds = getTagKeywordIds(connection, tagId);
+
+			List<Integer> ids = getSampleIds(connection, tagId); //getSampleIds(connection, tagKeywordIds);
+
+			return Database.getSamples(connection, ids, maxCount);
+		}
+
+
+		//SearchStackElement<Integer> e = null;
+
+		Deque<SearchResults> tempStack =
+				new ArrayDeque<SearchResults>();
+
+		//while (!searchStack.isEmpty()) {
+		//	e = searchStack.pop();
+
+		for (SearchStackElement<Integer> e : searchQueue) {
+			switch (e.mOp) {
+			case MATCH:
+				// First get a list of keywords matching the search
+				//List<Integer> keywordIds = getKeywordIds(connection, e.mText);
+
+				// Now see if the tag of interest contains those keyword ids
+				//List<Integer> tagKeywordIds = 
+				//		getTagKeywordIds(connection, tagId, keywordIds);
+
+				String keyword = e.mText;
+
+				boolean include = include(keyword);
+
+				// Get all samples matched to those keywords for the tag.
+				tempStack.push(new SearchResults(getSampleIds(connection, tagId, e.mText, include), include)); //tagKeywordIds); //getSampleIds(connection, tagKeywordIds));
+
+				break;
+			case AND:
+				tempStack.push(and(tempStack.pop(), tempStack.pop()));
+				break;
+			case OR:
+				tempStack.push(or(tempStack.pop(), tempStack.pop()));
+				break;
+			default:
+				break;
+			}
+		}
+
+		// The result will be left on the tempStack
+
+		//List<Integer> sampleIds = getSampleIds(connection, tempStack.pop());
+
+		SearchResults results = tempStack.pop();
+
+		Collection<Integer> samples;
+
+		if (results.getInclude()) {
+			samples = results.getValues();
+		} else {
+			samples = Collections.emptySet();
+		}
+
+		return Database.getSamples(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
+	}
 
 	/**
 	 * Performs an intersection of two sets of samples. If either of the
@@ -284,6 +358,14 @@ public class Search {
 				ALL_TAG_SAMPLES_SQL, 
 				tagId);
 	}
+	
+	public  static List<Integer> getSampleIds(JdbcTemplate connection, 
+			int tagId) throws SQLException {
+
+		return Database.getIds(connection, 
+				ALL_TAG_SAMPLES_SQL, 
+				tagId);
+	}
 
 	/**
 	 * Find all the samples matching keywords associated with a particular
@@ -298,6 +380,52 @@ public class Search {
 	 * @throws SQLException the SQL exception
 	 */
 	private static Set<Integer> getSampleIds(Connection connection, 
+			int tagId,
+			String keyword,
+			boolean include) throws SQLException {
+
+		boolean exact = exact(keyword);
+
+		if (exact) {
+			// Strip quotation marks
+			keyword = keyword.substring(1, keyword.length() - 1);
+		}
+
+		if (!include) {
+			// Strip dash at beginning
+			keyword = keyword.substring(1);
+		}
+
+		//System.err.println("keyword3 " + keyword + " " + exact + " " + include);
+
+		if (exact) {
+			// Match on the tag value for the sample. This is not quite
+			// exact but is designed for cases where a word in the value
+			// should be included or excluded.
+
+			//System.err.println("keyword4 " + SAMPLE_KEYWORD_EXACT_SEARCH_SQL + " " + tagId + " " + keyword);
+
+			return getIds(connection, 
+					SAMPLE_KEYWORD_EXACT_SEARCH_SQL, 
+					tagId,
+					keyword);
+		} else {
+			// In the non-exact match we match on indexed keywords. Note
+			// that this can make excluding samples difficult since if they
+			// are indexed on multiple keywords, -keyword, will eliminate
+			// matches based on the keyword, but keep all others making this
+			// function effectively useless
+			
+			//System.err.println("keyword5 " + SAMPLE_KEYWORD_SEARCH_SQL + " " + tagId + " " + keyword);
+
+			return getIds(connection, 
+					SAMPLE_KEYWORD_SEARCH_SQL, 
+					tagId,
+					keyword);
+		}
+	}
+	
+	private static List<Integer> getSampleIds(JdbcTemplate connection, 
 			int tagId,
 			String keyword,
 			boolean include) throws SQLException {
@@ -378,6 +506,21 @@ public class Search {
 
 		return ret;
 	}
+	
+	public static List<Integer> getIds(JdbcTemplate connection, 
+			final String sql,
+			int id1,
+			String id2) throws SQLException {
+		return connection.query(
+				sql,
+				new Object[]{id1, id2},
+				new RowMapper<Integer>() {
+					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt(1);
+					}
+				});
+	}
+	
 
 	/*
 	private static List<Integer> getTagKeywordIds(Connection connection, 

@@ -45,6 +45,8 @@ import org.abh.common.json.JsonBuilder;
 import org.abh.common.json.JsonObject;
 import org.abh.common.path.Path;
 import org.abh.common.text.TextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import edu.columbia.rdf.edb.EDB;
 import edu.columbia.rdf.edb.Experiment;
@@ -61,7 +63,7 @@ import net.sf.ehcache.Element;
  * Provides a connection to the database for servlets and
  * deals with closing the connection.
  * 
- * @author Antony Holmes
+ * @author Antony Holmes Holmes
  *
  */
 public abstract class DatabaseServlet  {
@@ -90,11 +92,11 @@ public abstract class DatabaseServlet  {
 
 
 	/** The Constant TAGS_SAMPLE_SQL. */
-	private static final String TAGS_SAMPLE_SQL = 
+	public static final String TAGS_SAMPLE_SQL = 
 			"SELECT tags_sample.id, tags_sample.tag_id, tags_sample.value FROM tags_sample WHERE tags_sample.sample_id = ?";
 
 	/** Returns just the specific tags mentioned. */
-	private static final String SAMPLE_SPECIFIC_TAG_SQL = 
+	public static final String SAMPLE_SPECIFIC_TAG_SQL = 
 			TAGS_SAMPLE_SQL + " AND tags_sample.tag_id = ?";
 
 	/** The Constant SAMPLE_SPECIFIC_TAGS_SQL. */
@@ -102,11 +104,11 @@ public abstract class DatabaseServlet  {
 			TAGS_SAMPLE_SQL + " AND tags_sample.tag_id = ANY(?::int[])";
 
 	/** The Constant TAGS_SAMPLE_INT_SQL. */
-	private static final String TAGS_SAMPLE_INT_SQL = 
+	public static final String TAGS_SAMPLE_INT_SQL = 
 			"SELECT tags_sample_int.id, tags_sample_int.tag_id, tags_sample_int.value FROM tags_sample_int WHERE tags_sample_int.sample_id = ?";
 
 	/** The Constant SAMPLE_SPECIFIC_INT_TAG_SQL. */
-	private static final String SAMPLE_SPECIFIC_INT_TAG_SQL = 
+	public static final String SAMPLE_SPECIFIC_INT_TAG_SQL = 
 			TAGS_SAMPLE_INT_SQL + " AND tags_sample_int.tag_id = ?";
 
 	/** The Constant SAMPLE_SPECIFIC_INT_TAGS_SQL. */
@@ -114,16 +116,16 @@ public abstract class DatabaseServlet  {
 			TAGS_SAMPLE_INT_SQL + " AND tags_sample_int.tag_id = ANY(?::int[])";
 
 	/** The Constant SAMPLE_FLOAT_TAG_SQL. */
-	private static final String SAMPLE_FLOAT_TAG_SQL = 
+	public static final String TAGS_SAMPLE_FLOAT_SQL = 
 			"SELECT tags_sample_float.id, tags_sample_float.tag_id, tags_sample_float.value FROM tags_sample_float WHERE tags_sample_float.sample_id = ?";
 
 	/** The Constant SAMPLE_SPECIFIC_FLOAT_TAG_SQL. */
-	private static final String SAMPLE_SPECIFIC_FLOAT_TAG_SQL = 
-			SAMPLE_FLOAT_TAG_SQL + " AND tags_sample_float.tag_id = ?";
+	public static final String SAMPLE_SPECIFIC_FLOAT_TAG_SQL = 
+			TAGS_SAMPLE_FLOAT_SQL + " AND tags_sample_float.tag_id = ?";
 
 	/** The Constant SAMPLE_SPECIFIC_FLOAT_TAGS_SQL. */
 	private static final String SAMPLE_SPECIFIC_FLOAT_TAGS_SQL = 
-			SAMPLE_FLOAT_TAG_SQL + " AND tags_sample_float.tag_id = ANY(?::int[])";
+			TAGS_SAMPLE_FLOAT_SQL + " AND tags_sample_float.tag_id = ANY(?::int[])";
 
 
 
@@ -166,14 +168,17 @@ public abstract class DatabaseServlet  {
 	private static final Set<Integer> ALL_ORGANISMS = Collections.emptySet();
 
 	/** The ds. */
-	private DataSource ds = null;
+	private DataSource mDs = null;
+	
+	@Autowired
+	private JdbcTemplate mJdbcTemplate;
 
 	/**
 	 * Instantiates a new database servlet.
 	 */
 	public DatabaseServlet() {
 		try {
-			ds = (DataSource)EDB.lookup("jdbc/experimentdb");
+			mDs = (DataSource)EDB.lookup("jdbc/experimentdb");
 		} catch (NamingException e1) {
 			e1.printStackTrace();
 		}
@@ -412,7 +417,7 @@ public abstract class DatabaseServlet  {
 			int sampleId) throws SQLException {
 
 		PreparedStatement statement = 
-				connection.prepareStatement(SAMPLE_FLOAT_TAG_SQL);
+				connection.prepareStatement(TAGS_SAMPLE_FLOAT_SQL);
 
 		statement.setInt(1, sampleId);
 
@@ -1821,6 +1826,10 @@ public abstract class DatabaseServlet  {
 
 		return id;
 	}
+	
+	public static int getTagId(JdbcTemplate jdbcTemplate, String name) throws SQLException {
+		return Database.getId(jdbcTemplate, TAG_ID_SQL, name);
+	}
 
 	/**
 	 * Gets the sample id from geo accession.
@@ -1855,12 +1864,12 @@ public abstract class DatabaseServlet  {
 	 * @return the connection
 	 * @throws SQLException the SQL exception
 	 */
-	protected Connection getConnection() throws SQLException {
-		if (ds == null) {
+	public Connection getConnection() throws SQLException {
+		if (mDs == null) {
 			return null;
 		}
 
-		return ds.getConnection();
+		return mDs.getConnection();
 	}
 
 	/**

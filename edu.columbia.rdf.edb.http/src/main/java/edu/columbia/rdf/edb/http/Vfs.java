@@ -17,11 +17,16 @@ package edu.columbia.rdf.edb.http;
 
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.abh.common.database.ResultsSetTable;
 import org.abh.common.io.PathUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -30,7 +35,7 @@ import org.abh.common.io.PathUtils;
 public class Vfs {
 
 	/** The Constant VFS_FILE_SQL. */
-	private static final String VFS_FILE_SQL = 
+	public static final String VFS_FILE_SQL = 
 			"SELECT vfs.id, vfs.parent_id, vfs.name, vfs.type_id, vfs.path, TO_CHAR(vfs.created, 'YYYY-MM-DD') AS created FROM vfs WHERE vfs.id = ? ORDER BY vfs.id";
 	
 	/** The Constant VFS_FILES_SQL. */
@@ -252,6 +257,11 @@ public class Vfs {
 		return Database.getIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
 	}
 	
+	public static List<Integer> getSampleFiles(JdbcTemplate connection, 
+			int sampleId) throws SQLException {
+		return Database.getIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
+	}
+	
 	/**
 	 * Returns the samples associated with a vfs id.
 	 *
@@ -280,6 +290,13 @@ public class Vfs {
 		return getFileTable(connection, vfsId);
 	}
 	
+	public static VfsFileBean getSampleFileDir(JdbcTemplate connection,
+			int sampleId) throws SQLException {
+		int vfsId = getSampleFilesDir(connection, sampleId);
+		
+		return getFile(connection, vfsId);
+	}
+	
 	/**
 	 * Gets the sample files dir.
 	 *
@@ -289,6 +306,11 @@ public class Vfs {
 	 * @throws SQLException the SQL exception
 	 */
 	public static int getSampleFilesDir(Connection connection, 
+			int sampleId) throws SQLException {
+		return Database.getId(connection, SAMPLE_FILE_DIR_SQL, sampleId);
+	}
+	
+	public static int getSampleFilesDir(JdbcTemplate connection, 
 			int sampleId) throws SQLException {
 		return Database.getId(connection, SAMPLE_FILE_DIR_SQL, sampleId);
 	}
@@ -310,26 +332,57 @@ public class Vfs {
 		
 		return path;
 	}
+	
+	public static Path getSampleDirPath(JdbcTemplate jdbcTemplate, int sampleId) {
+		int vfsId = Database.getId(jdbcTemplate, VFS_SAMPLE_DIR_SQL, sampleId);
+		
+		Path path = PathUtils.getPath(Database.getString(jdbcTemplate, VFS_PATH_SQL, vfsId));
+		
+		return path;
+	}
 
 	
+	public static List<VfsFileBean> getFiles(JdbcTemplate connection, 
+			Collection<Integer> ids) throws SQLException {
+		List<VfsFileBean> ret = new ArrayList<VfsFileBean>(1000);
 
-	/*
-	public static List<Integer> getVfsTags(Connection connection, int vfsId) {
-		List<Integer> ret = Collections.emptyList();
+		for (int id : ids) {
+			ret.add(getFile(connection, id));
+		}
+
+		return ret;
+	}
+
+	/**
+	 * Return a file bean from a given file id.
+	 * 
+	 * @param jdbcTemplate
+	 * @param fid
+	 * @return
+	 * @throws SQLException
+	 */
+	public static VfsFileBean getFile(JdbcTemplate jdbcTemplate, 
+			int fid) throws SQLException {
+		List<VfsFileBean> files = jdbcTemplate.query(Vfs.VFS_FILE_SQL, 
+				new Object[]{fid}, 
+				new RowMapper<VfsFileBean>() {
+			@Override
+			public VfsFileBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new VfsFileBean(rs.getInt(1), 
+						rs.getInt(2),
+						rs.getString(3),
+						rs.getInt(4),
+						rs.getString(5),
+						rs.getString(6));
+			}
+
+		});
 		
-		PreparedStatement statement = 
-				connection.prepareStatement(VFS_SQL);
-
-		DatabaseResultsTable table = null;
-
-		try {
-			statement.setInt(1, vfsId);
-
-			table = JDBCConnection.getTable(statement);
-		} finally {
-			statement.close();
+		if (files.size() > 0)  {
+			return files.get(0);
+		} else {
+			return null;
 		}
 	}
-	*/
 
 }

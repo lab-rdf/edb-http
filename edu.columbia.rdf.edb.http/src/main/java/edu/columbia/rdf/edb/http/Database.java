@@ -18,9 +18,12 @@ package edu.columbia.rdf.edb.http;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +32,11 @@ import org.abh.common.bioinformatics.annotation.Species;
 import org.abh.common.bioinformatics.annotation.Type;
 import org.abh.common.database.JDBCConnection;
 import org.abh.common.database.ResultsSetTable;
+import org.abh.common.text.TextUtils;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
 import edu.columbia.rdf.edb.Experiment;
 import edu.columbia.rdf.edb.Person;
@@ -40,7 +48,7 @@ import edu.columbia.rdf.edb.TypeMap;
  * The Class Database.
  */
 public class Database {
-	
+
 	/** The Constant ALL_SAMPLE_IDS_SQL. */
 	public static final String ALL_SAMPLE_IDS_SQL = 
 			"SELECT samples.id FROM samples";
@@ -69,9 +77,44 @@ public class Database {
 	public static final String EXPERIMENTS_SQL = 
 			"SELECT experiments.id, experiments.public_id, experiments.name, experiments.description, TO_CHAR(experiments.created, 'YYYY-MM-DD') FROM experiments";
 
+	public static final String EXPERIMENT_SQL = 
+			EXPERIMENTS_SQL + " WHERE experiments.id = ?";
+	
+	public static final String EXPERIMENT_PUBLIC_ID_SQL = 
+			EXPERIMENTS_SQL + " WHERE experiments.public_id = ?";
+
+	
 	/** The Constant ALIAS_SQL. */
 	private static final String ALIAS_SQL = 
 			"SELECT DISTINCT sample_aliases.sample_id FROM sample_aliases WHERE sample_aliases.name = ? LIMIT 1";
+
+	private static class IntExtractor implements ResultSetExtractor<Integer> {
+		@Override
+		public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
+			// If there is a record, return its value, otherwise -1
+			return rs.next() ? rs.getInt(1) : -1;
+		}
+	};
+
+	private static class StringExtractor implements ResultSetExtractor<String> {
+		@Override
+		public String extractData(ResultSet rs) throws SQLException, DataAccessException {
+			// If there is a record, return its value, otherwise -1
+			return rs.next() ? rs.getString(1) : TextUtils.EMPTY_STRING;
+		}
+	};
+
+	/**
+	 * Extracts ids from a database.
+	 */
+	private static final ResultSetExtractor<Integer> ID_EXTRACTOR = 
+			new IntExtractor();
+
+	/**
+	 * Extracts strings from a database.
+	 */
+	private static final ResultSetExtractor<String> STRING_EXTRACTOR = 
+			new StringExtractor();
 
 
 	/**
@@ -143,8 +186,7 @@ public class Database {
 	public static ResultsSetTable getTable(Connection connection, 
 			final String sql,
 			final Collection<Integer> ids) throws SQLException {
-		PreparedStatement statement = 
-				connection.prepareStatement(sql);
+		PreparedStatement statement = connection.prepareStatement(sql);
 
 		statement.setArray(1, createConnArray(connection, ids));
 
@@ -177,15 +219,6 @@ public class Database {
 		return JDBCConnection.resultSetTable(statement);
 	}
 
-	/**
-	 * Returns the id from the first record matching the query or -1 otherwise.
-	 *
-	 * @param connection the connection
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the id
-	 * @throws SQLException the SQL exception
-	 */
 	public static int getId(Connection connection, final String sql, int id) throws SQLException {
 		int ret = -1;
 
@@ -200,6 +233,36 @@ public class Database {
 		}
 
 		return ret;
+	}
+
+	/**
+	 * Returns the numerical id of the first column of a query, which is
+	 * assumed to be an id.
+	 * 
+	 * @param jdbcTemplate		The jdbc connection.
+	 * @param sql				The sql.
+	 * @param id				The id to match on.
+	 * @return					The id of the matched row or -1 if no match.
+	 */
+	public static int getId(JdbcTemplate jdbcTemplate, 
+			final String sql, 
+			int id) {
+		return jdbcTemplate.query(sql, new Object[]{id}, ID_EXTRACTOR);
+	}
+
+	/**
+	 * Returns the numerical id of the first column of a query, which is
+	 * assumed to be an id.
+	 * 
+	 * @param jdbcTemplate		The jdbc connection.
+	 * @param sql				The sql.
+	 * @param id				The id to match on.
+	 * @return					The id of the matched row or -1 if no match.
+	 */
+	public static int getId(JdbcTemplate jdbcTemplate, 
+			final String sql, 
+			final String id) {
+		return jdbcTemplate.query(sql, new Object[]{id}, ID_EXTRACTOR);
 	}
 
 	/**
@@ -249,18 +312,18 @@ public class Database {
 				connection.prepareStatement(sql);
 
 		try {
-			
+
 			Array array = createConnArray(connection, ids);
-			
+
 			statement.setArray(1, array);
 
 			ret = JDBCConnection.getIntList(statement);
-			
+
 			array.free();
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -297,7 +360,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -325,7 +388,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -370,12 +433,25 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
 
 		return ret;
+	}
+
+	public static List<Integer> getIds(JdbcTemplate jdbcTemplate, 
+			final String sql,
+			int id) throws SQLException {
+		return jdbcTemplate.query(
+				sql,
+				new Object[]{id},
+				new RowMapper<Integer>() {
+					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt(1);
+					}
+				});
 	}
 
 	/**
@@ -403,14 +479,14 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptySet();
 		}
 
 		return ret;
 	}
-	
+
 	/**
 	 * Gets the ids set.
 	 *
@@ -436,7 +512,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptySet();
 		}
@@ -477,7 +553,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -512,7 +588,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -544,7 +620,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -644,6 +720,12 @@ public class Database {
 		return ret;
 	}
 
+	public static String getString(JdbcTemplate jdbcTemplate, 
+			final String sql,
+			int id) {
+		return jdbcTemplate.query(sql, new Object[]{id}, STRING_EXTRACTOR);
+	}
+
 	/**
 	 * Gets the string.
 	 *
@@ -694,7 +776,7 @@ public class Database {
 		} finally {
 			statement.close();
 		}
-		
+
 		if (ret == null) {
 			ret = Collections.emptyList();
 		}
@@ -740,17 +822,9 @@ public class Database {
 	 * @throws SQLException the SQL exception
 	 */
 	public static TypeMap getTypes(Connection connection, String type) throws SQLException {
-		StringBuilder buffer = new StringBuilder("SELECT ")
-				.append(type)
-				.append(".id, ")
-				.append(type)
-				.append(".name ")
-				.append("FROM ")
-				.append(type);
-
 		//System.err.println("types " + buffer.toString());
 
-		ResultsSetTable table = getTable(connection, buffer.toString());
+		ResultsSetTable table = getTable(connection, getTypeSql(type));
 
 		TypeMap map = new TypeMap();
 
@@ -763,6 +837,38 @@ public class Database {
 		}
 
 		return map;
+	}
+
+	public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, 
+			String type) throws SQLException {
+		return jdbcTemplate.query(getTypeSql(type), new RowMapper<TypeBean>() {
+			@Override
+			public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new TypeBean(rs.getInt(1), rs.getString(2));
+			}
+		});
+	}
+
+	private static final Map<String, String> TYPE_MAP =
+			new HashMap<String, String>();
+
+	public static String getTypeSql(String type) {
+		if (!TYPE_MAP.containsKey(type)) {
+			StringBuilder buffer = new StringBuilder("SELECT ")
+					.append(type)
+					.append(".id, ")
+					.append(type)
+					.append(".name ")
+					.append("FROM ")
+					.append(type)
+					.append(" ORDER BY ")
+					.append(type)
+					.append(".name");
+
+			TYPE_MAP.put(type, buffer.toString());
+		}
+
+		return TYPE_MAP.get(type);
 	}
 
 	/**
@@ -782,6 +888,50 @@ public class Database {
 		} else {
 			return getTable(connection, SAMPLES_SQL, ids);
 		}
+	}
+
+	public static List<SampleBean> getSamples(JdbcTemplate connection, 
+			Collection<Integer> ids,
+			int maxCount) throws SQLException {
+
+		List<SampleBean> ret = new ArrayList<SampleBean>(1000);
+
+		for (int id : ids) {
+			ret.addAll(getSample(connection, id));
+		}
+
+		return ret;
+	}
+
+	public static List<SampleBean> getSample(final JdbcTemplate connection, 
+			final int id) throws SQLException {
+		return connection.query(SAMPLE_SQL, 
+				new Object[]{id},
+				new RowMapper<SampleBean>() {
+			@Override
+			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+				///samples.id, 
+				//samples.experiment_id, 
+				//samples.expression_type_id, 
+				//samples.name, 
+				//samples.organism_id, 
+				//TO_CHAR(samples.created, 'YYYY-MM-DD')
+				
+				Collection<Integer> sampleGroupIds = 
+						Groups.sampleGroups(connection, id);
+
+				return new SampleBean(rs.getInt(1), 
+						rs.getInt(2),
+						rs.getString(4),
+						rs.getInt(3),
+						rs.getInt(5),
+						rs.getString(6),
+						sampleGroupIds);
+				
+				
+			}
+		});
 	}
 
 	/**
@@ -804,6 +954,54 @@ public class Database {
 	public static Map<Integer, Experiment> getExperiments(Connection connection) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public static List<ExperimentBean> getExperiment(JdbcTemplate connection, 
+			int id) throws SQLException {
+		return connection.query(EXPERIMENT_SQL, 
+				new Object[]{id},
+				new RowMapper<ExperimentBean>() {
+			@Override
+			public ExperimentBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+				///samples.id, 
+				//samples.experiment_id, 
+				//samples.expression_type_id, 
+				//samples.name, 
+				//samples.organism_id, 
+				//TO_CHAR(samples.created, 'YYYY-MM-DD')
+
+				return new ExperimentBean(rs.getInt(1), 
+						rs.getString(2),
+						rs.getString(4),
+						rs.getString(3),
+						rs.getString(5));
+			}
+		});
+	}
+	
+	public static List<ExperimentBean> getExperiment(JdbcTemplate connection, 
+			String publicId) throws SQLException {
+		return connection.query(EXPERIMENT_PUBLIC_ID_SQL, 
+				new Object[]{publicId},
+				new RowMapper<ExperimentBean>() {
+			@Override
+			public ExperimentBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+				///samples.id, 
+				//samples.experiment_id, 
+				//samples.expression_type_id, 
+				//samples.name, 
+				//samples.organism_id, 
+				//TO_CHAR(samples.created, 'YYYY-MM-DD')
+
+				return new ExperimentBean(rs.getInt(1), 
+						rs.getString(2),
+						rs.getString(4),
+						rs.getString(3),
+						rs.getString(5));
+			}
+		});
 	}
 
 	/**

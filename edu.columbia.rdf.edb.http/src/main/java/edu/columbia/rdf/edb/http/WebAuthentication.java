@@ -61,7 +61,7 @@ public class WebAuthentication {
 			"INSERT INTO login_sessions (key, person_id) VALUES (?, ?)";
 
 	/** The Constant LOGIN_IP_SQL. */
-	private static final String LOGIN_IP_SQL = 
+	public static final String LOGIN_IP_SQL = 
 			"SELECT login_ip_address.ip_address, login_ip_address.person_id FROM login_ip_address";
 
 	/** The Constant LOGIN_SQL. */
@@ -71,9 +71,8 @@ public class WebAuthentication {
 	//private final static String SAMPLE_PERMISSIONS_SQL = 
 	//		"SELECT sample_permissions.id FROM sample_permissions WHERE sample_permissions.sample_id = ? AND sample_permissions.person_id = ?";
 
-	/** The Constant EXPERIMENT_PERMISSIONS_SQL. */
-	private final static String EXPERIMENT_PERMISSIONS_SQL = 
-			"SELECT experiment_permissions.id FROM experiment_permissions WHERE experiment_permissions.experiment_id = ? AND experiment_permissions.person_id = ?";
+	//private final static String EXPERIMENT_PERMISSIONS_SQL = 
+	//		"SELECT experiment_permissions.id FROM experiment_permissions WHERE experiment_permissions.experiment_id = ? AND experiment_permissions.person_id = ?";
 
 	//private final static String VFS_PERMISSIONS_SQL = 
 	//		"SELECT vfs_permissions.id FROM vfs_permissions WHERE vfs_permissions.vfs_id = ? AND vfs_permissions.person_id = ?";
@@ -88,14 +87,14 @@ public class WebAuthentication {
 			"SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
 
 	/** The Constant BLOCKED_IP_ADDRESS. */
-	private static final String BLOCKED_IP_ADDRESS = "blocked";
+	static final String BLOCKED_IP_ADDRESS = "blocked";
 
 	/** The Constant VALIDATE_IP_SQL. */
-	private static final String VALIDATE_IP_SQL = 
+	public static final String VALIDATE_IP_SQL = 
 			"SELECT login_ip_address.id FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
 	/** The Constant KEY_SQL. */
-	private static final String KEY_SQL = 
+	public static final String KEY_SQL = 
 			"SELECT persons.api_key FROM persons WHERE persons.id = ?";
 
 	/** The Constant SQL_LOGIN_ATTEMPT. */
@@ -774,7 +773,7 @@ public class WebAuthentication {
 				connection, 
 				userId,
 				otk,
-				(Long)context.getAttribute("totp-step"));
+				(long)context.getAttribute("totp-step"));
 	}
 
 	/**
@@ -796,22 +795,20 @@ public class WebAuthentication {
 			int otk,
 			long step) throws SQLException {
 
-		boolean auth = strictTOTPAuthUser(context,
-				request,
-				connection, 
-				userId,
-				otk,
-				step);
-
 		if (checkAuthEnabled(context)) {
-			return auth;
+			return strictTOTPAuthUser(context,
+					request,
+					connection, 
+					userId,
+					otk,
+					step);
 		} else {
 			return true;
 		}
 	}
 
 	/**
-	 * Strict TOTP auth user.
+	 * Strict TOTP auth user. Always authenticate.
 	 *
 	 * @param context the context
 	 * @param request the request
@@ -831,7 +828,7 @@ public class WebAuthentication {
 				connection, 
 				userId,
 				otk,
-				(Long)context.getAttribute("totp-step"));
+				(long)context.getAttribute("totp-step"));
 	}
 
 	/**
@@ -968,7 +965,7 @@ public class WebAuthentication {
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
 	 */
-	public static boolean checkAuthEnabled(ServletContext context) throws SQLException {
+	public static boolean checkAuthEnabled(ServletContext context) {
 		return context.getAttribute("auth-enabled") != null;
 	}
 
@@ -979,7 +976,7 @@ public class WebAuthentication {
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
 	 */
-	public static boolean checkViewPermissionsEnabled(ServletContext context) throws SQLException {
+	public static boolean checkViewPermissionsEnabled(ServletContext context) {
 		return context.getAttribute("view-permissions-enabled") != null;
 	}
 

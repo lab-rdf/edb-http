@@ -18,9 +18,11 @@ package edu.columbia.rdf.edb.http;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.abh.common.collections.CollectionUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -92,6 +94,31 @@ public class Groups {
 		
 		return ids;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static Collection<Integer> userGroups(JdbcTemplate connection, 
+			int userId) throws SQLException {
+		
+		Cache cache = CacheManager.getInstance().getCache("user-groups-cache");
+
+		//
+		// See if the item has been cached as viewable or not.
+		//
+
+		Element ce = cache.get(userId);
+
+		if (ce != null) {
+			return (Collection<Integer>)ce.getObjectValue();
+		}
+		
+		List<Integer> ids = Database.getIds(connection, GROUP_IDS_SQL, userId);
+		
+		ce = new Element(userId, ids);
+		
+		cache.put(ce);
+		
+		return ids;
+	}
 
 	/**
 	 * Returns true if the sample is in one of the groups the user belongs
@@ -135,6 +162,11 @@ public class Groups {
 	public static Collection<Integer> sampleGroups(Connection connection, 
 			int sampleId) throws SQLException {
 		return Database.getIdsSet(connection, SAMPLE_GROUPS_SQL, sampleId);
+	}
+	
+	public static Collection<Integer> sampleGroups(JdbcTemplate connection, 
+			int sampleId) throws SQLException {
+		return Database.getIds(connection, SAMPLE_GROUPS_SQL, sampleId);
 	}
 	
 	/**

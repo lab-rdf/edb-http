@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -384,7 +385,7 @@ public class Search {
 			String keyword,
 			boolean include) throws SQLException {
 
-		boolean exact = exact(keyword);
+		boolean exact = quoted(keyword);
 
 		if (exact) {
 			// Strip quotation marks
@@ -430,9 +431,9 @@ public class Search {
 			String keyword,
 			boolean include) throws SQLException {
 
-		boolean exact = exact(keyword);
+		boolean quoted = quoted(keyword);
 
-		if (exact) {
+		if (quoted) {
 			// Strip quotation marks
 			keyword = keyword.substring(1, keyword.length() - 1);
 		}
@@ -444,7 +445,7 @@ public class Search {
 
 		//System.err.println("keyword3 " + keyword + " " + exact + " " + include);
 
-		if (exact) {
+		if (quoted) {
 			// Match on the tag value for the sample. This is not quite
 			// exact but is designed for cases where a word in the value
 			// should be included or excluded.
@@ -587,26 +588,72 @@ public class Search {
 	}
 
 	/**
-	 * Exact.
+	 * Returns true if the string is in quotations.
 	 *
 	 * @param keyword the keyword
 	 * @return true, if successful
 	 */
-	private static boolean exact(String keyword) {
+	private static boolean quoted(String keyword) {
 		return keyword.charAt(0) == '"';
 	}
 
 	/**
-	 * Include.
+	 * Returns true if the word does not start with a dash '-'. A dash
+	 * representations negation of the statement.
 	 *
 	 * @param keyword the keyword
 	 * @return true, if successful
 	 */
 	private static boolean include(String keyword) {
-		if (exact(keyword)) {
+		if (quoted(keyword)) {
 			return keyword.charAt(1) != '-';
 		} else {
 			return keyword.charAt(0) != '-';
 		}
+	}
+
+	/**
+	 * Filter a list of samples to only contain those of a specific type.
+	 * 
+	 * @param samples
+	 * @param types
+	 * @return
+	 */
+	public static List<SampleBean> filterByTypes(List<SampleBean> samples, 
+			Collection<Integer> types) {
+		if (CollectionUtils.isNullOrEmpty(types)) {
+			return samples;
+		}
+		
+		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
+		
+		for (SampleBean sample : samples) {
+			int type = sample.getType();
+			
+			if (types.contains(type)) {
+				ret.add(sample);
+			}
+		}
+		
+		return ret;
+	}
+	
+	public static List<SampleBean> filterByOrganisms(List<SampleBean> samples, 
+			Collection<Integer> organisms) {
+		if (CollectionUtils.isNullOrEmpty(organisms)) {
+			return samples;
+		}
+		
+		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
+		
+		for (SampleBean sample : samples) {
+			int organism = sample.getOrganismId();
+			
+			if (organisms.contains(organism)) {
+				ret.add(sample);
+			}
+		}
+		
+		return ret;
 	}
 }

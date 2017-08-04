@@ -60,6 +60,8 @@ public class Database {
 	/** The Constant SAMPLE_SQL. */
 	public static final String SAMPLE_SQL = 
 			ALL_SAMPLES_SQL + " WHERE samples.id = ?";
+	
+	public static final String SAMPLE_NAME_SQL = "SELECT samples.name FROM samples WHERE samples.id = ?";
 
 	/** The Constant SAMPLES_SQL. */
 	public static final String SAMPLES_SQL = 
@@ -824,7 +826,7 @@ public class Database {
 	public static TypeMap getTypes(Connection connection, String type) throws SQLException {
 		//System.err.println("types " + buffer.toString());
 
-		ResultsSetTable table = getTable(connection, getTypeSql(type));
+		ResultsSetTable table = getTable(connection, getTypesSql(type));
 
 		TypeMap map = new TypeMap();
 
@@ -841,18 +843,41 @@ public class Database {
 
 	public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, 
 			String type) throws SQLException {
-		return jdbcTemplate.query(getTypeSql(type), new RowMapper<TypeBean>() {
+		return jdbcTemplate.query(getTypesSql(type), new RowMapper<TypeBean>() {
 			@Override
 			public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return new TypeBean(rs.getInt(1), rs.getString(2));
 			}
 		});
 	}
+	
+	public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, 
+			String type,
+			int id) {
+		return jdbcTemplate.query(getTypeSql(type, id), new RowMapper<TypeBean>() {
+			@Override
+			public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new TypeBean(rs.getInt(1), rs.getString(2));
+			}
+		});
+	}
+	
+	public static TypeBean getType(JdbcTemplate jdbcTemplate, 
+			String type,
+			int id) {
+		List<TypeBean> types = getTypes(jdbcTemplate, type, id);
+		
+		if (types.size() > 0) {
+			return types.get(0);
+		} else {
+			return null;
+		}
+	}
 
 	private static final Map<String, String> TYPE_MAP =
 			new HashMap<String, String>();
 
-	public static String getTypeSql(String type) {
+	public static String getTypesSql(String type) {
 		if (!TYPE_MAP.containsKey(type)) {
 			StringBuilder buffer = new StringBuilder("SELECT ")
 					.append(type)
@@ -870,6 +895,28 @@ public class Database {
 
 		return TYPE_MAP.get(type);
 	}
+	
+	/**
+	 * Return the sql to get the value of a specific type id.
+	 * @param type
+	 * @param id
+	 * @return
+	 */
+	public static String getTypeSql(String type, int id) {
+		StringBuilder buffer = new StringBuilder("SELECT ")
+					.append(type)
+					.append(".id, ")
+					.append(type)
+					.append(".name ")
+					.append("FROM ")
+					.append(type)
+					.append(" WHERE ")
+					.append(type)
+					.append(".id = ")
+					.append(id);
+
+		return buffer.toString();
+	}
 
 	/**
 	 * Gets the samples table.
@@ -883,7 +930,7 @@ public class Database {
 	public static ResultsSetTable getSamplesTable(Connection connection, 
 			Collection<Integer> ids,
 			int maxCount) throws SQLException {
-		if (maxCount > 0) {
+		if (maxCount > -1) {
 			return getTable(connection, SAMPLES_LIMIT_SQL, ids, maxCount);
 		} else {
 			return getTable(connection, SAMPLES_SQL, ids);
@@ -897,13 +944,77 @@ public class Database {
 		List<SampleBean> ret = new ArrayList<SampleBean>(1000);
 
 		for (int id : ids) {
-			ret.addAll(getSample(connection, id));
+			ret.addAll(getSamples(connection, id));
 		}
 
 		return ret;
 	}
 
-	public static List<SampleBean> getSample(final JdbcTemplate connection, 
+	public static SampleBean getSample(final JdbcTemplate connection, 
+			final int id) throws SQLException {
+		List<SampleBean> ret = connection.query(SAMPLE_SQL, 
+				new Object[]{id},
+				new RowMapper<SampleBean>() {
+			@Override
+			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+				///samples.id, 
+				//samples.experiment_id, 
+				//samples.expression_type_id, 
+				//samples.name, 
+				//samples.organism_id, 
+				//TO_CHAR(samples.created, 'YYYY-MM-DD')
+				
+				Collection<Integer> sampleGroupIds = 
+						Groups.sampleGroups(connection, id);
+
+				return new SampleBean(rs.getInt(1), 
+						rs.getInt(2),
+						rs.getString(4),
+						rs.getInt(3),
+						rs.getInt(5),
+						rs.getString(6),
+						sampleGroupIds);
+				
+				
+			}
+		});
+		
+		if (ret.size() > 0) {
+			return ret.get(0);
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the name of a sample.
+	 * 
+	 * @param connection
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String getSampleName(final JdbcTemplate connection, 
+			final int id) {
+		TypeBean type = getType(connection, "samples", id);
+		
+		if (type != null) {
+			return type.getName();
+		} else {
+			return TextUtils.EMPTY_STRING;
+		}
+	}
+	
+	/**
+	 * Return a single sample in a list.
+	 * 
+	 * @param connection
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	public static List<SampleBean> getSamples(final JdbcTemplate connection, 
 			final int id) throws SQLException {
 		return connection.query(SAMPLE_SQL, 
 				new Object[]{id},

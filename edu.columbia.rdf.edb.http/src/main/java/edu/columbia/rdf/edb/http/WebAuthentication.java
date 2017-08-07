@@ -68,6 +68,7 @@ public class WebAuthentication {
 	private static final String LOGIN_SQL =
 			"SELECT login_persons.person_id, login_persons.password_hash_salted, login_persons.salt FROM login_persons WHERE login_persons.user_name = ?";
 
+	
 	//private final static String SAMPLE_PERMISSIONS_SQL = 
 	//		"SELECT sample_permissions.id FROM sample_permissions WHERE sample_permissions.sample_id = ? AND sample_permissions.person_id = ?";
 
@@ -113,7 +114,7 @@ public class WebAuthentication {
 
 	/** The Constant JSON_AUTH_FAILED_OTK. */
 	public static final Json JSON_AUTH_FAILED_OTK = 
-			new JsonAuthFailed("otk");
+			new JsonAuthFailed("totp");
 
 	/** The Constant JSON_AUTH_FAILED_SAMPLE. */
 	public static final Json JSON_AUTH_FAILED_SAMPLE = 
@@ -758,7 +759,7 @@ public class WebAuthentication {
 	 * @param request the request
 	 * @param connection the connection
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
 	 */
@@ -766,13 +767,13 @@ public class WebAuthentication {
 			HttpServletRequest request,
 			Connection connection, 
 			int userId,
-			int otk) throws SQLException {
+			int totp) throws SQLException {
 
 		return totpAuthUser(context,
 				request,
 				connection, 
 				userId,
-				otk,
+				totp,
 				(long)context.getAttribute("totp-step"));
 	}
 
@@ -783,7 +784,7 @@ public class WebAuthentication {
 	 * @param request the request
 	 * @param connection the connection
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
@@ -792,7 +793,7 @@ public class WebAuthentication {
 			HttpServletRequest request,
 			Connection connection, 
 			int userId,
-			int otk,
+			int totp,
 			long step) throws SQLException {
 
 		if (checkAuthEnabled(context)) {
@@ -800,7 +801,7 @@ public class WebAuthentication {
 					request,
 					connection, 
 					userId,
-					otk,
+					totp,
 					step);
 		} else {
 			return true;
@@ -814,7 +815,7 @@ public class WebAuthentication {
 	 * @param request the request
 	 * @param connection the connection
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
 	 */
@@ -822,12 +823,12 @@ public class WebAuthentication {
 			HttpServletRequest request,
 			Connection connection, 
 			int userId,
-			int otk) throws SQLException {
+			int totp) throws SQLException {
 		return strictTOTPAuthUser(context,
 				request,
 				connection, 
 				userId,
-				otk,
+				totp,
 				(long)context.getAttribute("totp-step"));
 	}
 
@@ -838,7 +839,7 @@ public class WebAuthentication {
 	 * @param request the request
 	 * @param connection the connection
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
@@ -847,7 +848,7 @@ public class WebAuthentication {
 			HttpServletRequest request,
 			Connection connection, 
 			int userId,
-			int otk,
+			int totp,
 			long step) throws SQLException {
 
 		if (userId == -1) {
@@ -872,11 +873,11 @@ public class WebAuthentication {
 			return false;
 		}
 
-		//return TOTP.totpAuth(key, otk, step);
+		//return TOTP.totpAuth(key, totp, step);
 
 		return totpAuth(userId, 
 				key,
-				otk, 
+				totp, 
 				step);
 	}
 
@@ -885,17 +886,17 @@ public class WebAuthentication {
 	 *
 	 * @param userId the user id
 	 * @param key the key
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 */
 	private static boolean totpAuth(int userId, 
 			String key,
-			int otk, 
+			int totp, 
 			long step) {
 		return totpAuth(userId, 
 				key,
-				otk, 
+				totp, 
 				step,
 				System.currentTimeMillis(),
 				0);
@@ -906,7 +907,7 @@ public class WebAuthentication {
 	 *
 	 * @param userId the user id
 	 * @param key the key
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @param time the time
 	 * @param epoch the epoch
@@ -914,7 +915,7 @@ public class WebAuthentication {
 	 */
 	private static boolean totpAuth(int userId, 
 			String key,
-			int otk, 
+			int totp, 
 			long step,
 			long time,
 			long epoch) {
@@ -922,7 +923,7 @@ public class WebAuthentication {
 		long counter = TOTP.getCounter(time, epoch, step);
 
 		Cache tcCache = CacheManager.getInstance().getCache("totp-tc-cache");
-		//Cache otkCache = CacheManager.getInstance().getCache("totp-otk-cache");
+		//Cache otkCache = CacheManager.getInstance().getCache("totp-totp-cache");
 
 		Element ce = tcCache.get(userId);
 
@@ -948,11 +949,11 @@ public class WebAuthentication {
 			return true;
 		}
 
-		boolean auth = TOTP.totpAuth(key, otk, time, epoch, step);
+		boolean auth = TOTP.totpAuth(key, totp, time, epoch, step);
 
 		if (auth) {
 			tcCache.put(new Element(userId, counter));
-			//otkCache.put(new Element(userId, otk));
+			//otkCache.put(new Element(userId, totp));
 		}
 
 		return auth;
@@ -1115,7 +1116,7 @@ public class WebAuthentication {
 	 * @param request the request
 	 * @param connection the connection
 	 * @param person the person
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @return true, if successful
 	 * @throws SQLException the SQL exception
 	 */
@@ -1123,7 +1124,7 @@ public class WebAuthentication {
 			HttpServletRequest request,
 			Connection connection, 
 			int person,
-			String otk) throws SQLException {
+			int totp) throws SQLException {
 		String key = getKey(context, connection, person);
 
 		if (key == null) {
@@ -1135,7 +1136,7 @@ public class WebAuthentication {
 		Element ce = cache.get(person);
 
 		if (ce != null) {
-			if (ce.getObjectValue().equals(otk)) {
+			if (ce.getObjectValue().equals(totp)) {
 				return true;
 			}
 		}
@@ -1145,11 +1146,11 @@ public class WebAuthentication {
 
 		long step = (Long)context.getAttribute("topt-step");
 
-		boolean ret = TOTP.totp256Auth(key, otk, step);
+		boolean ret = TOTP.totp256Auth(key, totp, step);
 
 		if (ret) {
 			// Only store the for 5 mins if it is valid
-			cache.put(new Element(person, otk));
+			cache.put(new Element(person, totp));
 		}
 
 		return ret;
@@ -1219,12 +1220,12 @@ public class WebAuthentication {
 	}
 
 	/**
-	 * Otk auth error.
+	 * totp auth error.
 	 *
 	 * @param json the json
 	 */
 	public static void otkAuthError(JsonBuilder json) {
-		authError("otk", json);
+		authError("totp", json);
 	}
 
 	/**
@@ -1271,4 +1272,6 @@ public class WebAuthentication {
 	public static void fieldAuthError(JsonBuilder json) {
 		authError("field", json);
 	}
+	
+	
 }

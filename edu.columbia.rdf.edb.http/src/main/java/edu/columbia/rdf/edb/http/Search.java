@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -144,7 +143,7 @@ public class Search {
 
 			List<Integer> ids = getSampleIds(connection, tagId); //getSampleIds(connection, tagKeywordIds);
 
-			return Database.getSamplesTable(connection, ids, maxCount);
+			return Samples.getSamplesTable(connection, ids, maxCount);
 		}
 
 
@@ -199,10 +198,10 @@ public class Search {
 			samples = Collections.emptySet();
 		}
 
-		return Database.getSamplesTable(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
+		return Samples.getSamplesTable(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
 	}
 	
-	public static List<SampleBean> search(JdbcTemplate connection, 
+	public static List<SampleBean> searchSamples(JdbcTemplate connection, 
 			int tagId,
 			List<SearchStackElement<Integer>> searchQueue,
 			int maxCount) throws SQLException {
@@ -215,7 +214,7 @@ public class Search {
 
 			List<Integer> ids = getSampleIds(connection, tagId); //getSampleIds(connection, tagKeywordIds);
 
-			return Database.getSamples(connection, ids, maxCount);
+			return Samples.getSamples(connection, ids, maxCount);
 		}
 
 
@@ -270,7 +269,7 @@ public class Search {
 			samples = Collections.emptySet();
 		}
 
-		return Database.getSamples(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
+		return Samples.getSamples(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
 	}
 
 	/**
@@ -610,50 +609,5 @@ public class Search {
 		} else {
 			return keyword.charAt(0) != '-';
 		}
-	}
-
-	/**
-	 * Filter a list of samples to only contain those of a specific type.
-	 * 
-	 * @param samples
-	 * @param types
-	 * @return
-	 */
-	public static List<SampleBean> filterByTypes(List<SampleBean> samples, 
-			Collection<Integer> types) {
-		if (CollectionUtils.isNullOrEmpty(types)) {
-			return samples;
-		}
-		
-		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
-		
-		for (SampleBean sample : samples) {
-			int type = sample.getType();
-			
-			if (types.contains(type)) {
-				ret.add(sample);
-			}
-		}
-		
-		return ret;
-	}
-	
-	public static List<SampleBean> filterByOrganisms(List<SampleBean> samples, 
-			Collection<Integer> organisms) {
-		if (CollectionUtils.isNullOrEmpty(organisms)) {
-			return samples;
-		}
-		
-		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
-		
-		for (SampleBean sample : samples) {
-			int organism = sample.getOrganismId();
-			
-			if (organisms.contains(organism)) {
-				ret.add(sample);
-			}
-		}
-		
-		return ret;
 	}
 }

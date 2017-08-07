@@ -16,6 +16,7 @@
 package edu.columbia.rdf.edb.http;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Set;
 
 import org.abh.common.collections.CollectionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -54,6 +56,12 @@ public class Groups {
 	private static final String GROUP_SAMPLES_SQL = 
 			"SELECT groups_samples.sample_id FROM groups_samples WHERE groups_samples.group_id = ANY(?::int[])";
 
+	
+	public static final String GROUPS_SQL = 
+			"SELECT groups.id, groups.name FROM groups ORDER BY groups.name";
+	
+	public static final String GROUP_SQL = 
+			"SELECT groups.id, groups.name FROM groups WHERE groups.id = ? ORDER BY groups.name";
 	
 	/**
 	 * Instantiates a new groups.
@@ -164,9 +172,9 @@ public class Groups {
 		return Database.getIdsSet(connection, SAMPLE_GROUPS_SQL, sampleId);
 	}
 	
-	public static Collection<Integer> sampleGroups(JdbcTemplate connection, 
+	public static Collection<Integer> sampleGroups(JdbcTemplate jdbcTemplate, 
 			int sampleId) throws SQLException {
-		return Database.getIds(connection, SAMPLE_GROUPS_SQL, sampleId);
+		return Database.getIds(jdbcTemplate, SAMPLE_GROUPS_SQL, sampleId);
 	}
 	
 	/**
@@ -217,5 +225,29 @@ public class Groups {
 	public static boolean userInSampleGroups(Collection<Integer> userGroupIds,
 			Collection<Integer> sampleGroupIds) {
 		return CollectionUtils.contains(userGroupIds, sampleGroupIds);
+	}
+	
+	public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate) throws SQLException {
+		return Query.query(jdbcTemplate,
+				GROUPS_SQL,
+				new RowMapper<GroupBean>() {
+			@Override
+			public GroupBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new GroupBean(rs.getInt(1), rs.getString(2));
+			}
+		});
+	}
+	
+	public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate,
+			Collection<Integer> gids) throws SQLException {
+		return Query.query(jdbcTemplate,
+				GROUP_SQL,
+				gids,
+				new RowMapper<GroupBean>() {
+			@Override
+			public GroupBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new GroupBean(rs.getInt(1), rs.getString(2));
+			}
+		});
 	}
 }

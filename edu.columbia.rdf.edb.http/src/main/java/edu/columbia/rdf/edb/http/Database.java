@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.abh.common.bioinformatics.annotation.Species;
 import org.abh.common.bioinformatics.annotation.Type;
 import org.abh.common.database.JDBCConnection;
 import org.abh.common.database.ResultsSetTable;
@@ -38,9 +36,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-import edu.columbia.rdf.edb.Experiment;
-import edu.columbia.rdf.edb.Person;
-import edu.columbia.rdf.edb.Sample;
 import edu.columbia.rdf.edb.TypeMap;
 
 // TODO: Auto-generated Javadoc
@@ -52,15 +47,16 @@ public class Database {
 	/** The Constant ALL_SAMPLE_IDS_SQL. */
 	public static final String ALL_SAMPLE_IDS_SQL = 
 			"SELECT samples.id FROM samples";
-
+	
 	/** The Constant ALL_SAMPLES_SQL. */
 	public static final String ALL_SAMPLES_SQL =
 			"SELECT samples.id, samples.experiment_id, samples.expression_type_id, samples.name, samples.organism_id, TO_CHAR(samples.created, 'YYYY-MM-DD') FROM samples";
 
+
 	/** The Constant SAMPLE_SQL. */
 	public static final String SAMPLE_SQL = 
 			ALL_SAMPLES_SQL + " WHERE samples.id = ?";
-	
+
 	public static final String SAMPLE_NAME_SQL = "SELECT samples.name FROM samples WHERE samples.id = ?";
 
 	/** The Constant SAMPLES_SQL. */
@@ -81,11 +77,11 @@ public class Database {
 
 	public static final String EXPERIMENT_SQL = 
 			EXPERIMENTS_SQL + " WHERE experiments.id = ?";
-	
+
 	public static final String EXPERIMENT_PUBLIC_ID_SQL = 
 			EXPERIMENTS_SQL + " WHERE experiments.public_id = ?";
 
-	
+
 	/** The Constant ALIAS_SQL. */
 	private static final String ALIAS_SQL = 
 			"SELECT DISTINCT sample_aliases.sample_id FROM sample_aliases WHERE sample_aliases.name = ? LIMIT 1";
@@ -850,7 +846,7 @@ public class Database {
 			}
 		});
 	}
-	
+
 	public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, 
 			String type,
 			int id) {
@@ -861,12 +857,12 @@ public class Database {
 			}
 		});
 	}
-	
+
 	public static TypeBean getType(JdbcTemplate jdbcTemplate, 
 			String type,
 			int id) {
 		List<TypeBean> types = getTypes(jdbcTemplate, type, id);
-		
+
 		if (types.size() > 0) {
 			return types.get(0);
 		} else {
@@ -895,7 +891,7 @@ public class Database {
 
 		return TYPE_MAP.get(type);
 	}
-	
+
 	/**
 	 * Return the sql to get the value of a specific type id.
 	 * @param type
@@ -904,248 +900,19 @@ public class Database {
 	 */
 	public static String getTypeSql(String type, int id) {
 		StringBuilder buffer = new StringBuilder("SELECT ")
-					.append(type)
-					.append(".id, ")
-					.append(type)
-					.append(".name ")
-					.append("FROM ")
-					.append(type)
-					.append(" WHERE ")
-					.append(type)
-					.append(".id = ")
-					.append(id);
+				.append(type)
+				.append(".id, ")
+				.append(type)
+				.append(".name ")
+				.append("FROM ")
+				.append(type)
+				.append(" WHERE ")
+				.append(type)
+				.append(".id = ")
+				.append(id);
 
 		return buffer.toString();
 	}
 
-	/**
-	 * Gets the samples table.
-	 *
-	 * @param connection the connection
-	 * @param ids the ids
-	 * @param maxCount the max count
-	 * @return the samples table
-	 * @throws SQLException the SQL exception
-	 */
-	public static ResultsSetTable getSamplesTable(Connection connection, 
-			Collection<Integer> ids,
-			int maxCount) throws SQLException {
-		if (maxCount > -1) {
-			return getTable(connection, SAMPLES_LIMIT_SQL, ids, maxCount);
-		} else {
-			return getTable(connection, SAMPLES_SQL, ids);
-		}
-	}
 
-	public static List<SampleBean> getSamples(JdbcTemplate connection, 
-			Collection<Integer> ids,
-			int maxCount) throws SQLException {
-
-		List<SampleBean> ret = new ArrayList<SampleBean>(1000);
-
-		for (int id : ids) {
-			ret.addAll(getSamples(connection, id));
-		}
-
-		return ret;
-	}
-
-	public static SampleBean getSample(final JdbcTemplate connection, 
-			final int id) throws SQLException {
-		List<SampleBean> ret = connection.query(SAMPLE_SQL, 
-				new Object[]{id},
-				new RowMapper<SampleBean>() {
-			@Override
-			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				///samples.id, 
-				//samples.experiment_id, 
-				//samples.expression_type_id, 
-				//samples.name, 
-				//samples.organism_id, 
-				//TO_CHAR(samples.created, 'YYYY-MM-DD')
-				
-				Collection<Integer> sampleGroupIds = 
-						Groups.sampleGroups(connection, id);
-
-				return new SampleBean(rs.getInt(1), 
-						rs.getInt(2),
-						rs.getString(4),
-						rs.getInt(3),
-						rs.getInt(5),
-						rs.getString(6),
-						sampleGroupIds);
-				
-				
-			}
-		});
-		
-		if (ret.size() > 0) {
-			return ret.get(0);
-		} else {
-			return null;
-		}
-	}
-	
-	/**
-	 * Get the name of a sample.
-	 * 
-	 * @param connection
-	 * @param id
-	 * @return
-	 * @throws SQLException
-	 */
-	public static String getSampleName(final JdbcTemplate connection, 
-			final int id) {
-		TypeBean type = getType(connection, "samples", id);
-		
-		if (type != null) {
-			return type.getName();
-		} else {
-			return TextUtils.EMPTY_STRING;
-		}
-	}
-	
-	/**
-	 * Return a single sample in a list.
-	 * 
-	 * @param connection
-	 * @param id
-	 * @return
-	 * @throws SQLException
-	 */
-	public static List<SampleBean> getSamples(final JdbcTemplate connection, 
-			final int id) throws SQLException {
-		return connection.query(SAMPLE_SQL, 
-				new Object[]{id},
-				new RowMapper<SampleBean>() {
-			@Override
-			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				///samples.id, 
-				//samples.experiment_id, 
-				//samples.expression_type_id, 
-				//samples.name, 
-				//samples.organism_id, 
-				//TO_CHAR(samples.created, 'YYYY-MM-DD')
-				
-				Collection<Integer> sampleGroupIds = 
-						Groups.sampleGroups(connection, id);
-
-				return new SampleBean(rs.getInt(1), 
-						rs.getInt(2),
-						rs.getString(4),
-						rs.getInt(3),
-						rs.getInt(5),
-						rs.getString(6),
-						sampleGroupIds);
-				
-				
-			}
-		});
-	}
-
-	/**
-	 * Gets the samples table.
-	 *
-	 * @param connection the connection
-	 * @return the samples table
-	 * @throws SQLException the SQL exception
-	 */
-	public static ResultsSetTable getSamplesTable(Connection connection) throws SQLException {
-		return getTable(connection, ALL_SAMPLES_SQL);
-	}
-
-	/**
-	 * Gets the experiments.
-	 *
-	 * @param connection the connection
-	 * @return the experiments
-	 */
-	public static Map<Integer, Experiment> getExperiments(Connection connection) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public static List<ExperimentBean> getExperiment(JdbcTemplate connection, 
-			int id) throws SQLException {
-		return connection.query(EXPERIMENT_SQL, 
-				new Object[]{id},
-				new RowMapper<ExperimentBean>() {
-			@Override
-			public ExperimentBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				///samples.id, 
-				//samples.experiment_id, 
-				//samples.expression_type_id, 
-				//samples.name, 
-				//samples.organism_id, 
-				//TO_CHAR(samples.created, 'YYYY-MM-DD')
-
-				return new ExperimentBean(rs.getInt(1), 
-						rs.getString(2),
-						rs.getString(4),
-						rs.getString(3),
-						rs.getString(5));
-			}
-		});
-	}
-	
-	public static List<ExperimentBean> getExperiment(JdbcTemplate connection, 
-			String publicId) throws SQLException {
-		return connection.query(EXPERIMENT_PUBLIC_ID_SQL, 
-				new Object[]{publicId},
-				new RowMapper<ExperimentBean>() {
-			@Override
-			public ExperimentBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-				///samples.id, 
-				//samples.experiment_id, 
-				//samples.expression_type_id, 
-				//samples.name, 
-				//samples.organism_id, 
-				//TO_CHAR(samples.created, 'YYYY-MM-DD')
-
-				return new ExperimentBean(rs.getInt(1), 
-						rs.getString(2),
-						rs.getString(4),
-						rs.getString(3),
-						rs.getString(5));
-			}
-		});
-	}
-
-	/**
-	 * Gets the sample.
-	 *
-	 * @param connection the connection
-	 * @param sampleId the sample id
-	 * @param experiments the experiments
-	 * @param organisms the organisms
-	 * @param fieldMap the field map
-	 * @param expressionTypes the expression types
-	 * @param personMap the person map
-	 * @return the sample
-	 */
-	public static Sample getSample(Connection connection, 
-			int sampleId, 
-			Map<Integer, Experiment> experiments,
-			Map<Integer, Species> organisms, 
-			TypeMap fieldMap, 
-			TypeMap expressionTypes,
-			Map<Integer, Person> personMap) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * Gets the all sample ids.
-	 *
-	 * @param connection the connection
-	 * @return the all sample ids
-	 * @throws SQLException the SQL exception
-	 */
-	public static List<Integer> getAllSampleIds(Connection connection) throws SQLException {
-		return getIds(connection, ALL_SAMPLE_IDS_SQL);
-	}
 }

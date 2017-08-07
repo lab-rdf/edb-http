@@ -15,6 +15,8 @@
  */
 package edu.columbia.rdf.edb.http;
 
+import java.util.regex.Pattern;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,6 +39,7 @@ public class WebAuth {
 	public static final String VALIDATE_IP_SQL = 
 			"SELECT COUNT(login_ip_address.id) FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
+	private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
 	
 	/**
 	 * Validate that the reported user is accessing from a valid ip
@@ -98,15 +101,11 @@ public class WebAuth {
 	 * @return the user id
 	 */
 	public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
+		user = santizeUser(user);
+		
 		String sql = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
 		
-	    Integer v = jdbcTemplate.queryForObject(sql, Integer.class, user);
-	    
-	    if (v != null) {
-	    	return v;
-	    } else {
-	    	return -1;
-	    }
+	    return Query.queryForId(jdbcTemplate, sql, user);
 	}
 	
 	/**
@@ -117,20 +116,20 @@ public class WebAuth {
 	 * @param request the request
 	 * @param jdbcTemplate the jdbc template
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @return true, if successful
 	 */
 	public static boolean totpAuthUser(ServletContext context,
 			HttpServletRequest request,
 			JdbcTemplate jdbcTemplate,
 			int userId,
-			int otk) {
+			int totp) {
 
 		return totpAuthUser(context,
 				request,
 				jdbcTemplate,
 				userId,
-				otk,
+				totp,
 				(long)context.getAttribute("totp-step"));
 	}
 
@@ -141,7 +140,7 @@ public class WebAuth {
 	 * @param request the request
 	 * @param jdbcTemplate the jdbc template
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 */
@@ -149,7 +148,7 @@ public class WebAuth {
 			HttpServletRequest request,
 			JdbcTemplate jdbcTemplate,
 			int userId,
-			int otk,
+			int totp,
 			long step) {
 
 		if (WebAuthentication.checkAuthEnabled(context)) {
@@ -157,7 +156,7 @@ public class WebAuth {
 					request,
 					jdbcTemplate, 
 					userId,
-					otk,
+					totp,
 					step);
 		} else {
 			return true;
@@ -171,19 +170,19 @@ public class WebAuth {
 	 * @param request the request
 	 * @param jdbcTemplate the jdbc template
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @return true, if successful
 	 */
 	public static boolean strictTOTPAuthUser(ServletContext context,
 			HttpServletRequest request,
 			JdbcTemplate jdbcTemplate,
 			int userId,
-			int otk) {
+			int totp) {
 		return strictTOTPAuthUser(context,
 				request,
 				jdbcTemplate, 
 				userId,
-				otk,
+				totp,
 				(long)context.getAttribute("totp-step"));
 	}
 
@@ -194,7 +193,7 @@ public class WebAuth {
 	 * @param request the request
 	 * @param jdbcTemplate the jdbc template
 	 * @param userId the user id
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 */
@@ -202,7 +201,7 @@ public class WebAuth {
 			HttpServletRequest request,
 			JdbcTemplate jdbcTemplate,
 			int userId,
-			int otk,
+			int totp,
 			long step){
 
 		if (userId == -1) {
@@ -227,11 +226,11 @@ public class WebAuth {
 			return false;
 		}
 
-		//return TOTP.totpAuth(key, otk, step);
+		//return TOTP.totpAuth(key, totp, step);
 
 		return totpAuth(userId, 
 				key,
-				otk, 
+				totp, 
 				step);
 	}
 
@@ -240,17 +239,17 @@ public class WebAuth {
 	 *
 	 * @param userId the user id
 	 * @param key the key
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @return true, if successful
 	 */
 	private static boolean totpAuth(int userId, 
 			String key,
-			int otk, 
+			int totp, 
 			long step) {
 		return totpAuth(userId, 
 				key,
-				otk, 
+				totp, 
 				step,
 				System.currentTimeMillis(),
 				0);
@@ -261,7 +260,7 @@ public class WebAuth {
 	 *
 	 * @param userId the user id
 	 * @param key the key
-	 * @param otk the otk
+	 * @param totp the totp
 	 * @param step the step
 	 * @param time the time
 	 * @param epoch the epoch
@@ -269,7 +268,7 @@ public class WebAuth {
 	 */
 	private static boolean totpAuth(int userId, 
 			String key,
-			int otk, 
+			int totp, 
 			long step,
 			long time,
 			long epoch) {
@@ -277,7 +276,7 @@ public class WebAuth {
 		long counter = TOTP.getCounter(time, epoch, step);
 
 		Cache tcCache = CacheManager.getInstance().getCache("totp-tc-cache");
-		//Cache otkCache = CacheManager.getInstance().getCache("totp-otk-cache");
+		//Cache otkCache = CacheManager.getInstance().getCache("totp-totp-cache");
 
 		Element ce = tcCache.get(userId);
 
@@ -303,11 +302,11 @@ public class WebAuth {
 			return true;
 		}
 
-		boolean auth = TOTP.totpAuth(key, otk, time, epoch, step);
+		boolean auth = TOTP.totpAuth(key, totp, time, epoch, step);
 
 		if (auth) {
 			tcCache.put(new Element(userId, counter));
-			//otkCache.put(new Element(userId, otk));
+			//otkCache.put(new Element(userId, totp));
 		}
 
 		return auth;
@@ -337,5 +336,13 @@ public class WebAuth {
 		cache.put(new Element(userId, key));
 
 		return key;
+	}
+	
+	public static String santizeUser(String user) {
+		if (USER_REGEX.matcher(user).matches()) {
+			return user;
+		} else {
+			return TextUtils.EMPTY_STRING;
+		}
 	}
 }

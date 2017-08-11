@@ -40,6 +40,9 @@ public class WebAuth {
 			"SELECT COUNT(login_ip_address.id) FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
 	private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
+
+	private static final String USER_ID_SQL = 
+			"SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
 	
 	/**
 	 * Validate that the reported user is accessing from a valid ip
@@ -80,9 +83,10 @@ public class WebAuth {
 
 		boolean valid = false;
 
-		int count = jdbcTemplate.queryForObject(VALIDATE_IP_SQL, 
-				Integer.class, 
-				new Object[]{person, ipAddress});
+		int count = Query.queryForId(jdbcTemplate,
+				VALIDATE_IP_SQL, 
+				person, 
+				ipAddress);
 
 		if (count > 0) {
 			cache.put(new Element(person, ipAddress));
@@ -103,9 +107,7 @@ public class WebAuth {
 	public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
 		user = santizeUser(user);
 		
-		String sql = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
-		
-	    return Query.queryForId(jdbcTemplate, sql, user);
+		return Query.queryForId(jdbcTemplate, USER_ID_SQL, user);
 	}
 	
 	/**
@@ -152,7 +154,7 @@ public class WebAuth {
 			long step) {
 
 		if (WebAuthentication.checkAuthEnabled(context)) {
-			return strictTOTPAuthUser(context,
+			return strictTotpAuthUser(context,
 					request,
 					jdbcTemplate, 
 					userId,
@@ -178,7 +180,7 @@ public class WebAuth {
 			JdbcTemplate jdbcTemplate,
 			int userId,
 			int totp) {
-		return strictTOTPAuthUser(context,
+		return strictTotpAuthUser(context,
 				request,
 				jdbcTemplate, 
 				userId,
@@ -197,7 +199,7 @@ public class WebAuth {
 	 * @param step the step
 	 * @return true, if successful
 	 */
-	public static boolean strictTOTPAuthUser(ServletContext context,
+	public static boolean strictTotpAuthUser(ServletContext context,
 			HttpServletRequest request,
 			JdbcTemplate jdbcTemplate,
 			int userId,
@@ -220,7 +222,7 @@ public class WebAuth {
 
 		// Now check the one time key is valid
 
-		String key = getKey(context, jdbcTemplate, userId);
+		String key = getKey(jdbcTemplate, userId);
 
 		if (TextUtils.isNullOrEmpty(key)) {
 			return false;
@@ -320,8 +322,7 @@ public class WebAuth {
 	 * @param userId the user id
 	 * @return the key
 	 */
-	public static String getKey(ServletContext context,
-			JdbcTemplate jdbcTemplate,
+	public static String getKey(JdbcTemplate jdbcTemplate,
 			int userId) {
 		Cache cache = CacheManager.getInstance().getCache("key-cache");
 
@@ -331,13 +332,19 @@ public class WebAuth {
 			return (String)ce.getObjectValue();
 		}
 
-		String key = jdbcTemplate.queryForObject(WebAuthentication.KEY_SQL, String.class, userId);
+		String key = Query.queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
 
 		cache.put(new Element(userId, key));
 
 		return key;
 	}
 	
+	/**
+	 * Ensure the user contains only lowercase letters or numbers.
+	 * 
+	 * @param user
+	 * @return
+	 */
 	public static String santizeUser(String user) {
 		if (USER_REGEX.matcher(user).matches()) {
 			return user;

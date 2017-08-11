@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 //@JsonPropertyOrder(alphabetic=true)
-@JsonPropertyOrder({"id", "pid", "n", "ds", "d"})
+@JsonPropertyOrder({"id", "p", "n", "ds", "d"})
 public class ExperimentBean extends Type {
 
 	private String mPublicId;
@@ -30,7 +30,7 @@ public class ExperimentBean extends Type {
 		return mDate;
 	}
 	
-	@JsonGetter("pid")
+	@JsonGetter("p")
 	public String getPublicId() {
 		return mPublicId;
 	}

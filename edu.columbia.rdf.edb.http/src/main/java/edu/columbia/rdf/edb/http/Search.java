@@ -201,27 +201,22 @@ public class Search {
 		return Samples.getSamplesTable(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
 	}
 	
-	public static List<SampleBean> searchSamples(JdbcTemplate connection, 
+	public static List<SampleBean> searchSamples(JdbcTemplate jdbcTemplate, 
 			int tagId,
 			List<SearchStackElement<Integer>> searchQueue,
 			int maxCount) throws SQLException {
 
 		if (searchQueue.size() == 0) {
-			//return Database.getSamplesTable(connection);
+			// Return all samples without doing a search
+			//List<Integer> ids = getSampleIds(jdbcTemplate, tagId); //getSampleIds(connection, tagKeywordIds);
 
-			// Get all the key word ids for the tag
-			//List<Integer> tagKeywordIds = getTagKeywordIds(connection, tagId);
-
-			List<Integer> ids = getSampleIds(connection, tagId); //getSampleIds(connection, tagKeywordIds);
-
-			return Samples.getSamples(connection, ids, maxCount);
+			return Samples.getSamples(jdbcTemplate);
 		}
 
 
 		//SearchStackElement<Integer> e = null;
 
-		Deque<SearchResults> tempStack =
-				new ArrayDeque<SearchResults>();
+		Deque<SearchResults> tempStack = new ArrayDeque<SearchResults>();
 
 		//while (!searchStack.isEmpty()) {
 		//	e = searchStack.pop();
@@ -241,7 +236,7 @@ public class Search {
 				boolean include = include(keyword);
 
 				// Get all samples matched to those keywords for the tag.
-				tempStack.push(new SearchResults(getSampleIds(connection, tagId, e.mText, include), include)); //tagKeywordIds); //getSampleIds(connection, tagKeywordIds));
+				tempStack.push(new SearchResults(getSampleIds(jdbcTemplate, tagId, e.mText, include), include)); //tagKeywordIds); //getSampleIds(connection, tagKeywordIds));
 
 				break;
 			case AND:
@@ -269,7 +264,7 @@ public class Search {
 			samples = Collections.emptySet();
 		}
 
-		return Samples.getSamples(connection, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
+		return Samples.getSamples(jdbcTemplate, samples, maxCount); //Database.getSamplesTable(connection, sampleIds, maxCount);
 	}
 
 	/**
@@ -285,7 +280,10 @@ public class Search {
 	 */
 	private static SearchResults and(SearchResults sr1, SearchResults sr2) {
 
-		if (!sr1.getInclude() && sr2.getInclude()) {
+		if (!sr1.getInclude() && !sr2.getInclude()) {
+			//Return nothing
+			return new SearchResults();
+		} else if (!sr1.getInclude() && sr2.getInclude()) {
 			return new SearchResults(CollectionUtils.notIn(sr2.getValues(), sr1.getValues()));
 		} else if (sr1.getInclude() && !sr2.getInclude()) {
 			return new SearchResults(CollectionUtils.notIn(sr1.getValues(), sr2.getValues()));
@@ -362,7 +360,7 @@ public class Search {
 	public  static List<Integer> getSampleIds(JdbcTemplate connection, 
 			int tagId) throws SQLException {
 
-		return Database.getIds(connection, 
+		return Query.queryForIds(connection, 
 				ALL_TAG_SAMPLES_SQL, 
 				tagId);
 	}

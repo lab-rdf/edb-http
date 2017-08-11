@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.abh.common.bioinformatics.annotation.Type;
+import org.abh.common.collections.CollectionUtils;
 import org.abh.common.database.JDBCConnection;
 import org.abh.common.database.ResultsSetTable;
 import org.abh.common.text.TextUtils;
@@ -439,19 +440,6 @@ public class Database {
 		return ret;
 	}
 
-	public static List<Integer> getIds(JdbcTemplate jdbcTemplate, 
-			final String sql,
-			int id) throws SQLException {
-		return jdbcTemplate.query(
-				sql,
-				new Object[]{id},
-				new RowMapper<Integer>() {
-					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-						return rs.getInt(1);
-					}
-				});
-	}
-
 	/**
 	 * Returns the ids from a query as a set of ints.
 	 *
@@ -775,11 +763,7 @@ public class Database {
 			statement.close();
 		}
 
-		if (ret == null) {
-			ret = Collections.emptyList();
-		}
-
-		return ret;
+		return CollectionUtils.makeEmpty(ret);
 	}
 
 	/**
@@ -863,11 +847,7 @@ public class Database {
 			int id) {
 		List<TypeBean> types = getTypes(jdbcTemplate, type, id);
 
-		if (types.size() > 0) {
-			return types.get(0);
-		} else {
-			return null;
-		}
+		return CollectionUtils.head(types);
 	}
 
 	private static final Map<String, String> TYPE_MAP =

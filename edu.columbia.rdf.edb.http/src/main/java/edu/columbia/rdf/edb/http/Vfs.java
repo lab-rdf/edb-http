@@ -259,7 +259,7 @@ public class Vfs {
 	
 	public static List<Integer> getSampleFiles(JdbcTemplate connection, 
 			int sampleId) throws SQLException {
-		return Database.getIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
+		return Query.queryForIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
 	}
 	
 	/**

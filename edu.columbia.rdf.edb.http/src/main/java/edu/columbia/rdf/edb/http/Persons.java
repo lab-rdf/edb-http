@@ -15,6 +15,19 @@ public class Persons {
 	
 	private static final String PERSON_SQL = 
 			PERSONS_SQL + " WHERE persons.id = ?";
+	
+	public static final String ADMIN_GROUP_SQL =
+			"SELECT COUNT(groups.id) FROM groups, groups_persons WHERE groups.id = groups_persons.group_id AND groups_persons.person_id= ? AND groups.name = 'Administrator'";
+
+	public static final String SUPERUSER_GROUP_SQL =
+			"SELECT COUNT(groups.id) FROM groups, groups_persons WHERE groups.id = groups_persons.group_id AND groups_persons.person_id= ? AND groups.name = 'Superuser'";
+
+	private static String GROUPS_SQL = 
+			"SELECT groups.id, groups.name, groups.color FROM groups, groups_persons WHERE groups.id = groups_persons.group_id AND groups_persons.person_id= ?";
+
+	private static String GROUP_IDS_SQL = 
+			"SELECT groups_persons.group_id FROM groups_persons WHERE groups_persons.person_id= ?";
+
 
 	private Persons() {
 		// Do nothing
@@ -42,8 +55,8 @@ public class Persons {
 
 				return new PersonBean(rs.getInt(1), 
 						rs.getString(2),
-						rs.getString(4),
 						rs.getString(3),
+						rs.getString(4),
 						rs.getString(5));
 			}
 		});
@@ -60,8 +73,8 @@ public class Persons {
 
 				return new PersonBean(rs.getInt(1), 
 						rs.getString(2),
-						rs.getString(4),
 						rs.getString(3),
+						rs.getString(4),
 						rs.getString(5));
 			}
 		});
@@ -76,10 +89,67 @@ public class Persons {
 
 				return new PersonBean(rs.getInt(1), 
 						rs.getString(2),
-						rs.getString(4),
 						rs.getString(3),
+						rs.getString(4),
 						rs.getString(5));
 			}
 		});
+	}
+	
+	/**
+	 * Returns true if user is part of the admin group.
+	 * 
+	 * @param jdbcTemplate
+	 * @param pid
+	 * @return
+	 */
+	public static boolean isAdmin(JdbcTemplate jdbcTemplate,
+			int pid) {
+		return Query.queryForId(jdbcTemplate,
+				ADMIN_GROUP_SQL,
+				pid) > 0;
+	}
+	
+	/**
+	 * Returns true if user is part of the superuser group.
+	 * 
+	 * @param jdbcTemplate
+	 * @param pid
+	 * @return
+	 */
+	public static boolean isSuper(JdbcTemplate jdbcTemplate,
+			int pid) {
+		return Query.queryForId(jdbcTemplate,
+				SUPERUSER_GROUP_SQL,
+				pid) > 0;
+	}
+	
+	/**
+	 * Return the group ids for a person.
+	 * 
+	 * @param jdbcTemplate
+	 * @param pid
+	 * @return
+	 */
+	public static List<Integer> groupIds(JdbcTemplate jdbcTemplate,
+			int pid) {
+		return Query.queryForIds(jdbcTemplate,
+				GROUP_IDS_SQL,
+				pid);
+	}
+
+	/**
+	 * Get the groups for a person.
+	 * 
+	 * @param jdbcTemplate
+	 * @param pid
+	 * @return
+	 */
+	public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate, 
+			int pid) {
+		return Query.query(jdbcTemplate,
+				GROUPS_SQL,
+				pid,
+				Groups.GROUP_BEAN_MAPPER);
 	}
 }

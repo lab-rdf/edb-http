@@ -16,6 +16,7 @@
 package edu.columbia.rdf.edb.http;
 
 import java.util.Collection;
+import java.util.Collections;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -23,12 +24,19 @@ import java.util.Collection;
  */
 public class SearchResults {
 	
+	private static final Collection<Integer> EMPTY_SET = Collections.emptySet();
+
 	/** The m values. */
 	private Collection<Integer> mValues;
 	
 	/** The m include. */
 	private boolean mInclude;
 
+	
+	public SearchResults() {
+		this(EMPTY_SET);
+	}
+	
 	/**
 	 * Instantiates a new search results.
 	 *

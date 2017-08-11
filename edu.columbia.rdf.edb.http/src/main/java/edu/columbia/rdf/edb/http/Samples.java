@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.abh.common.bioinformatics.annotation.Species;
+import org.abh.common.collections.CollectionUtils;
 import org.abh.common.database.ResultsSetTable;
 import org.abh.common.text.TextUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,9 +21,17 @@ import edu.columbia.rdf.edb.Sample;
 import edu.columbia.rdf.edb.TypeMap;
 
 public class Samples {
-	/** The Constant ALL_SAMPLES_SQL. */
+	private static final String SAMPLE_FIELDS = 
+			"samples.id, samples.experiment_id, samples.expression_type_id, samples.name, samples.organism_id, TO_CHAR(samples.created, 'YYYY-MM-DD')";
+
 	public static final String ALL_SAMPLES_SQL =
-			"SELECT samples.id, samples.experiment_id, samples.expression_type_id, samples.name, samples.organism_id, TO_CHAR(samples.created, 'YYYY-MM-DD') FROM samples";
+			"SELECT " + SAMPLE_FIELDS + " FROM samples";
+
+	/**
+	 * Pick only samples we are 
+	 */
+	public static final String ALL_SAMPLES_WITHIN_GROUPS_SQL =
+			"SELECT DISTINCT " + SAMPLE_FIELDS + " FROM samples, groups_persons, groups_samples WHERE samples.id = groups_samples.sample_id AND groups_samples.group_id = groups_persons.group_id AND groups_persons.person_id = ?";
 	
 	public static String SAMPLE_PERSON_IDS_SQL =
 			"SELECT sample_persons.person_id FROM sample_persons WHERE sample_persons.sample_id = ?";
@@ -30,6 +39,10 @@ public class Samples {
 	public static final String SAMPLE_GEO_SQL = 
 			"SELECT geo_samples.id, geo_samples.name, geo_samples.geo_series_id, geo_samples.geo_platform_id FROM geo_samples WHERE geo_samples.sample_id = ?";
 	
+	/** Return the ids of the groups associated with a sample. */
+	private static final String SAMPLE_GROUPS_SQL = 
+			"SELECT groups_samples.group_id FROM groups_samples WHERE groups_samples.sample_id = ?";
+
 	
 	public static List<SampleBean> getSamples(final JdbcTemplate jdbcTemplate) throws SQLException {
 		return jdbcTemplate.query(ALL_SAMPLES_SQL,
@@ -37,42 +50,24 @@ public class Samples {
 			@Override
 			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 				int id = rs.getInt(1);
+				
+				Collection<Integer> sampleGroupIds = 
+						getGroups(jdbcTemplate, id);
 
-				return getSample(jdbcTemplate, id);
+				return new SampleBean(id, 
+						rs.getInt(2),
+						rs.getString(4),
+						rs.getInt(3),
+						rs.getInt(5),
+						rs.getString(6),
+						sampleGroupIds);
+
+				//return getSample(jdbcTemplate, id);
 			}
 		});
 	}
 	
-	/**
-	 * Gets the samples table.
-	 *
-	 * @param connection the connection
-	 * @return the samples table
-	 * @throws SQLException the SQL exception
-	 */
-	public static ResultsSetTable getSamplesTable(Connection connection) throws SQLException {
-		return Database.getTable(connection, ALL_SAMPLES_SQL);
-	}
 	
-	
-	/**
-	 * Gets the samples table.
-	 *
-	 * @param connection the connection
-	 * @param ids the ids
-	 * @param maxCount the max count
-	 * @return the samples table
-	 * @throws SQLException the SQL exception
-	 */
-	public static ResultsSetTable getSamplesTable(Connection connection, 
-			Collection<Integer> ids,
-			int maxCount) throws SQLException {
-		if (maxCount > -1) {
-			return Database.getTable(connection, Database.SAMPLES_LIMIT_SQL, ids, maxCount);
-		} else {
-			return Database.getTable(connection, Database.SAMPLES_SQL, ids);
-		}
-	}
 
 	public static List<SampleBean> getSamples(JdbcTemplate connection, 
 			Collection<Integer> ids,
@@ -118,21 +113,15 @@ public class Samples {
 	 */
 	public static List<SampleBean> getSamples(final JdbcTemplate jdbcTemplate, 
 			final int id) throws SQLException {
-		return jdbcTemplate.query(Database.SAMPLE_SQL, 
-				new Object[]{id},
+		return Query.query(jdbcTemplate, 
+				Database.SAMPLE_SQL, 
+				id,
 				new RowMapper<SampleBean>() {
 			@Override
 			public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-				///samples.id, 
-				//samples.experiment_id, 
-				//samples.expression_type_id, 
-				//samples.name, 
-				//samples.organism_id, 
-				//TO_CHAR(samples.created, 'YYYY-MM-DD')
-
 				Collection<Integer> sampleGroupIds = 
-						Groups.sampleGroups(jdbcTemplate, id);
+						getGroups(jdbcTemplate, id);
 
 				return new SampleBean(rs.getInt(1), 
 						rs.getInt(2),
@@ -151,11 +140,7 @@ public class Samples {
 			final int id) throws SQLException {
 		List<SampleBean> ret = getSamples(jdbcTemplate, id);
 
-		if (ret.size() > 0) {
-			return ret.get(0);
-		} else {
-			return null;
-		}
+		return CollectionUtils.head(ret);
 	}
 
 	/**
@@ -192,6 +177,14 @@ public class Samples {
 		return Database.getIds(connection, Database.ALL_SAMPLE_IDS_SQL);
 	}
 
+	/**
+	 * Get the persons associated with a sample.
+	 * 
+	 * @param jdbcTemplate
+	 * @param sid
+	 * @return
+	 * @throws SQLException
+	 */
 	public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate, int sid) throws SQLException {
 		List<Integer> pids = Query.queryForIds(jdbcTemplate, 
 				SAMPLE_PERSON_IDS_SQL, 
@@ -217,5 +210,49 @@ public class Samples {
 						Geo.getPlatform(jdbcTemplate, platformId));
 			}
 		});
+	}
+	
+	/**
+	 * Get the groups associated with a sample.
+	 * 
+	 * @param jdbcTemplate
+	 * @param sampleId
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Collection<Integer> getGroups(JdbcTemplate jdbcTemplate, 
+			int sampleId) throws SQLException {
+		return Query.queryForIds(jdbcTemplate, SAMPLE_GROUPS_SQL, sampleId);
+	}
+	
+	/**
+	 * Gets the samples table.
+	 *
+	 * @param connection the connection
+	 * @return the samples table
+	 * @throws SQLException the SQL exception
+	 */
+	public static ResultsSetTable getSamplesTable(Connection connection) throws SQLException {
+		return Database.getTable(connection, ALL_SAMPLES_SQL);
+	}
+	
+	
+	/**
+	 * Gets the samples table.
+	 *
+	 * @param connection the connection
+	 * @param ids the ids
+	 * @param maxCount the max count
+	 * @return the samples table
+	 * @throws SQLException the SQL exception
+	 */
+	public static ResultsSetTable getSamplesTable(Connection connection, 
+			Collection<Integer> ids,
+			int maxCount) throws SQLException {
+		if (maxCount > -1) {
+			return Database.getTable(connection, Database.SAMPLES_LIMIT_SQL, ids, maxCount);
+		} else {
+			return Database.getTable(connection, Database.SAMPLES_SQL, ids);
+		}
 	}
 }

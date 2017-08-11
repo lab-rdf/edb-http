@@ -39,7 +39,7 @@ public class Groups {
 	/** The Constant GROUP_IDS_SQL. */
 	private static final String GROUP_IDS_SQL = 
 			"SELECT groups_persons.group_id FROM groups_persons WHERE groups_persons.person_id = ?";
-	
+
 	/** Return the ids of the groups associated with a sample. */
 	private static final String SAMPLE_GROUPS_SQL = 
 			"SELECT groups_samples.group_id FROM groups_samples WHERE groups_samples.sample_id = ?";
@@ -51,18 +51,31 @@ public class Groups {
 	/** The Constant SAMPLE_GROUP_COUNT_SQL. */
 	private static final String SAMPLE_GROUP_COUNT_SQL = 
 			"SELECT COUNT(id) FROM groups_samples WHERE groups_samples.sample_id = ? AND groups_samples.group_id = ?";
-	
+
 	/** The Constant GROUP_SAMPLES_SQL. */
 	private static final String GROUP_SAMPLES_SQL = 
 			"SELECT groups_samples.sample_id FROM groups_samples WHERE groups_samples.group_id = ANY(?::int[])";
 
-	
+
 	public static final String GROUPS_SQL = 
-			"SELECT groups.id, groups.name FROM groups ORDER BY groups.name";
-	
+			"SELECT groups.id, groups.name, groups.color FROM groups ORDER BY groups.name";
+
 	public static final String GROUP_SQL = 
-			"SELECT groups.id, groups.name FROM groups WHERE groups.id = ? ORDER BY groups.name";
+			"SELECT groups.id, groups.name, groups.color FROM groups WHERE groups.id = ?";
 	
+	
+	
+	private static class GroupBeanMapper implements RowMapper<GroupBean> {
+		@Override
+		public GroupBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return new GroupBean(rs.getInt(1), rs.getString(2), rs.getString(3));
+		}
+	}
+	
+	public static final GroupBeanMapper GROUP_BEAN_MAPPER = 
+			new GroupBeanMapper();
+
+
 	/**
 	 * Instantiates a new groups.
 	 */
@@ -81,7 +94,7 @@ public class Groups {
 	@SuppressWarnings("unchecked")
 	public static Collection<Integer> userGroups(Connection connection, 
 			int userId) throws SQLException {
-		
+
 		Cache cache = CacheManager.getInstance().getCache("user-groups-cache");
 
 		//
@@ -93,20 +106,20 @@ public class Groups {
 		if (ce != null) {
 			return (Collection<Integer>)ce.getObjectValue();
 		}
-		
+
 		Set<Integer> ids = Database.getIdsSet(connection, GROUP_IDS_SQL, userId);
-		
+
 		ce = new Element(userId, ids);
-		
+
 		cache.put(ce);
-		
+
 		return ids;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static Collection<Integer> userGroups(JdbcTemplate connection, 
 			int userId) throws SQLException {
-		
+
 		Cache cache = CacheManager.getInstance().getCache("user-groups-cache");
 
 		//
@@ -118,13 +131,13 @@ public class Groups {
 		if (ce != null) {
 			return (Collection<Integer>)ce.getObjectValue();
 		}
-		
-		List<Integer> ids = Database.getIds(connection, GROUP_IDS_SQL, userId);
-		
+
+		List<Integer> ids = Query.queryForIds(connection, GROUP_IDS_SQL, userId);
+
 		ce = new Element(userId, ids);
-		
+
 		cache.put(ce);
-		
+
 		return ids;
 	}
 
@@ -143,7 +156,7 @@ public class Groups {
 			Collection<Integer> groupIds) throws SQLException {
 		return Database.getId(connection, SAMPLE_GROUPS_COUNT_SQL, sampleId, groupIds) > 0;
 	}
-	
+
 	/**
 	 * Sample is in group.
 	 *
@@ -158,7 +171,7 @@ public class Groups {
 			int groupId) throws SQLException {
 		return Database.getId(connection, SAMPLE_GROUP_COUNT_SQL, sampleId, groupId) > 0;
 	}
-	
+
 	/**
 	 * Return the groups associated with a sample.
 	 *
@@ -171,12 +184,9 @@ public class Groups {
 			int sampleId) throws SQLException {
 		return Database.getIdsSet(connection, SAMPLE_GROUPS_SQL, sampleId);
 	}
-	
-	public static Collection<Integer> sampleGroups(JdbcTemplate jdbcTemplate, 
-			int sampleId) throws SQLException {
-		return Database.getIds(jdbcTemplate, SAMPLE_GROUPS_SQL, sampleId);
-	}
-	
+
+
+
 	/**
 	 * Return the samples associated with a set of groups.
 	 *
@@ -191,7 +201,7 @@ public class Groups {
 			Collection<Integer> groupIds) throws SQLException {
 		return Database.getIdsSet(connection, GROUP_SAMPLES_SQL, groupIds);
 	}
-	
+
 	/**
 	 * Returns true if a user belongs to a sample's groups (and by
 	 * extension the user can thus view the sample).
@@ -214,7 +224,7 @@ public class Groups {
 		// Determine if this one of the user groups ids is in the sample group ids
 		return userInSampleGroups(userGroupIds, sampleGroupIds);
 	}
-	
+
 	/**
 	 * User in sample groups.
 	 *
@@ -226,28 +236,20 @@ public class Groups {
 			Collection<Integer> sampleGroupIds) {
 		return CollectionUtils.contains(userGroupIds, sampleGroupIds);
 	}
-	
+
 	public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate) throws SQLException {
 		return Query.query(jdbcTemplate,
 				GROUPS_SQL,
-				new RowMapper<GroupBean>() {
-			@Override
-			public GroupBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return new GroupBean(rs.getInt(1), rs.getString(2));
-			}
-		});
+				GROUP_BEAN_MAPPER);
 	}
-	
+
 	public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate,
 			Collection<Integer> gids) throws SQLException {
 		return Query.query(jdbcTemplate,
 				GROUP_SQL,
 				gids,
-				new RowMapper<GroupBean>() {
-			@Override
-			public GroupBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return new GroupBean(rs.getInt(1), rs.getString(2));
-			}
-		});
+				GROUP_BEAN_MAPPER);
 	}
+	
+
 }

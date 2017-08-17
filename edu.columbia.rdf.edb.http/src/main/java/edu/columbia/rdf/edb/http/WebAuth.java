@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.abh.common.cryptography.TOTP;
-import org.abh.common.text.TextUtils;
+import org.jebtk.core.cryptography.TOTP;
+import org.jebtk.core.text.TextUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import net.sf.ehcache.Cache;

@@ -15,7 +15,7 @@
  */
 package edu.columbia.rdf.edb.http;
 
-import org.abh.common.json.JsonObject;
+import org.jebtk.core.json.JsonObject;
 
 // TODO: Auto-generated Javadoc
 /**

@@ -2,7 +2,7 @@ package edu.columbia.rdf.edb.http;
 
 import java.util.Collection;
 
-import org.abh.common.bioinformatics.annotation.Type;
+import org.jebtk.bioinformatics.annotation.Type;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

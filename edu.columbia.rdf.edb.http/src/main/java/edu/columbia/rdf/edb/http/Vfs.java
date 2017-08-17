@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.abh.common.database.ResultsSetTable;
-import org.abh.common.io.PathUtils;
+import org.jebtk.core.io.PathUtils;
+import org.jebtk.database.ResultsSetTable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

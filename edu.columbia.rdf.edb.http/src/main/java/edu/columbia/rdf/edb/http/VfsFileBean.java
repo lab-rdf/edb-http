@@ -1,7 +1,7 @@
 package edu.columbia.rdf.edb.http;
 
-import org.abh.common.IdProperty;
-import org.abh.common.NameProperty;
+import org.jebtk.core.IdProperty;
+import org.jebtk.core.NameProperty;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;

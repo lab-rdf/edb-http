@@ -37,13 +37,13 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>org.abh</groupId>
-			<artifactId>org.abh.common</artifactId>
+			<groupId>org.jebtk</groupId>
+			<artifactId>org.jebtk.core</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.abh</groupId>
-			<artifactId>org.abh.common.database</artifactId>
+			<groupId>org.jebtk</groupId>
+			<artifactId>org.jebtk.database</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>

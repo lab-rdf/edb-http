@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.abh.common.bioinformatics.annotation.Type;
-import org.abh.common.collections.CollectionUtils;
-import org.abh.common.database.JDBCConnection;
-import org.abh.common.database.ResultsSetTable;
-import org.abh.common.text.TextUtils;
+import org.jebtk.core.collections.CollectionUtils;
+import org.jebtk.core.text.TextUtils;
+import org.jebtk.database.JDBCConnection;
+import org.jebtk.database.ResultsSetTable;
+import org.jebtk.bioinformatics.annotation.Type;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;

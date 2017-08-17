@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.abh.common.collections.CollectionUtils;
-import org.abh.common.text.TextUtils;
+import org.jebtk.core.collections.CollectionUtils;
+import org.jebtk.core.text.TextUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

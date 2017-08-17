@@ -26,10 +26,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
-import org.abh.common.collections.CollectionUtils;
-import org.abh.common.database.JDBCConnection;
-import org.abh.common.database.ResultsSetTable;
-import org.abh.common.search.SearchStackElement;
+import org.jebtk.core.collections.CollectionUtils;
+import org.jebtk.core.search.SearchStackElement;
+import org.jebtk.database.JDBCConnection;
+import org.jebtk.database.ResultsSetTable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

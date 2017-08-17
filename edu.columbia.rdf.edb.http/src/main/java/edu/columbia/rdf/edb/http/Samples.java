@@ -8,10 +8,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.abh.common.bioinformatics.annotation.Species;
-import org.abh.common.collections.CollectionUtils;
-import org.abh.common.database.ResultsSetTable;
-import org.abh.common.text.TextUtils;
+import org.jebtk.core.collections.CollectionUtils;
+import org.jebtk.core.text.TextUtils;
+import org.jebtk.database.ResultsSetTable;
+import org.jebtk.bioinformatics.annotation.Species;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 

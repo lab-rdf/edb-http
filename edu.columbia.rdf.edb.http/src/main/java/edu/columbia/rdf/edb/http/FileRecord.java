@@ -17,7 +17,7 @@ package edu.columbia.rdf.edb.http;
 
 import java.nio.file.Path;
 
-import org.abh.common.bioinformatics.annotation.Type;
+import org.jebtk.bioinformatics.annotation.Type;
 
 // TODO: Auto-generated Javadoc
 /**

@@ -23,70 +23,73 @@ import javax.servlet.ServletContextListener;
 
 import org.jebtk.core.io.PathUtils;
 
-
 // TODO: Auto-generated Javadoc
 /**
- * The listener interface for receiving EDBWInitContext events.
- * The class that is interested in processing a EDBWInitContext
- * event implements this interface, and the object created
- * with that class is registered with a component using the
- * component's <code>addEDBWInitContextListener<code> method. When
- * the EDBWInitContext event occurs, that object's appropriate
+ * The listener interface for receiving EDBWInitContext events. The class that
+ * is interested in processing a EDBWInitContext event implements this
+ * interface, and the object created with that class is registered with a
+ * component using the component's <code>addEDBWInitContextListener<code>
+ * method. When the EDBWInitContext event occurs, that object's appropriate
  * method is invoked.
  *
  * @see EDBWInitContextEvent
  */
 public class EDBWInitContextListener implements ServletContextListener {
-	
-	/** The Constant DATA_DIR_PARAM. */
-	public static final String DATA_DIR_PARAM = "data-directory";
-	
-	/** The Constant TOTP_PARAM. */
-	public static final String TOTP_PARAM = "totp-step";
-	
-	/** The Constant AUTH_PARAM. */
-	public static final String AUTH_PARAM = "auth-enabled";
-	
-	/** The Constant VIEW_PARAM. */
-	public static final String VIEW_PARAM = "view-permissions-enabled";
-	
-	/* (non-Javadoc)
-	 * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
-	 */
-	@Override
-	public void contextDestroyed(ServletContextEvent e) {
-		// Do nothing
-	}
 
-	/* (non-Javadoc)
-	 * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
-	 */
-	@Override
-	public void contextInitialized(ServletContextEvent e) {
-		ServletContext context = e.getServletContext();
-		
-		boolean auth = Boolean.parseBoolean(context.getInitParameter(AUTH_PARAM));
-		
-		if (auth) {
-			// The app tests for this setting existing to quickly 
-			// determine whether to validate credentials. It does not
-			// matter what value is associated with auth-enabled.
-			context.setAttribute(AUTH_PARAM, true);
-		}
-		
-		boolean view = Boolean.parseBoolean(context.getInitParameter(VIEW_PARAM));
-		
-		if (view) {
-			context.setAttribute(VIEW_PARAM, true);
-		}
-		
-		context.setAttribute(TOTP_PARAM, 
-				Long.parseLong(context.getInitParameter(TOTP_PARAM)));
-		
-		Path dir = PathUtils.getPath(context.getInitParameter(DATA_DIR_PARAM)).toAbsolutePath();
-		
-		context.setAttribute("dir", dir);
-		context.setAttribute(DATA_DIR_PARAM, dir);
-	}
+  /** The Constant DATA_DIR_PARAM. */
+  public static final String DATA_DIR_PARAM = "data-directory";
+
+  /** The Constant TOTP_PARAM. */
+  public static final String TOTP_PARAM = "totp-step";
+
+  /** The Constant AUTH_PARAM. */
+  public static final String AUTH_PARAM = "auth-enabled";
+
+  /** The Constant VIEW_PARAM. */
+  public static final String VIEW_PARAM = "view-permissions-enabled";
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.
+   * ServletContextEvent)
+   */
+  @Override
+  public void contextDestroyed(ServletContextEvent e) {
+    // Do nothing
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.
+   * ServletContextEvent)
+   */
+  @Override
+  public void contextInitialized(ServletContextEvent e) {
+    ServletContext context = e.getServletContext();
+
+    boolean auth = Boolean.parseBoolean(context.getInitParameter(AUTH_PARAM));
+
+    if (auth) {
+      // The app tests for this setting existing to quickly
+      // determine whether to validate credentials. It does not
+      // matter what value is associated with auth-enabled.
+      context.setAttribute(AUTH_PARAM, true);
+    }
+
+    boolean view = Boolean.parseBoolean(context.getInitParameter(VIEW_PARAM));
+
+    if (view) {
+      context.setAttribute(VIEW_PARAM, true);
+    }
+
+    context.setAttribute(TOTP_PARAM, Long.parseLong(context.getInitParameter(TOTP_PARAM)));
+
+    Path dir = PathUtils.getPath(context.getInitParameter(DATA_DIR_PARAM)).toAbsolutePath();
+
+    context.setAttribute("dir", dir);
+    context.setAttribute(DATA_DIR_PARAM, dir);
+  }
 
 }

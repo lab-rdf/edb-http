@@ -34,322 +34,305 @@ import net.sf.ehcache.Element;
  * Framework.
  */
 public class WebAuth {
-	
-	/** The Constant VALIDATE_IP_SQL. */
-	public static final String VALIDATE_IP_SQL = 
-			"SELECT COUNT(login_ip_address.id) FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
-	private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
+  /** The Constant VALIDATE_IP_SQL. */
+  public static final String VALIDATE_IP_SQL = "SELECT COUNT(login_ip_address.id) FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
-	private static final String USER_ID_SQL = 
-			"SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
-	
-	/**
-	 * Validate that the reported user is accessing from a valid ip
-	 * address.
-	 *
-	 * @param context the context
-	 * @param jdbcTemplate the jdbc template
-	 * @param person the person
-	 * @param ipAddress the ip address
-	 * @return true, if successful
-	 */
-	public static boolean validateIPAddress(ServletContext context,
-			JdbcTemplate jdbcTemplate,
-			int person, 
-			String ipAddress) {
-		Cache cache = CacheManager.getInstance().getCache("ip_add_cache");
+  private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
 
-		Element ce = cache.get(person);
+  private static final String USER_ID_SQL = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
 
-		if (ce != null) {
-			// If the cache contains blocked, then this user is not allowed
-			// to login in from this ip address
+  /**
+   * Validate that the reported user is accessing from a valid ip address.
+   *
+   * @param context
+   *          the context
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param person
+   *          the person
+   * @param ipAddress
+   *          the ip address
+   * @return true, if successful
+   */
+  public static boolean validateIPAddress(ServletContext context, JdbcTemplate jdbcTemplate, int person,
+      String ipAddress) {
+    Cache cache = CacheManager.getInstance().getCache("ip_add_cache");
 
-			String cachedIpAddress = (String)ce.getObjectValue();
+    Element ce = cache.get(person);
 
-			if (cachedIpAddress.equals(WebAuthentication.BLOCKED_IP_ADDRESS)) {
-				return false;
-			}
+    if (ce != null) {
+      // If the cache contains blocked, then this user is not allowed
+      // to login in from this ip address
 
-			if (cachedIpAddress.equals(ipAddress)) {
-				return true;
-			}
-		}
+      String cachedIpAddress = (String) ce.getObjectValue();
 
-		// We had a cache miss or else the ip address does not match the
-		// cache so we resort to a longer check
+      if (cachedIpAddress.equals(WebAuthentication.BLOCKED_IP_ADDRESS)) {
+        return false;
+      }
 
+      if (cachedIpAddress.equals(ipAddress)) {
+        return true;
+      }
+    }
 
-		boolean valid = false;
+    // We had a cache miss or else the ip address does not match the
+    // cache so we resort to a longer check
 
-		int count = Query.queryForId(jdbcTemplate,
-				VALIDATE_IP_SQL, 
-				person, 
-				ipAddress);
+    boolean valid = false;
 
-		if (count > 0) {
-			cache.put(new Element(person, ipAddress));
-		} else {
-			cache.put(new Element(person, WebAuthentication.BLOCKED_IP_ADDRESS));
-		}
+    int count = Query.queryForId(jdbcTemplate, VALIDATE_IP_SQL, person, ipAddress);
 
-		return valid;
-	}
-	
-	/**
-	 * Gets the user id.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param user the user
-	 * @return the user id
-	 */
-	public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
-		user = santizeUser(user);
-		
-		return Query.queryForId(jdbcTemplate, USER_ID_SQL, user);
-	}
-	
-	/**
-	 * Authenicate a user based on an user id, their ip address and a
-	 * one time random key.
-	 *
-	 * @param context the context
-	 * @param request the request
-	 * @param jdbcTemplate the jdbc template
-	 * @param userId the user id
-	 * @param totp the totp
-	 * @return true, if successful
-	 */
-	public static boolean totpAuthUser(ServletContext context,
-			HttpServletRequest request,
-			JdbcTemplate jdbcTemplate,
-			int userId,
-			int totp) {
+    if (count > 0) {
+      cache.put(new Element(person, ipAddress));
+    } else {
+      cache.put(new Element(person, WebAuthentication.BLOCKED_IP_ADDRESS));
+    }
 
-		return totpAuthUser(context,
-				request,
-				jdbcTemplate,
-				userId,
-				totp,
-				(long)context.getAttribute("totp-step"));
-	}
+    return valid;
+  }
 
-	/**
-	 * Totp auth user.
-	 *
-	 * @param context the context
-	 * @param request the request
-	 * @param jdbcTemplate the jdbc template
-	 * @param userId the user id
-	 * @param totp the totp
-	 * @param step the step
-	 * @return true, if successful
-	 */
-	public static boolean totpAuthUser(ServletContext context,
-			HttpServletRequest request,
-			JdbcTemplate jdbcTemplate,
-			int userId,
-			int totp,
-			long step) {
+  /**
+   * Gets the user id.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param user
+   *          the user
+   * @return the user id
+   */
+  public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
+    user = santizeUser(user);
 
-		if (WebAuthentication.checkAuthEnabled(context)) {
-			return strictTotpAuthUser(context,
-					request,
-					jdbcTemplate, 
-					userId,
-					totp,
-					step);
-		} else {
-			return true;
-		}
-	}
+    return Query.queryForId(jdbcTemplate, USER_ID_SQL, user);
+  }
 
-	/**
-	 * Strict TOTP auth user. Always authenticate.
-	 *
-	 * @param context the context
-	 * @param request the request
-	 * @param jdbcTemplate the jdbc template
-	 * @param userId the user id
-	 * @param totp the totp
-	 * @return true, if successful
-	 */
-	public static boolean strictTOTPAuthUser(ServletContext context,
-			HttpServletRequest request,
-			JdbcTemplate jdbcTemplate,
-			int userId,
-			int totp) {
-		return strictTotpAuthUser(context,
-				request,
-				jdbcTemplate, 
-				userId,
-				totp,
-				(long)context.getAttribute("totp-step"));
-	}
+  /**
+   * Authenicate a user based on an user id, their ip address and a one time
+   * random key.
+   *
+   * @param context
+   *          the context
+   * @param request
+   *          the request
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param userId
+   *          the user id
+   * @param totp
+   *          the totp
+   * @return true, if successful
+   */
+  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, JdbcTemplate jdbcTemplate,
+      int userId, int totp) {
 
-	/**
-	 * Strict TOTP auth user.
-	 *
-	 * @param context the context
-	 * @param request the request
-	 * @param jdbcTemplate the jdbc template
-	 * @param userId the user id
-	 * @param totp the totp
-	 * @param step the step
-	 * @return true, if successful
-	 */
-	public static boolean strictTotpAuthUser(ServletContext context,
-			HttpServletRequest request,
-			JdbcTemplate jdbcTemplate,
-			int userId,
-			int totp,
-			long step){
+    return totpAuthUser(context, request, jdbcTemplate, userId, totp, (long) context.getAttribute("totp-step"));
+  }
 
-		if (userId == -1) {
-			return false;
-		}
+  /**
+   * Totp auth user.
+   *
+   * @param context
+   *          the context
+   * @param request
+   *          the request
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param userId
+   *          the user id
+   * @param totp
+   *          the totp
+   * @param step
+   *          the step
+   * @return true, if successful
+   */
+  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, JdbcTemplate jdbcTemplate,
+      int userId, int totp, long step) {
 
-		// First validate the ip address
-		boolean validIp = validateIPAddress(context, 
-				jdbcTemplate, 
-				userId, 
-				request.getRemoteAddr());
+    if (WebAuthentication.checkAuthEnabled(context)) {
+      return strictTotpAuthUser(context, request, jdbcTemplate, userId, totp, step);
+    } else {
+      return true;
+    }
+  }
 
-		if (!validIp) {
-			return false;
-		}
+  /**
+   * Strict TOTP auth user. Always authenticate.
+   *
+   * @param context
+   *          the context
+   * @param request
+   *          the request
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param userId
+   *          the user id
+   * @param totp
+   *          the totp
+   * @return true, if successful
+   */
+  public static boolean strictTOTPAuthUser(ServletContext context, HttpServletRequest request,
+      JdbcTemplate jdbcTemplate, int userId, int totp) {
+    return strictTotpAuthUser(context, request, jdbcTemplate, userId, totp, (long) context.getAttribute("totp-step"));
+  }
 
-		// Now check the one time key is valid
+  /**
+   * Strict TOTP auth user.
+   *
+   * @param context
+   *          the context
+   * @param request
+   *          the request
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param userId
+   *          the user id
+   * @param totp
+   *          the totp
+   * @param step
+   *          the step
+   * @return true, if successful
+   */
+  public static boolean strictTotpAuthUser(ServletContext context, HttpServletRequest request,
+      JdbcTemplate jdbcTemplate, int userId, int totp, long step) {
 
-		String key = getKey(jdbcTemplate, userId);
+    if (userId == -1) {
+      return false;
+    }
 
-		if (TextUtils.isNullOrEmpty(key)) {
-			return false;
-		}
+    // First validate the ip address
+    boolean validIp = validateIPAddress(context, jdbcTemplate, userId, request.getRemoteAddr());
 
-		//return TOTP.totpAuth(key, totp, step);
+    if (!validIp) {
+      return false;
+    }
 
-		return totpAuth(userId, 
-				key,
-				totp, 
-				step);
-	}
+    // Now check the one time key is valid
 
-	/**
-	 * Totp auth.
-	 *
-	 * @param userId the user id
-	 * @param key the key
-	 * @param totp the totp
-	 * @param step the step
-	 * @return true, if successful
-	 */
-	private static boolean totpAuth(int userId, 
-			String key,
-			int totp, 
-			long step) {
-		return totpAuth(userId, 
-				key,
-				totp, 
-				step,
-				System.currentTimeMillis(),
-				0);
-	}
+    String key = getKey(jdbcTemplate, userId);
 
-	/**
-	 * Totp auth.
-	 *
-	 * @param userId the user id
-	 * @param key the key
-	 * @param totp the totp
-	 * @param step the step
-	 * @param time the time
-	 * @param epoch the epoch
-	 * @return true, if successful
-	 */
-	private static boolean totpAuth(int userId, 
-			String key,
-			int totp, 
-			long step,
-			long time,
-			long epoch) {
+    if (TextUtils.isNullOrEmpty(key)) {
+      return false;
+    }
 
-		long counter = TOTP.getCounter(time, epoch, step);
+    // return TOTP.totpAuth(key, totp, step);
 
-		Cache tcCache = CacheManager.getInstance().getCache("totp-tc-cache");
-		//Cache otkCache = CacheManager.getInstance().getCache("totp-totp-cache");
+    return totpAuth(userId, key, totp, step);
+  }
 
-		Element ce = tcCache.get(userId);
+  /**
+   * Totp auth.
+   *
+   * @param userId
+   *          the user id
+   * @param key
+   *          the key
+   * @param totp
+   *          the totp
+   * @param step
+   *          the step
+   * @return true, if successful
+   */
+  private static boolean totpAuth(int userId, String key, int totp, long step) {
+    return totpAuth(userId, key, totp, step, System.currentTimeMillis(), 0);
+  }
 
-		long cachedCounter = -1;
+  /**
+   * Totp auth.
+   *
+   * @param userId
+   *          the user id
+   * @param key
+   *          the key
+   * @param totp
+   *          the totp
+   * @param step
+   *          the step
+   * @param time
+   *          the time
+   * @param epoch
+   *          the epoch
+   * @return true, if successful
+   */
+  private static boolean totpAuth(int userId, String key, int totp, long step, long time, long epoch) {
 
-		if (ce != null) {
-			cachedCounter = (long)ce.getObjectValue();
+    long counter = TOTP.getCounter(time, epoch, step);
 
-			//System.err.println("cache " + cachedCounter + " " + counter);
-		}
+    Cache tcCache = CacheManager.getInstance().getCache("totp-tc-cache");
+    // Cache otkCache = CacheManager.getInstance().getCache("totp-totp-cache");
 
-		//ce = otkCache.get(userId);
+    Element ce = tcCache.get(userId);
 
-		//long cachedOtk = -1;
+    long cachedCounter = -1;
 
-		//if (ce != null) {
-		//	cachedOtk = (Long)ce.getObjectValue();
-		//}
+    if (ce != null) {
+      cachedCounter = (long) ce.getObjectValue();
 
-		// The client and server are in the same counter frame so we don't
-		// have to validate further
-		if (counter == cachedCounter) {
-			return true;
-		}
+      // System.err.println("cache " + cachedCounter + " " + counter);
+    }
 
-		boolean auth = TOTP.totpAuth(key, totp, time, epoch, step);
+    // ce = otkCache.get(userId);
 
-		if (auth) {
-			tcCache.put(new Element(userId, counter));
-			//otkCache.put(new Element(userId, totp));
-		}
+    // long cachedOtk = -1;
 
-		return auth;
-	}
-	
-	/**
-	 * Gets the key.
-	 *
-	 * @param context the context
-	 * @param jdbcTemplate the jdbc template
-	 * @param userId the user id
-	 * @return the key
-	 */
-	public static String getKey(JdbcTemplate jdbcTemplate,
-			int userId) {
-		Cache cache = CacheManager.getInstance().getCache("key-cache");
+    // if (ce != null) {
+    // cachedOtk = (Long)ce.getObjectValue();
+    // }
 
-		Element ce = cache.get(userId);
+    // The client and server are in the same counter frame so we don't
+    // have to validate further
+    if (counter == cachedCounter) {
+      return true;
+    }
 
-		if (ce != null) {
-			return (String)ce.getObjectValue();
-		}
+    boolean auth = TOTP.totpAuth(key, totp, time, epoch, step);
 
-		String key = Query.queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
+    if (auth) {
+      tcCache.put(new Element(userId, counter));
+      // otkCache.put(new Element(userId, totp));
+    }
 
-		cache.put(new Element(userId, key));
+    return auth;
+  }
 
-		return key;
-	}
-	
-	/**
-	 * Ensure the user contains only lowercase letters or numbers.
-	 * 
-	 * @param user
-	 * @return
-	 */
-	public static String santizeUser(String user) {
-		if (USER_REGEX.matcher(user).matches()) {
-			return user;
-		} else {
-			return TextUtils.EMPTY_STRING;
-		}
-	}
+  /**
+   * Gets the key.
+   *
+   * @param context
+   *          the context
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param userId
+   *          the user id
+   * @return the key
+   */
+  public static String getKey(JdbcTemplate jdbcTemplate, int userId) {
+    Cache cache = CacheManager.getInstance().getCache("key-cache");
+
+    Element ce = cache.get(userId);
+
+    if (ce != null) {
+      return (String) ce.getObjectValue();
+    }
+
+    String key = Query.queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
+
+    cache.put(new Element(userId, key));
+
+    return key;
+  }
+
+  /**
+   * Ensure the user contains only lowercase letters or numbers.
+   * 
+   * @param user
+   * @return
+   */
+  public static String santizeUser(String user) {
+    if (USER_REGEX.matcher(user).matches()) {
+      return user;
+    } else {
+      return TextUtils.EMPTY_STRING;
+    }
+  }
 }

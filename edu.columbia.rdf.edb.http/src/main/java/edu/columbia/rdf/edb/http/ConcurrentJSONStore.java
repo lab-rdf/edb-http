@@ -21,5 +21,5 @@ import org.jebtk.core.json.JsonObject;
  * The Class ConcurrentJSONStore.
  */
 public class ConcurrentJSONStore extends ConcurrentIdValueStore<JsonObject> {
-	
+
 }

@@ -25,29 +25,32 @@ import org.jebtk.bioinformatics.annotation.Type;
  */
 public class FileRecord extends Type {
 
-	/** The m path. */
-	private Path mPath;
+  /** The m path. */
+  private Path mPath;
 
-	/**
-	 * Instantiates a new file record.
-	 *
-	 * @param id the id
-	 * @param name the name
-	 * @param path the path
-	 */
-	public FileRecord(int id, String name, Path path) {
-		super(id, name);
-		
-		mPath = path;
-	}
-	
-	/**
-	 * Gets the path.
-	 *
-	 * @return the path
-	 */
-	public Path getPath() {
-		return mPath;
-	}
+  /**
+   * Instantiates a new file record.
+   *
+   * @param id
+   *          the id
+   * @param name
+   *          the name
+   * @param path
+   *          the path
+   */
+  public FileRecord(int id, String name, Path path) {
+    super(id, name);
+
+    mPath = path;
+  }
+
+  /**
+   * Gets the path.
+   *
+   * @return the path
+   */
+  public Path getPath() {
+    return mPath;
+  }
 
 }

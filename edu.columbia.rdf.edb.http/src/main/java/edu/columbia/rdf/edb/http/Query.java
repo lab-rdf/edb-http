@@ -32,410 +32,423 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public class Query {
 
-	private static class IdMapper implements RowMapper<Integer> {
-		@Override
-		public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return rs.getInt(1);
-		}
-	}
-	
-	
-	private static class StringMapper implements RowMapper<String> {
-		@Override
-		public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-			return rs.getString(1);
-		}
-	}
-	
-	private static final IdMapper ID_MAPPER = new IdMapper();
-	
-	private static final StringMapper STRING_MAPPER = new StringMapper();
+  private static class IdMapper implements RowMapper<Integer> {
+    @Override
+    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return rs.getInt(1);
+    }
+  }
 
-	
-	/**
-	 * Instantiates a new query.
-	 */
-	private Query() {
-		// Do nothing
-	}
+  private static class StringMapper implements RowMapper<String> {
+    @Override
+    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return rs.getString(1);
+    }
+  }
 
-	/**
-	 * Use a collection of ids to bind to an sql statement and return the
-	 * union of all rows from all queries using those ids.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param ids the ids
-	 * @param rowMapper the row mapper
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			Collection<Integer> ids,
-			RowMapper<T> rowMapper) {
-		return query(jdbcTemplate, sql, ids, 100, rowMapper);
-	}
+  private static final IdMapper ID_MAPPER = new IdMapper();
 
-	/**
-	 * JdbcTemplate query where query has one integer parameter.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param rowMapper the row mapper
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			int id,
-			RowMapper<T> rowMapper) {
-		return jdbcTemplate.query(sql, new Object[]{id}, rowMapper);
-	}
+  private static final StringMapper STRING_MAPPER = new StringMapper();
 
-	/**
-	 * Query.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param rowMapper the row mapper
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			Object id,
-			RowMapper<T> rowMapper) {
-		return jdbcTemplate.query(sql, new Object[]{id}, rowMapper);
-	}
+  /**
+   * Instantiates a new query.
+   */
+  private Query() {
+    // Do nothing
+  }
 
-	/**
-	 * Return the values of a query taking an arbitrary number of input
-	 * parameters.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param rowMapper the row mapper
-	 * @param id the id
-	 * @param ids the ids
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			RowMapper<T> rowMapper,
-			Object id,
-			Object... ids) {
+  /**
+   * Use a collection of ids to bind to an sql statement and return the union of
+   * all rows from all queries using those ids.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param ids
+   *          the ids
+   * @param rowMapper
+   *          the row mapper
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, Collection<Integer> ids,
+      RowMapper<T> rowMapper) {
+    return query(jdbcTemplate, sql, ids, 100, rowMapper);
+  }
 
-		return jdbcTemplate.query(sql, 
-				CollectionUtils.concatenate(id, ids), 
-				rowMapper);
-	}
+  /**
+   * JdbcTemplate query where query has one integer parameter.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param rowMapper
+   *          the row mapper
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, int id, RowMapper<T> rowMapper) {
+    return jdbcTemplate.query(sql, new Object[] { id }, rowMapper);
+  }
 
-	/**
-	 * Query.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param rowMapper the row mapper
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			RowMapper<T> rowMapper) {
-		return jdbcTemplate.query(sql, rowMapper);
-	}
+  /**
+   * Query.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param rowMapper
+   *          the row mapper
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, Object id, RowMapper<T> rowMapper) {
+    return jdbcTemplate.query(sql, new Object[] { id }, rowMapper);
+  }
 
-	/**
-	 * A revised version of query for object that will either return the first
-	 * item from a row list or null if there are no rows, without throwing
-	 * an exception.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param rowMapper the row mapper
-	 * @return the t
-	 */
-	public static <T> T querySingle(JdbcTemplate jdbcTemplate, 
-			String sql,
-			int id,
-			RowMapper<T> rowMapper) {
-		List<T> ret = query(jdbcTemplate, sql, id, rowMapper);
+  /**
+   * Return the values of a query taking an arbitrary number of input parameters.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param rowMapper
+   *          the row mapper
+   * @param id
+   *          the id
+   * @param ids
+   *          the ids
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper, Object id,
+      Object... ids) {
 
-		return CollectionUtils.head(ret);
-	}
+    return jdbcTemplate.query(sql, CollectionUtils.concatenate(id, ids), rowMapper);
+  }
 
-	/**
-	 * Query single.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param rowMapper the row mapper
-	 * @return the t
-	 */
-	public static <T> T querySingle(JdbcTemplate jdbcTemplate, 
-			String sql,
-			Object id,
-			RowMapper<T> rowMapper) {
-		List<T> ret = query(jdbcTemplate, sql, id, rowMapper);
+  /**
+   * Query.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param rowMapper
+   *          the row mapper
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper) {
+    return jdbcTemplate.query(sql, rowMapper);
+  }
 
-		return CollectionUtils.head(ret);
-	}
+  /**
+   * A revised version of query for object that will either return the first item
+   * from a row list or null if there are no rows, without throwing an exception.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param rowMapper
+   *          the row mapper
+   * @return the t
+   */
+  public static <T> T querySingle(JdbcTemplate jdbcTemplate, String sql, int id, RowMapper<T> rowMapper) {
+    List<T> ret = query(jdbcTemplate, sql, id, rowMapper);
 
-	/**
-	 * Query single.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param ids the ids
-	 * @param rowMapper the row mapper
-	 * @return the t
-	 */
-	public static <T> T querySingle(JdbcTemplate jdbcTemplate, 
-			String sql,
-			Collection<Integer> ids,
-			RowMapper<T> rowMapper) {
-		List<T> ret = query(jdbcTemplate, sql, ids, rowMapper);
+    return CollectionUtils.head(ret);
+  }
 
-		return CollectionUtils.head(ret);
-	}
+  /**
+   * Query single.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param rowMapper
+   *          the row mapper
+   * @return the t
+   */
+  public static <T> T querySingle(JdbcTemplate jdbcTemplate, String sql, Object id, RowMapper<T> rowMapper) {
+    List<T> ret = query(jdbcTemplate, sql, id, rowMapper);
 
-	/**
-	 * Query single.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param rowMapper the row mapper
-	 * @param id the id
-	 * @param ids the ids
-	 * @return the t
-	 */
-	public static <T> T querySingle(JdbcTemplate jdbcTemplate, 
-			String sql,
-			RowMapper<T> rowMapper,
-			Object id,
-			Object ids) {
-		List<T> ret = query(jdbcTemplate, sql, rowMapper, id, ids);
+    return CollectionUtils.head(ret);
+  }
 
-		return CollectionUtils.head(ret);
-	}
+  /**
+   * Query single.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param ids
+   *          the ids
+   * @param rowMapper
+   *          the row mapper
+   * @return the t
+   */
+  public static <T> T querySingle(JdbcTemplate jdbcTemplate, String sql, Collection<Integer> ids,
+      RowMapper<T> rowMapper) {
+    List<T> ret = query(jdbcTemplate, sql, ids, rowMapper);
 
-	/**
-	 * Query.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param ids the ids
-	 * @param size 			the expected size of the results list.
-	 * @param rowMapper 	the row mapper
-	 * @return the list
-	 */
-	public static <T> List<T> query(JdbcTemplate jdbcTemplate, 
-			String sql,
-			Collection<Integer> ids,
-			int size,
-			RowMapper<T> rowMapper) {
-		List<T> ret = new ArrayList<T>(size);
+    return CollectionUtils.head(ret);
+  }
 
-		for (int id : ids) {
-			ret.addAll(query(jdbcTemplate, sql, id, rowMapper));
-		}
+  /**
+   * Query single.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param rowMapper
+   *          the row mapper
+   * @param id
+   *          the id
+   * @param ids
+   *          the ids
+   * @return the t
+   */
+  public static <T> T querySingle(JdbcTemplate jdbcTemplate, String sql, RowMapper<T> rowMapper, Object id,
+      Object ids) {
+    List<T> ret = query(jdbcTemplate, sql, rowMapper, id, ids);
 
-		return ret;
-	}
+    return CollectionUtils.head(ret);
+  }
 
-	/**
-	 * Query for string.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the string
-	 */
-	public static String queryForString(JdbcTemplate jdbcTemplate,
-			String sql,
-			int id) {
-		String ret = querySingle(jdbcTemplate,
-				sql,
-				id,
-				STRING_MAPPER);
+  /**
+   * Query.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param ids
+   *          the ids
+   * @param size
+   *          the expected size of the results list.
+   * @param rowMapper
+   *          the row mapper
+   * @return the list
+   */
+  public static <T> List<T> query(JdbcTemplate jdbcTemplate, String sql, Collection<Integer> ids, int size,
+      RowMapper<T> rowMapper) {
+    List<T> ret = new ArrayList<T>(size);
 
-		// Return an empty string if the object is null
-		return TextUtils.nonNull(ret);
-	}
+    for (int id : ids) {
+      ret.addAll(query(jdbcTemplate, sql, id, rowMapper));
+    }
 
-	/**
-	 * Query for id.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @return the int
-	 */
-	public static int queryForId(JdbcTemplate jdbcTemplate,
-			String sql) {
-		List<Integer> ret = queryForIds(jdbcTemplate, sql);
+    return ret;
+  }
 
-		return headId(ret);
-	}
+  /**
+   * Query for string.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @return the string
+   */
+  public static String queryForString(JdbcTemplate jdbcTemplate, String sql, int id) {
+    String ret = querySingle(jdbcTemplate, sql, id, STRING_MAPPER);
 
-	/**
-	 * Query for id.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the int
-	 */
-	public static int queryForId(JdbcTemplate jdbcTemplate,
-			String sql,
-			int id) {
-		List<Integer> ret = queryForIds(jdbcTemplate, sql, id);
+    // Return an empty string if the object is null
+    return TextUtils.nonNull(ret);
+  }
 
-		return headId(ret);
-	}
+  /**
+   * Query for id.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @return the int
+   */
+  public static int queryForId(JdbcTemplate jdbcTemplate, String sql) {
+    List<Integer> ret = queryForIds(jdbcTemplate, sql);
 
-	/**
-	 * Query for id.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the int
-	 */
-	public static int queryForId(JdbcTemplate jdbcTemplate,
-			String sql,
-			Object id) {
-		List<Integer> ret = queryForIds(jdbcTemplate, sql, id);
+    return headId(ret);
+  }
 
-		return headId(ret);
-	}
+  /**
+   * Query for id.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @return the int
+   */
+  public static int queryForId(JdbcTemplate jdbcTemplate, String sql, int id) {
+    List<Integer> ret = queryForIds(jdbcTemplate, sql, id);
 
-	/**
-	 * Return the integer value of a query taking multiple parameters.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param ids the ids
-	 * @return the int
-	 */
-	public static int queryForId(JdbcTemplate jdbcTemplate,
-			String sql,
-			Object id,
-			Object... ids) {
-		List<Integer> ret = queryForIds(jdbcTemplate, sql, id, ids);
+    return headId(ret);
+  }
 
-		return headId(ret);
-	}
+  /**
+   * Query for id.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @return the int
+   */
+  public static int queryForId(JdbcTemplate jdbcTemplate, String sql, Object id) {
+    List<Integer> ret = queryForIds(jdbcTemplate, sql, id);
 
-	/**
-	 * Query for object.
-	 *
-	 * @param <T> the generic type
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param rowMapper the row mapper
-	 * @return the t
-	 */
-	public static <T> T queryForObject(JdbcTemplate jdbcTemplate,
-			String sql,
-			int id,
-			RowMapper<T> rowMapper) {
-		return jdbcTemplate.queryForObject(sql,
-				new Object[]{id},
-				rowMapper);
-	}
+    return headId(ret);
+  }
 
-	/**
-	 * Return a list of ids from a query.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @return the list
-	 */
-	public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, 
-			String sql) {
-		return query(jdbcTemplate,
-				sql,
-				ID_MAPPER);
-	}
+  /**
+   * Return the integer value of a query taking multiple parameters.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param ids
+   *          the ids
+   * @return the int
+   */
+  public static int queryForId(JdbcTemplate jdbcTemplate, String sql, Object id, Object... ids) {
+    List<Integer> ret = queryForIds(jdbcTemplate, sql, id, ids);
 
-	/**
-	 * Return a list of ids from a query taking one integer parameter.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the list
-	 */
-	public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, 
-			String sql, 
-			int id) {
-		return query(jdbcTemplate,
-				sql,
-				id,
-				ID_MAPPER);
-	}
+    return headId(ret);
+  }
 
-	/**
-	 * Query for ids.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @return the list
-	 */
-	public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, 
-			String sql, 
-			Object id) {
-		return query(jdbcTemplate,
-				sql,
-				id,
-				ID_MAPPER);
-	}
+  /**
+   * Query for object.
+   *
+   * @param <T>
+   *          the generic type
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param rowMapper
+   *          the row mapper
+   * @return the t
+   */
+  public static <T> T queryForObject(JdbcTemplate jdbcTemplate, String sql, int id, RowMapper<T> rowMapper) {
+    return jdbcTemplate.queryForObject(sql, new Object[] { id }, rowMapper);
+  }
 
-	/**
-	 * Query returning an id list taking an arbitrary number of parameters.
-	 *
-	 * @param jdbcTemplate the jdbc template
-	 * @param sql the sql
-	 * @param id the id
-	 * @param ids the ids
-	 * @return the list
-	 */
-	public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, 
-			String sql, 
-			Object id,
-			Object... ids) {
-		return query(jdbcTemplate,
-				sql,
-				ID_MAPPER,
-				id,
-				ids);
-	}
+  /**
+   * Return a list of ids from a query.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @return the list
+   */
+  public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, String sql) {
+    return query(jdbcTemplate, sql, ID_MAPPER);
+  }
 
-	/**
-	 * Returns the head of an id list.
-	 * 
-	 * @param ret
-	 * @return
-	 */
-	private static int headId(final List<Integer> ret) {
-		if (ret.size() > 0) {
-			return ret.get(0);
-		} else {
-			return -1;
-		}
-	}
+  /**
+   * Return a list of ids from a query taking one integer parameter.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @return the list
+   */
+  public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, String sql, int id) {
+    return query(jdbcTemplate, sql, id, ID_MAPPER);
+  }
+
+  /**
+   * Query for ids.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @return the list
+   */
+  public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, String sql, Object id) {
+    return query(jdbcTemplate, sql, id, ID_MAPPER);
+  }
+
+  /**
+   * Query returning an id list taking an arbitrary number of parameters.
+   *
+   * @param jdbcTemplate
+   *          the jdbc template
+   * @param sql
+   *          the sql
+   * @param id
+   *          the id
+   * @param ids
+   *          the ids
+   * @return the list
+   */
+  public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate, String sql, Object id, Object... ids) {
+    return query(jdbcTemplate, sql, ID_MAPPER, id, ids);
+  }
+
+  /**
+   * Returns the head of an id list.
+   * 
+   * @param ret
+   * @return
+   */
+  private static int headId(final List<Integer> ret) {
+    if (ret.size() > 0) {
+      return ret.get(0);
+    } else {
+      return -1;
+    }
+  }
 }

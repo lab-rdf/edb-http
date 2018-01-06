@@ -28,121 +28,112 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * The Class Search.
  */
 public class Filter {
-	private Filter() {
-		// Do nothing
-	}
+  private Filter() {
+    // Do nothing
+  }
 
-	/**
-	 * Filter a list of samples to only contain those of a specific type.
-	 * 
-	 * @param samples
-	 * @param types
-	 * @return
-	 */
-	public static List<SampleBean> filterByTypes(List<SampleBean> samples, 
-			Collection<Integer> types) {
-		if (CollectionUtils.isNullOrEmpty(types)) {
-			return samples;
-		}
+  /**
+   * Filter a list of samples to only contain those of a specific type.
+   * 
+   * @param samples
+   * @param types
+   * @return
+   */
+  public static List<SampleBean> filterByTypes(List<SampleBean> samples, Collection<Integer> types) {
+    if (CollectionUtils.isNullOrEmpty(types)) {
+      return samples;
+    }
 
-		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
+    List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
 
-		for (SampleBean sample : samples) {
-			int type = sample.getType();
+    for (SampleBean sample : samples) {
+      int type = sample.getType();
 
-			if (types.contains(type)) {
-				ret.add(sample);
-			}
-		}
+      if (types.contains(type)) {
+        ret.add(sample);
+      }
+    }
 
-		return ret;
-	}
+    return ret;
+  }
 
-	public static List<SampleBean> filterByOrganisms(List<SampleBean> samples, 
-			Collection<Integer> organisms) {
-		if (CollectionUtils.isNullOrEmpty(organisms)) {
-			return samples;
-		}
+  public static List<SampleBean> filterByOrganisms(List<SampleBean> samples, Collection<Integer> organisms) {
+    if (CollectionUtils.isNullOrEmpty(organisms)) {
+      return samples;
+    }
 
-		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
+    List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
 
-		for (SampleBean sample : samples) {
-			int organism = sample.getOrganismId();
+    for (SampleBean sample : samples) {
+      int organism = sample.getOrganismId();
 
-			if (organisms.contains(organism)) {
-				ret.add(sample);
-			}
-		}
+      if (organisms.contains(organism)) {
+        ret.add(sample);
+      }
+    }
 
-		return ret;
-	}
+    return ret;
+  }
 
-	public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
-			Auth auth,
-			List<SampleBean> samples, 
-			List<Integer> gids,
-			boolean allMode) {
-		return filterByGroups(jdbcTemplate, auth, samples, CollectionUtils.toSet(gids), allMode);
-	}
+  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate, Auth auth, List<SampleBean> samples,
+      List<Integer> gids, boolean allMode) {
+    return filterByGroups(jdbcTemplate, auth, samples, CollectionUtils.toSet(gids), allMode);
+  }
 
-	/**
-	 * Filter samples by which groups a user belongs to.
-	 * 
-	 * @param samples
-	 * @param gids
-	 * @return
-	 */
-	public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
-			Auth auth,
-			List<SampleBean> samples, 
-			Collection<Integer> gids,
-			boolean allMode) {
+  /**
+   * Filter samples by which groups a user belongs to.
+   * 
+   * @param samples
+   * @param gids
+   * @return
+   */
+  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate, Auth auth, List<SampleBean> samples,
+      Collection<Integer> gids, boolean allMode) {
 
+    List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
 
-		List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
+    if (allMode) {
+      // Add sample only if it belongs to all groups
 
-		if (allMode) {
-			// Add sample only if it belongs to all groups
+      if (gids.size() == 0) {
+        // If there are no group ids specified, then match to all
+        gids = Persons.groupIds(jdbcTemplate, auth.getUserId());
+      }
 
-			if (gids.size() == 0) {
-				// If there are no group ids specified, then match to all
-				gids = Persons.groupIds(jdbcTemplate, auth.getUserId());
-			}
+      for (SampleBean sample : samples) {
+        boolean include = true;
 
-			for (SampleBean sample : samples) {
-				boolean include = true;
+        Set<Integer> sgids = CollectionUtils.toSet(sample.getGroups());
 
-				Set<Integer> sgids = CollectionUtils.toSet(sample.getGroups());
-				
-				// Each sample must in all of the groups
-				for (int gid : gids) {
-					if (!sgids.contains(gid)) {
-						include = false;
-						break;
-					}
-				}
+        // Each sample must in all of the groups
+        for (int gid : gids) {
+          if (!sgids.contains(gid)) {
+            include = false;
+            break;
+          }
+        }
 
-				if (include) {
-					ret.add(sample);
-				}
-			}
-		} else {
-			// Add sample if it belongs to any of the groups
+        if (include) {
+          ret.add(sample);
+        }
+      }
+    } else {
+      // Add sample if it belongs to any of the groups
 
-			if (CollectionUtils.isNullOrEmpty(gids)) {
-				return samples;
-			}
+      if (CollectionUtils.isNullOrEmpty(gids)) {
+        return samples;
+      }
 
-			for (SampleBean sample : samples) {
-				for (int gid : sample.getGroups()) {
-					if (gids.contains(gid)) {
-						ret.add(sample);
-						break;
-					}
-				}
-			}
-		}
+      for (SampleBean sample : samples) {
+        for (int gid : sample.getGroups()) {
+          if (gids.contains(gid)) {
+            ret.add(sample);
+            break;
+          }
+        }
+      }
+    }
 
-		return ret;
-	}
+    return ret;
+  }
 }

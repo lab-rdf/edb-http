@@ -15,8 +15,6 @@
  */
 package edu.columbia.rdf.edb.http;
 
-
-
 // TODO: Auto-generated Javadoc
 /**
  * Stores ids and their associated string value.
@@ -24,9 +22,9 @@ package edu.columbia.rdf.edb.http;
  * @author Antony Holmes Holmes
  */
 public interface ConcurrentStore {
-	
-	/**
-	 * Clear.
-	 */
-	public void clear();
+
+  /**
+   * Clear.
+   */
+  public void clear();
 }

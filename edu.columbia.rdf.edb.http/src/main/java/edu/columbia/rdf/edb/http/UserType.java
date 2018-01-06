@@ -20,30 +20,31 @@ package edu.columbia.rdf.edb.http;
  * The Enum UserType.
  */
 public enum UserType {
-	
-	/** The normal. */
-	NORMAL,
-	
-	/** The administrator. */
-	ADMINISTRATOR,
-	
-	/** The superuser. */
-	SUPERUSER;
-	
-	/**
-	 * Gets the from id.
-	 *
-	 * @param userTypeId the user type id
-	 * @return the from id
-	 */
-	public static UserType getFromId(int userTypeId) {
-		switch(userTypeId) {
-		case 4:
-			return SUPERUSER;
-		case 3:
-			return ADMINISTRATOR;
-		default:
-			return NORMAL;
-		}
-	}
+
+  /** The normal. */
+  NORMAL,
+
+  /** The administrator. */
+  ADMINISTRATOR,
+
+  /** The superuser. */
+  SUPERUSER;
+
+  /**
+   * Gets the from id.
+   *
+   * @param userTypeId
+   *          the user type id
+   * @return the from id
+   */
+  public static UserType getFromId(int userTypeId) {
+    switch (userTypeId) {
+    case 4:
+      return SUPERUSER;
+    case 3:
+      return ADMINISTRATOR;
+    default:
+      return NORMAL;
+    }
+  }
 }

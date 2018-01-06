@@ -23,55 +23,57 @@ import java.util.Collections;
  * The Class SearchResults.
  */
 public class SearchResults {
-	
-	private static final Collection<Integer> EMPTY_SET = Collections.emptySet();
 
-	/** The m values. */
-	private Collection<Integer> mValues;
-	
-	/** The m include. */
-	private boolean mInclude;
+  private static final Collection<Integer> EMPTY_SET = Collections.emptySet();
 
-	
-	public SearchResults() {
-		this(EMPTY_SET);
-	}
-	
-	/**
-	 * Instantiates a new search results.
-	 *
-	 * @param values the values
-	 */
-	public SearchResults(Collection<Integer> values) {
-		this(values, true);
-	}
+  /** The m values. */
+  private Collection<Integer> mValues;
 
-	/**
-	 * Instantiates a new search results.
-	 *
-	 * @param values the values
-	 * @param include the include
-	 */
-	public SearchResults(Collection<Integer> values, boolean include) {
-		mValues = values;
-		mInclude = include;
-	}
-	
-	/**
-	 * Gets the values.
-	 *
-	 * @return the values
-	 */
-	public Collection<Integer> getValues() {
-		return mValues;
-	}
-	
-	/**
-	 * Gets the include.
-	 *
-	 * @return the include
-	 */
-	public boolean getInclude() {
-		return mInclude;
-	}
+  /** The m include. */
+  private boolean mInclude;
+
+  public SearchResults() {
+    this(EMPTY_SET);
+  }
+
+  /**
+   * Instantiates a new search results.
+   *
+   * @param values
+   *          the values
+   */
+  public SearchResults(Collection<Integer> values) {
+    this(values, true);
+  }
+
+  /**
+   * Instantiates a new search results.
+   *
+   * @param values
+   *          the values
+   * @param include
+   *          the include
+   */
+  public SearchResults(Collection<Integer> values, boolean include) {
+    mValues = values;
+    mInclude = include;
+  }
+
+  /**
+   * Gets the values.
+   *
+   * @return the values
+   */
+  public Collection<Integer> getValues() {
+    return mValues;
+  }
+
+  /**
+   * Gets the include.
+   *
+   * @return the include
+   */
+  public boolean getInclude() {
+    return mInclude;
+  }
 }

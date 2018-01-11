@@ -12,7 +12,8 @@ public class GeoBean extends Type {
   private String mSeriesAccession;
   private String mPlatform;
 
-  public GeoBean(int id, String seriesAccession, String accession, String platform) {
+  public GeoBean(int id, String seriesAccession, String accession,
+      String platform) {
     super(id, accession);
 
     mSeriesAccession = seriesAccession;

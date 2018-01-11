@@ -17,8 +17,8 @@ public class SampleBean extends Type {
   private int mOrganism;
   private Collection<Integer> mGroups;
 
-  public SampleBean(int id, int experimentId, String name, int typeId, int organismId, String date,
-      Collection<Integer> groups) {
+  public SampleBean(int id, int experimentId, String name, int typeId,
+      int organismId, String date, Collection<Integer> groups) {
     super(id, name);
 
     mExperimentId = experimentId;

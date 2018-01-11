@@ -30,12 +30,9 @@ public class ConcurrentIdStore implements ConcurrentStore {
   /**
    * Put.
    *
-   * @param keyId
-   *          the key id
-   * @param id
-   *          the id
-   * @param value
-   *          the value
+   * @param keyId the key id
+   * @param id the id
+   * @param value the value
    */
   public synchronized void put(int keyId, int id, boolean value) {
     if (!map.containsKey(keyId)) {
@@ -48,10 +45,8 @@ public class ConcurrentIdStore implements ConcurrentStore {
   /**
    * Contains.
    *
-   * @param keyId
-   *          the key id
-   * @param id
-   *          the id
+   * @param keyId the key id
+   * @param id the id
    * @return true, if successful
    */
   public synchronized boolean contains(int keyId, int id) {
@@ -65,10 +60,8 @@ public class ConcurrentIdStore implements ConcurrentStore {
   /**
    * Gets the.
    *
-   * @param keyId
-   *          the key id
-   * @param id
-   *          the id
+   * @param keyId the key id
+   * @param id the id
    * @return true, if successful
    */
   public synchronized boolean get(int keyId, int id) {

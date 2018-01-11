@@ -34,12 +34,9 @@ public class ConcurrentAuthenticationStore implements ConcurrentStore {
   /**
    * Put.
    *
-   * @param key
-   *          the key
-   * @param ipAddress
-   *          the ip address
-   * @param personId
-   *          the person id
+   * @param key the key
+   * @param ipAddress the ip address
+   * @param personId the person id
    */
   public synchronized void put(String key, String ipAddress, int personId) {
     if (!map.containsKey(key)) {
@@ -50,14 +47,12 @@ public class ConcurrentAuthenticationStore implements ConcurrentStore {
   }
 
   /**
-   * Returns the person id associated with the key mapping to a given ip address.
-   * If either the key and ip address do not partner, -1 will be returned
-   * indicating this is not a valid authentication.
+   * Returns the person id associated with the key mapping to a given ip
+   * address. If either the key and ip address do not partner, -1 will be
+   * returned indicating this is not a valid authentication.
    *
-   * @param key
-   *          the key
-   * @param ipAddress
-   *          the ip address
+   * @param key the key
+   * @param ipAddress the ip address
    * @return true, if successful
    */
   public synchronized boolean contains(String key, String ipAddress) {
@@ -69,17 +64,15 @@ public class ConcurrentAuthenticationStore implements ConcurrentStore {
   }
 
   /**
-   * Returns the person associated with a key for a given ip address. There is no
-   * check on whether the key and ip address have a match for speed. Use
-   * contains() to check there is a valid mapping before calling this method. This
-   * was done so that only one check is required to test if a mapping exists,
-   * otherwise contains() would be run twice, once to check if a mapping exists
-   * and again when requesting the person id.
+   * Returns the person associated with a key for a given ip address. There is
+   * no check on whether the key and ip address have a match for speed. Use
+   * contains() to check there is a valid mapping before calling this method.
+   * This was done so that only one check is required to test if a mapping
+   * exists, otherwise contains() would be run twice, once to check if a mapping
+   * exists and again when requesting the person id.
    *
-   * @param key
-   *          the key
-   * @param ipAddress
-   *          the ip address
+   * @param key the key
+   * @param ipAddress the ip address
    * @return the int
    */
   public synchronized int get(String key, String ipAddress) {

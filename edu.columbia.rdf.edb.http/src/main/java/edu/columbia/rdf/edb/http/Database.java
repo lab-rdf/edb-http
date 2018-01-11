@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jebtk.bioinformatics.annotation.Type;
 import org.jebtk.core.collections.CollectionUtils;
 import org.jebtk.core.text.TextUtils;
 import org.jebtk.database.JDBCConnection;
 import org.jebtk.database.ResultsSetTable;
-import org.jebtk.bioinformatics.annotation.Type;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -52,12 +52,14 @@ public class Database {
   public static final String ALL_SAMPLES_SQL = "SELECT samples.id, samples.experiment_id, samples.expression_type_id, samples.name, samples.organism_id, TO_CHAR(samples.created, 'YYYY-MM-DD') FROM samples";
 
   /** The Constant SAMPLE_SQL. */
-  public static final String SAMPLE_SQL = ALL_SAMPLES_SQL + " WHERE samples.id = ?";
+  public static final String SAMPLE_SQL = ALL_SAMPLES_SQL
+      + " WHERE samples.id = ?";
 
   public static final String SAMPLE_NAME_SQL = "SELECT samples.name FROM samples WHERE samples.id = ?";
 
   /** The Constant SAMPLES_SQL. */
-  public static final String SAMPLES_SQL = ALL_SAMPLES_SQL + " WHERE samples.id = ANY(?::int[]) ORDER BY samples.name";
+  public static final String SAMPLES_SQL = ALL_SAMPLES_SQL
+      + " WHERE samples.id = ANY(?::int[]) ORDER BY samples.name";
 
   /** The Constant SAMPLES_LIMIT_SQL. */
   public static final String SAMPLES_LIMIT_SQL = SAMPLES_SQL + " LIMIT ?";
@@ -68,16 +70,19 @@ public class Database {
   /** The Constant EXPERIMENTS_SQL. */
   public static final String EXPERIMENTS_SQL = "SELECT experiments.id, experiments.public_id, experiments.name, experiments.description, TO_CHAR(experiments.created, 'YYYY-MM-DD') FROM experiments";
 
-  public static final String EXPERIMENT_SQL = EXPERIMENTS_SQL + " WHERE experiments.id = ?";
+  public static final String EXPERIMENT_SQL = EXPERIMENTS_SQL
+      + " WHERE experiments.id = ?";
 
-  public static final String EXPERIMENT_PUBLIC_ID_SQL = EXPERIMENTS_SQL + " WHERE experiments.public_id = ?";
+  public static final String EXPERIMENT_PUBLIC_ID_SQL = EXPERIMENTS_SQL
+      + " WHERE experiments.public_id = ?";
 
   /** The Constant ALIAS_SQL. */
   private static final String ALIAS_SQL = "SELECT DISTINCT sample_aliases.sample_id FROM sample_aliases WHERE sample_aliases.name = ? LIMIT 1";
 
   private static class IntExtractor implements ResultSetExtractor<Integer> {
     @Override
-    public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
+    public Integer extractData(ResultSet rs)
+        throws SQLException, DataAccessException {
       // If there is a record, return its value, otherwise -1
       return rs.next() ? rs.getInt(1) : -1;
     }
@@ -85,7 +90,8 @@ public class Database {
 
   private static class StringExtractor implements ResultSetExtractor<String> {
     @Override
-    public String extractData(ResultSet rs) throws SQLException, DataAccessException {
+    public String extractData(ResultSet rs)
+        throws SQLException, DataAccessException {
       // If there is a record, return its value, otherwise -1
       return rs.next() ? rs.getString(1) : TextUtils.EMPTY_STRING;
     }
@@ -111,32 +117,28 @@ public class Database {
   /**
    * Creates the conn array.
    *
-   * @param connection
-   *          the connection
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param ids the ids
    * @return the array
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static Array createConnArray(Connection connection, Collection<Integer> ids) throws SQLException {
+  public static Array createConnArray(Connection connection,
+      Collection<Integer> ids) throws SQLException {
     return connection.createArrayOf("int", ids.toArray());
   }
 
   /**
    * Gets the table.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
    * @return the table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getTable(Connection connection, final String sql, int id) throws SQLException {
+  public static ResultsSetTable getTable(Connection connection,
+      final String sql,
+      int id) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     statement.setInt(1, id);
@@ -147,15 +149,13 @@ public class Database {
   /**
    * Gets the table.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
+   * @param connection the connection
+   * @param sql the sql
    * @return the table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getTable(Connection connection, final String sql) throws SQLException {
+  public static ResultsSetTable getTable(Connection connection,
+      final String sql) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     return JDBCConnection.resultSetTable(statement);
@@ -164,18 +164,15 @@ public class Database {
   /**
    * Create a table from a query that takes a list of integers as a parameter.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
    * @return the table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getTable(Connection connection, final String sql, final Collection<Integer> ids)
-      throws SQLException {
+  public static ResultsSetTable getTable(Connection connection,
+      final String sql,
+      final Collection<Integer> ids) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     statement.setArray(1, createConnArray(connection, ids));
@@ -188,20 +185,17 @@ public class Database {
    * second an int, for example a query where you want to return any records
    * matching a list of ids, but limit the number of records.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
+   * @param id the id
    * @return the table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getTable(Connection connection, final String sql, Collection<Integer> ids, int id)
-      throws SQLException {
+  public static ResultsSetTable getTable(Connection connection,
+      final String sql,
+      Collection<Integer> ids,
+      int id) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     statement.setArray(1, createConnArray(connection, ids));
@@ -210,7 +204,8 @@ public class Database {
     return JDBCConnection.resultSetTable(statement);
   }
 
-  public static int getId(Connection connection, final String sql, int id) throws SQLException {
+  public static int getId(Connection connection, final String sql, int id)
+      throws SQLException {
     int ret = -1;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -227,15 +222,12 @@ public class Database {
   }
 
   /**
-   * Returns the numerical id of the first column of a query, which is assumed to
-   * be an id.
+   * Returns the numerical id of the first column of a query, which is assumed
+   * to be an id.
    * 
-   * @param jdbcTemplate
-   *          The jdbc connection.
-   * @param sql
-   *          The sql.
-   * @param id
-   *          The id to match on.
+   * @param jdbcTemplate The jdbc connection.
+   * @param sql The sql.
+   * @param id The id to match on.
    * @return The id of the matched row or -1 if no match.
    */
   public static int getId(JdbcTemplate jdbcTemplate, final String sql, int id) {
@@ -243,35 +235,31 @@ public class Database {
   }
 
   /**
-   * Returns the numerical id of the first column of a query, which is assumed to
-   * be an id.
+   * Returns the numerical id of the first column of a query, which is assumed
+   * to be an id.
    * 
-   * @param jdbcTemplate
-   *          The jdbc connection.
-   * @param sql
-   *          The sql.
-   * @param id
-   *          The id to match on.
+   * @param jdbcTemplate The jdbc connection.
+   * @param sql The sql.
+   * @param id The id to match on.
    * @return The id of the matched row or -1 if no match.
    */
-  public static int getId(JdbcTemplate jdbcTemplate, final String sql, final String id) {
+  public static int getId(JdbcTemplate jdbcTemplate,
+      final String sql,
+      final String id) {
     return jdbcTemplate.query(sql, new Object[] { id }, ID_EXTRACTOR);
   }
 
   /**
    * Gets the id.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
    * @return the id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getId(Connection connection, final String sql, String id) throws SQLException {
+  public static int getId(Connection connection, final String sql, String id)
+      throws SQLException {
 
     int ret = -1;
 
@@ -291,18 +279,15 @@ public class Database {
   /**
    * Returns the ids of records matching a set of ids.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, final Collection<Integer> ids)
-      throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      final Collection<Integer> ids) throws SQLException {
 
     List<Integer> ret = null;
 
@@ -329,23 +314,20 @@ public class Database {
   }
 
   /**
-   * Gets a list of ids where the first parameter is a list of integers to an sql
-   * query and the second parameter is an int.
+   * Gets a list of ids where the first parameter is a list of integers to an
+   * sql query and the second parameter is an int.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
+   * @param id the id
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, final Collection<Integer> ids, int id)
-      throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      final Collection<Integer> ids,
+      int id) throws SQLException {
 
     List<Integer> ret = null;
 
@@ -370,15 +352,13 @@ public class Database {
   /**
    * Gets the ids.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
+   * @param connection the connection
+   * @param sql the sql
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql) throws SQLException {
+  public static List<Integer> getIds(Connection connection, final String sql)
+      throws SQLException {
     List<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -399,32 +379,29 @@ public class Database {
   /**
    * Gets the ids.
    *
-   * @param connection
-   *          the connection
-   * @param statement
-   *          the statement
+   * @param connection the connection
+   * @param statement the statement
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, PreparedStatement statement) throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      PreparedStatement statement) throws SQLException {
     return JDBCConnection.getIntList(statement);
   }
 
   /**
-   * Return the ids from an sql query using ids as parameters to the where clause.
+   * Return the ids from an sql query using ids as parameters to the where
+   * clause.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, int id) throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      int id) throws SQLException {
     List<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -447,17 +424,15 @@ public class Database {
   /**
    * Returns the ids from a query as a set of ints.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          The SQL query.
-   * @param id
-   *          A single int parameter to the query.
+   * @param connection the connection
+   * @param sql The SQL query.
+   * @param id A single int parameter to the query.
    * @return the ids set
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static Set<Integer> getIdsSet(Connection connection, final String sql, int id) throws SQLException {
+  public static Set<Integer> getIdsSet(Connection connection,
+      final String sql,
+      int id) throws SQLException {
 
     Set<Integer> ret = null;
 
@@ -481,18 +456,15 @@ public class Database {
   /**
    * Gets the ids set.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
    * @return the ids set
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static Set<Integer> getIdsSet(Connection connection, final String sql, final Collection<Integer> ids)
-      throws SQLException {
+  public static Set<Integer> getIdsSet(Connection connection,
+      final String sql,
+      final Collection<Integer> ids) throws SQLException {
 
     Set<Integer> ret = null;
 
@@ -514,21 +486,20 @@ public class Database {
   }
 
   /**
-   * Return the ids from an sql query using ids as parameters to the where clause.
+   * Return the ids from an sql query using ids as parameters to the where
+   * clause.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
+   * @param ids the ids
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, int id, int... ids) throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      int id,
+      int... ids) throws SQLException {
     List<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -557,20 +528,17 @@ public class Database {
   /**
    * Gets the ids.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
+   * @param ids the ids
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, int id, Collection<Integer> ids)
-      throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      int id,
+      Collection<Integer> ids) throws SQLException {
     List<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -594,17 +562,15 @@ public class Database {
   /**
    * Gets the ids.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param text
-   *          the text
+   * @param connection the connection
+   * @param sql the sql
+   * @param text the text
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getIds(Connection connection, final String sql, String text) throws SQLException {
+  public static List<Integer> getIds(Connection connection,
+      final String sql,
+      String text) throws SQLException {
     List<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -628,20 +594,17 @@ public class Database {
    * Get the first id from a query where the first parameter is fixed and the
    * second can be any from a collection of values.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
+   * @param ids the ids
    * @return the id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getId(Connection connection, final String sql, int id, Collection<Integer> ids)
-      throws SQLException {
+  public static int getId(Connection connection,
+      final String sql,
+      int id,
+      Collection<Integer> ids) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     int ret = -1;
@@ -662,19 +625,17 @@ public class Database {
    * Get the first id from a query where the first parameter is fixed and the
    * second can be any from a collection of values.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id1
-   *          the id 1
-   * @param id2
-   *          the id 2
+   * @param connection the connection
+   * @param sql the sql
+   * @param id1 the id 1
+   * @param id2 the id 2
    * @return the id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getId(Connection connection, final String sql, int id1, int id2) throws SQLException {
+  public static int getId(Connection connection,
+      final String sql,
+      int id1,
+      int id2) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     int ret = -1;
@@ -694,17 +655,15 @@ public class Database {
   /**
    * Gets the string.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
    * @return the string
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String getString(Connection connection, final String sql, int id) throws SQLException {
+  public static String getString(Connection connection,
+      final String sql,
+      int id) throws SQLException {
     String ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -720,24 +679,24 @@ public class Database {
     return ret;
   }
 
-  public static String getString(JdbcTemplate jdbcTemplate, final String sql, int id) {
+  public static String getString(JdbcTemplate jdbcTemplate,
+      final String sql,
+      int id) {
     return jdbcTemplate.query(sql, new Object[] { id }, STRING_EXTRACTOR);
   }
 
   /**
    * Gets the string.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id
-   *          the id
+   * @param connection the connection
+   * @param sql the sql
+   * @param id the id
    * @return the string
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String getString(Connection connection, final String sql, String id) throws SQLException {
+  public static String getString(Connection connection,
+      final String sql,
+      String id) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     String ret = null;
@@ -756,18 +715,15 @@ public class Database {
   /**
    * Returns a list of strings returned by a statement.
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param sql the sql
+   * @param ids the ids
    * @return the strings
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<String> getStrings(Connection connection, final String sql, Collection<Integer> ids)
-      throws SQLException {
+  public static List<String> getStrings(Connection connection,
+      final String sql,
+      Collection<Integer> ids) throws SQLException {
     PreparedStatement statement = connection.prepareStatement(sql);
 
     List<String> ret = null;
@@ -784,18 +740,15 @@ public class Database {
   /**
    * Gets the strings.
    *
-   * @param connection
-   *          the connection
-   * @param statement
-   *          the statement
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param statement the statement
+   * @param ids the ids
    * @return the strings
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<String> getStrings(Connection connection, PreparedStatement statement, Collection<Integer> ids)
-      throws SQLException {
+  public static List<String> getStrings(Connection connection,
+      PreparedStatement statement,
+      Collection<Integer> ids) throws SQLException {
     statement.setArray(1, createConnArray(connection, ids));
 
     return JDBCConnection.getStringList(statement);
@@ -804,30 +757,26 @@ public class Database {
   /**
    * Gets the sample id from alias.
    *
-   * @param connection
-   *          the connection
-   * @param name
-   *          the name
+   * @param connection the connection
+   * @param name the name
    * @return the sample id from alias
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getSampleIdFromAlias(Connection connection, String name) throws SQLException {
+  public static int getSampleIdFromAlias(Connection connection, String name)
+      throws SQLException {
     return getId(connection, ALIAS_SQL, name);
   }
 
   /**
    * Gets the types.
    *
-   * @param connection
-   *          the connection
-   * @param type
-   *          the type
+   * @param connection the connection
+   * @param type the type
    * @return the types
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static TypeMap getTypes(Connection connection, String type) throws SQLException {
+  public static TypeMap getTypes(Connection connection, String type)
+      throws SQLException {
     // System.err.println("types " + buffer.toString());
 
     ResultsSetTable table = getTable(connection, getTypesSql(type));
@@ -845,7 +794,8 @@ public class Database {
     return map;
   }
 
-  public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, String type) throws SQLException {
+  public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, String type)
+      throws SQLException {
     return jdbcTemplate.query(getTypesSql(type), new RowMapper<TypeBean>() {
       @Override
       public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -854,7 +804,9 @@ public class Database {
     });
   }
 
-  public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, String type, int id) {
+  public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate,
+      String type,
+      int id) {
     return jdbcTemplate.query(getTypeSql(type, id), new RowMapper<TypeBean>() {
       @Override
       public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -863,7 +815,9 @@ public class Database {
     });
   }
 
-  public static TypeBean getType(JdbcTemplate jdbcTemplate, String type, int id) {
+  public static TypeBean getType(JdbcTemplate jdbcTemplate,
+      String type,
+      int id) {
     List<TypeBean> types = getTypes(jdbcTemplate, type, id);
 
     return CollectionUtils.head(types);
@@ -873,8 +827,9 @@ public class Database {
 
   public static String getTypesSql(String type) {
     if (!TYPE_MAP.containsKey(type)) {
-      StringBuilder buffer = new StringBuilder("SELECT ").append(type).append(".id, ").append(type).append(".name ")
-          .append("FROM ").append(type).append(" ORDER BY ").append(type).append(".name");
+      StringBuilder buffer = new StringBuilder("SELECT ").append(type)
+          .append(".id, ").append(type).append(".name ").append("FROM ")
+          .append(type).append(" ORDER BY ").append(type).append(".name");
 
       TYPE_MAP.put(type, buffer.toString());
     }
@@ -890,8 +845,10 @@ public class Database {
    * @return
    */
   public static String getTypeSql(String type, int id) {
-    StringBuilder buffer = new StringBuilder("SELECT ").append(type).append(".id, ").append(type).append(".name ")
-        .append("FROM ").append(type).append(" WHERE ").append(type).append(".id = ").append(id);
+    StringBuilder buffer = new StringBuilder("SELECT ").append(type)
+        .append(".id, ").append(type).append(".name ").append("FROM ")
+        .append(type).append(" WHERE ").append(type).append(".id = ")
+        .append(id);
 
     return buffer.toString();
   }

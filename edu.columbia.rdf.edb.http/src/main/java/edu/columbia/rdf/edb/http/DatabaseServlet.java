@@ -34,6 +34,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
+import org.jebtk.bioinformatics.annotation.Species;
+import org.jebtk.bioinformatics.annotation.Type;
 import org.jebtk.core.collections.CollectionUtils;
 import org.jebtk.core.json.JsonArray;
 import org.jebtk.core.json.JsonBuilder;
@@ -43,8 +45,6 @@ import org.jebtk.core.text.TextUtils;
 import org.jebtk.database.DatabaseResultsTable;
 import org.jebtk.database.JDBCConnection;
 import org.jebtk.database.ResultsSetTable;
-import org.jebtk.bioinformatics.annotation.Species;
-import org.jebtk.bioinformatics.annotation.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -87,16 +87,19 @@ public abstract class DatabaseServlet {
   public static final String TAGS_SAMPLE_SQL = "SELECT tags_sample.id, tags_sample.tag_id, tags_sample.value FROM tags_sample WHERE tags_sample.sample_id = ?";
 
   /** Returns just the specific tags mentioned. */
-  public static final String SAMPLE_SPECIFIC_TAG_SQL = TAGS_SAMPLE_SQL + " AND tags_sample.tag_id = ?";
+  public static final String SAMPLE_SPECIFIC_TAG_SQL = TAGS_SAMPLE_SQL
+      + " AND tags_sample.tag_id = ?";
 
   /** The Constant SAMPLE_SPECIFIC_TAGS_SQL. */
-  private static final String SAMPLE_SPECIFIC_TAGS_SQL = TAGS_SAMPLE_SQL + " AND tags_sample.tag_id = ANY(?::int[])";
+  private static final String SAMPLE_SPECIFIC_TAGS_SQL = TAGS_SAMPLE_SQL
+      + " AND tags_sample.tag_id = ANY(?::int[])";
 
   /** The Constant TAGS_SAMPLE_INT_SQL. */
   public static final String TAGS_SAMPLE_INT_SQL = "SELECT tags_sample_int.id, tags_sample_int.tag_id, tags_sample_int.value FROM tags_sample_int WHERE tags_sample_int.sample_id = ?";
 
   /** The Constant SAMPLE_SPECIFIC_INT_TAG_SQL. */
-  public static final String SAMPLE_SPECIFIC_INT_TAG_SQL = TAGS_SAMPLE_INT_SQL + " AND tags_sample_int.tag_id = ?";
+  public static final String SAMPLE_SPECIFIC_INT_TAG_SQL = TAGS_SAMPLE_INT_SQL
+      + " AND tags_sample_int.tag_id = ?";
 
   /** The Constant SAMPLE_SPECIFIC_INT_TAGS_SQL. */
   private static final String SAMPLE_SPECIFIC_INT_TAGS_SQL = TAGS_SAMPLE_INT_SQL
@@ -162,14 +165,12 @@ public abstract class DatabaseServlet {
 
   /**
    * Returns the current version of the ExperimentDB database. This is user
-   * adjustable in the database so that tools know if there have been updates etc.
-   * It is the int of the timestamp since epoch.
+   * adjustable in the database so that tools know if there have been updates
+   * etc. It is the int of the timestamp since epoch.
    *
-   * @param connection
-   *          the connection
+   * @param connection the connection
    * @return the version
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   public static int getVersion(Connection connection) throws SQLException {
     int version = -1;
@@ -190,15 +191,13 @@ public abstract class DatabaseServlet {
   /**
    * Returns the public id of an experiment.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the experiment public id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static String getExperimentPublicId(Connection connection, int experimentId) throws SQLException {
+  protected static String getExperimentPublicId(Connection connection,
+      int experimentId) throws SQLException {
 
     // ConcurrentIdTextStore map =
     // (ConcurrentIdTextStore)context.getAttribute(Application.PUBLIC_ID_STORE_ATTRIBUTE);
@@ -207,7 +206,8 @@ public abstract class DatabaseServlet {
     // return map.get(experimentId);
     // }
 
-    PreparedStatement statement = connection.prepareStatement(EXPERIMENT_PUBLIC_ID_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(EXPERIMENT_PUBLIC_ID_SQL);
 
     String ret = null;
 
@@ -225,16 +225,15 @@ public abstract class DatabaseServlet {
   /**
    * Returns the experiment id for a given sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the experiment id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static int getExperimentId(Connection connection, int sampleId) throws SQLException {
-    Cache cache = CacheManager.getInstance().getCache("sample-experiment-cache");
+  protected static int getExperimentId(Connection connection, int sampleId)
+      throws SQLException {
+    Cache cache = CacheManager.getInstance()
+        .getCache("sample-experiment-cache");
 
     Element ce = cache.get(sampleId);
 
@@ -244,7 +243,8 @@ public abstract class DatabaseServlet {
 
     int experimentId = -1;
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_EXPERIMENT_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_EXPERIMENT_SQL);
 
     try {
       statement.setInt(1, sampleId);
@@ -262,15 +262,13 @@ public abstract class DatabaseServlet {
   /**
    * Returns text tags associated with an entity.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the text tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getTextTagsTable(Connection connection, int sampleId) throws SQLException {
+  protected static ResultsSetTable getTextTagsTable(Connection connection,
+      int sampleId) throws SQLException {
 
     PreparedStatement statement = connection.prepareStatement(TAGS_SAMPLE_SQL);
 
@@ -282,20 +280,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the text tags table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
    * @return the text tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getTextTagsTable(Connection connection, int sampleId, Collection<Integer> tags)
-      throws SQLException {
+  protected static ResultsSetTable getTextTagsTable(Connection connection,
+      int sampleId,
+      Collection<Integer> tags) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_TAGS_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_TAGS_SQL);
 
     statement.setInt(1, sampleId);
     statement.setArray(2, Database.createConnArray(connection, tags));
@@ -306,19 +302,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the text tag table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tag
-   *          the tag
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tag the tag
    * @return the text tag table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getTextTagTable(Connection connection, int sampleId, int tag) throws SQLException {
+  protected static ResultsSetTable getTextTagTable(Connection connection,
+      int sampleId,
+      int tag) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_TAG_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_TAG_SQL);
 
     statement.setInt(1, sampleId);
     statement.setInt(2, tag);
@@ -329,17 +324,16 @@ public abstract class DatabaseServlet {
   /**
    * Gets the int tags table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the int tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getIntTagsTable(Connection connection, int sampleId) throws SQLException {
+  protected static ResultsSetTable getIntTagsTable(Connection connection,
+      int sampleId) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(TAGS_SAMPLE_INT_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(TAGS_SAMPLE_INT_SQL);
 
     statement.setInt(1, sampleId);
 
@@ -349,19 +343,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the int tag table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tag
-   *          the tag
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tag the tag
    * @return the int tag table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getIntTagTable(Connection connection, int sampleId, int tag) throws SQLException {
+  protected static ResultsSetTable getIntTagTable(Connection connection,
+      int sampleId,
+      int tag) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_INT_TAG_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_INT_TAG_SQL);
 
     statement.setInt(1, sampleId);
     statement.setInt(2, tag);
@@ -372,20 +365,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the int tags table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
    * @return the int tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getIntTagsTable(Connection connection, int sampleId, Collection<Integer> tags)
-      throws SQLException {
+  protected static ResultsSetTable getIntTagsTable(Connection connection,
+      int sampleId,
+      Collection<Integer> tags) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_INT_TAGS_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_INT_TAGS_SQL);
 
     statement.setInt(1, sampleId);
     statement.setArray(2, Database.createConnArray(connection, tags));
@@ -396,17 +387,16 @@ public abstract class DatabaseServlet {
   /**
    * Gets the float tags table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the float tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getFloatTagsTable(Connection connection, int sampleId) throws SQLException {
+  protected static ResultsSetTable getFloatTagsTable(Connection connection,
+      int sampleId) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(TAGS_SAMPLE_FLOAT_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(TAGS_SAMPLE_FLOAT_SQL);
 
     statement.setInt(1, sampleId);
 
@@ -416,19 +406,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the float tag table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tag
-   *          the tag
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tag the tag
    * @return the float tag table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getFloatTagTable(Connection connection, int sampleId, int tag) throws SQLException {
+  protected static ResultsSetTable getFloatTagTable(Connection connection,
+      int sampleId,
+      int tag) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_FLOAT_TAG_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_FLOAT_TAG_SQL);
 
     statement.setInt(1, sampleId);
     statement.setInt(2, tag);
@@ -439,20 +428,18 @@ public abstract class DatabaseServlet {
   /**
    * Gets the float tags table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
    * @return the float tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getFloatTagsTable(Connection connection, int sampleId, Collection<Integer> tags)
-      throws SQLException {
+  protected static ResultsSetTable getFloatTagsTable(Connection connection,
+      int sampleId,
+      Collection<Integer> tags) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SAMPLE_SPECIFIC_FLOAT_TAGS_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(SAMPLE_SPECIFIC_FLOAT_TAGS_SQL);
 
     statement.setInt(1, sampleId);
     statement.setArray(2, Database.createConnArray(connection, tags));
@@ -463,21 +450,17 @@ public abstract class DatabaseServlet {
   /**
    * Gets the sample files table.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param userId
-   *          the user id
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param context the context
+   * @param userId the user id
+   * @param sampleId the sample id
    * @return the sample files table
-   * @throws SQLException
-   *           the SQL exception
-   * @throws ParseException
-   *           the parse exception
+   * @throws SQLException the SQL exception
+   * @throws ParseException the parse exception
    */
-  protected static ResultsSetTable getSampleFilesTable(Connection connection, ServletContext context, int userId,
+  protected static ResultsSetTable getSampleFilesTable(Connection connection,
+      ServletContext context,
+      int userId,
       int sampleId) throws SQLException, ParseException {
     return Vfs.getSampleFilesTable(connection, sampleId);
   }
@@ -485,54 +468,50 @@ public abstract class DatabaseServlet {
   /**
    * Gets the person table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the person table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getPersonTable(Connection connection, int sampleId) throws SQLException {
+  protected static ResultsSetTable getPersonTable(Connection connection,
+      int sampleId) throws SQLException {
     return Database.getTable(connection, SAMPLE_PERSONS_SQL, sampleId);
   }
 
   /**
    * Gets the person ids.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the person ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static List<Integer> getPersonIds(Connection connection, int sampleId) throws SQLException {
-    return JDBCConnection.getIntList(connection, SAMPLE_PERSON_IDS_SQL, sampleId);
+  protected static List<Integer> getPersonIds(Connection connection,
+      int sampleId) throws SQLException {
+    return JDBCConnection
+        .getIntList(connection, SAMPLE_PERSON_IDS_SQL, sampleId);
   }
 
   /**
    * Gets the geo.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param sampleJSON
-   *          the sample JSON
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param sampleJSON the sample JSON
    * @return the geo
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static void getGeo(Connection connection, int sampleId, JsonBuilder json) throws SQLException {
+  public static void getGeo(Connection connection,
+      int sampleId,
+      JsonBuilder json) throws SQLException {
     /*
      * String json = getSampleGeoJson(connection, sampleId);
      * 
      * if (json != null) { sampleJSON.insert("geo", json); }
      */
 
-    ResultsSetTable table = Database.getTable(connection, Database.SAMPLE_GEO_SQL, sampleId);
+    ResultsSetTable table = Database
+        .getTable(connection, Database.SAMPLE_GEO_SQL, sampleId);
 
     if (table.next()) {
       json.startObject();
@@ -547,17 +526,16 @@ public abstract class DatabaseServlet {
   /**
    * Construct geo json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the json object
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static JsonObject constructGeoJson(Connection connection, int sampleId) throws SQLException {
+  public static JsonObject constructGeoJson(Connection connection, int sampleId)
+      throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(Database.SAMPLE_GEO_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(Database.SAMPLE_GEO_SQL);
 
     ResultsSetTable table = null;
 
@@ -588,16 +566,15 @@ public abstract class DatabaseServlet {
   /**
    * Gets the sample geo json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample geo json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static String getSampleGeoJson(Connection connection, int sampleId) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement(JSON_SAMPLE_GEO_SQL);
+  protected static String getSampleGeoJson(Connection connection, int sampleId)
+      throws SQLException {
+    PreparedStatement statement = connection
+        .prepareStatement(JSON_SAMPLE_GEO_SQL);
 
     String ret = null;
 
@@ -617,20 +594,18 @@ public abstract class DatabaseServlet {
   /**
    * Returns the sample ids associated with an experiment.
    *
-   * @param context
-   *          the context
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param context the context
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the sample ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static List<Integer> getSampleIds(ServletContext context, Connection connection, int experimentId)
-      throws SQLException {
+  protected static List<Integer> getSampleIds(ServletContext context,
+      Connection connection,
+      int experimentId) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(EXPERIMENT_SAMPLES_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(EXPERIMENT_SAMPLES_SQL);
 
     List<Integer> ids = new ArrayList<Integer>();
 
@@ -649,17 +624,16 @@ public abstract class DatabaseServlet {
   /**
    * Gets the sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static ResultsSetTable getSample(Connection connection, int sampleId) throws SQLException {
+  protected static ResultsSetTable getSample(Connection connection,
+      int sampleId) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(Database.SAMPLE_SQL);
+    PreparedStatement statement = connection
+        .prepareStatement(Database.SAMPLE_SQL);
 
     ResultsSetTable table = null;
 
@@ -677,42 +651,41 @@ public abstract class DatabaseServlet {
   /**
    * Process samples.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param userId the user id
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processSamples(Connection connection, int userId, ResultsSetTable table, JsonBuilder jsonArray)
-      throws SQLException {
-    processSamples(connection, userId, ALL_TAGS, ALL_ORGANISMS, table, jsonArray);
+  protected static void processSamples(Connection connection,
+      int userId,
+      ResultsSetTable table,
+      JsonBuilder jsonArray) throws SQLException {
+    processSamples(connection,
+        userId,
+        ALL_TAGS,
+        ALL_ORGANISMS,
+        table,
+        jsonArray);
   }
 
   /**
    * Process samples.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param types
-   *          the types
-   * @param organisms
-   *          the organisms
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param userId the user id
+   * @param types the types
+   * @param organisms the organisms
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processSamples(Connection connection, int userId, Set<Integer> types, Set<Integer> organisms,
-      ResultsSetTable table, JsonBuilder jsonArray) throws SQLException {
+  protected static void processSamples(Connection connection,
+      int userId,
+      Set<Integer> types,
+      Set<Integer> organisms,
+      ResultsSetTable table,
+      JsonBuilder jsonArray) throws SQLException {
 
     boolean isAdmin = WebAuthentication.getIsAdminOrSuper(connection, userId);
 
@@ -724,7 +697,8 @@ public abstract class DatabaseServlet {
       int type = table.getInt(2);
       int organism = table.getInt(4);
 
-      Collection<Integer> sampleGroupIds = Groups.sampleGroups(connection, sampleId);
+      Collection<Integer> sampleGroupIds = Groups.sampleGroups(connection,
+          sampleId);
 
       // Determine if this one of the user groups ids is in the sample group ids
       boolean inGroup = CollectionUtils.contains(userGroupIds, sampleGroupIds);
@@ -747,8 +721,8 @@ public abstract class DatabaseServlet {
 
       // If you're not an admin, restrict which samples you can see.
       /*
-       * boolean isLocked = !WebAuthentication.canViewSample(connection, experimentId,
-       * sampleId, userId, isAdmin);
+       * boolean isLocked = !WebAuthentication.canViewSample(connection,
+       * experimentId, sampleId, userId, isAdmin);
        */
 
       // boolean isLocked = Groups.isLocked(connection, sampleId);
@@ -760,7 +734,8 @@ public abstract class DatabaseServlet {
       jsonArray.add(EDB.HEADING_EXPERIMENT, experimentId);
       jsonArray.add(EDB.HEADING_TYPE, type);
       jsonArray.add(EDB.HEADING_NAME, table.getString(3));
-      // sampleJSON.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
+      // sampleJSON.add(Application.HEADING_DESCRIPTION,
+      // table.getDataAsString(i, 4));
       jsonArray.add(EDB.HEADING_ORGANISM, organism);
 
       // jsonArray.add(Application.HEADING_STATE,
@@ -773,7 +748,8 @@ public abstract class DatabaseServlet {
 
       /*
        * if (tagView) { jsonArray.startArray(Application.HEADING_TAGS);
-       * getTagsJson(connection, sampleId, tags, jsonArray); jsonArray.endArray(); }
+       * getTagsJson(connection, sampleId, tags, jsonArray);
+       * jsonArray.endArray(); }
        */
 
       /// if (personView) {
@@ -802,17 +778,14 @@ public abstract class DatabaseServlet {
   /**
    * Add the groups to the sample.
    *
-   * @param connection
-   *          the connection
-   * @param groupIds
-   *          the group ids
-   * @param json
-   *          the json
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param groupIds the group ids
+   * @param json the json
+   * @throws SQLException the SQL exception
    */
-  private static void groupsJson(Connection connection, final Collection<Integer> groupIds, JsonBuilder json)
-      throws SQLException {
+  private static void groupsJson(Connection connection,
+      final Collection<Integer> groupIds,
+      JsonBuilder json) throws SQLException {
 
     json.startArray(EDB.HEADING_GROUPS);
 
@@ -827,17 +800,15 @@ public abstract class DatabaseServlet {
   /**
    * Gets the persons json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param sampleJSON
-   *          the sample JSON
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param sampleJSON the sample JSON
    * @return the persons json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static void getPersonsJson(Connection connection, int sampleId, JsonBuilder sampleJSON) throws SQLException {
+  private static void getPersonsJson(Connection connection,
+      int sampleId,
+      JsonBuilder sampleJSON) throws SQLException {
 
     String json = getSamplePersonsJson(connection, sampleId);
 
@@ -854,16 +825,15 @@ public abstract class DatabaseServlet {
   /**
    * Gets the sample persons json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample persons json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static String getSamplePersonsJson(Connection connection, int sampleId) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement(JSON_SAMPLE_PERSONS_SQL);
+  protected static String getSamplePersonsJson(Connection connection,
+      int sampleId) throws SQLException {
+    PreparedStatement statement = connection
+        .prepareStatement(JSON_SAMPLE_PERSONS_SQL);
 
     String ret = null;
 
@@ -883,15 +853,13 @@ public abstract class DatabaseServlet {
   /**
    * Construct persons json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the string
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String constructPersonsJson(Connection connection, int sampleId) throws SQLException {
+  public static String constructPersonsJson(Connection connection, int sampleId)
+      throws SQLException {
     JsonBuilder jsonArray = JsonBuilder.create().startArray();
 
     constructPersonsJson(connection, sampleId, jsonArray);
@@ -904,17 +872,14 @@ public abstract class DatabaseServlet {
   /**
    * Construct persons json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  public static void constructPersonsJson(Connection connection, int sampleId, JsonBuilder jsonArray)
-      throws SQLException {
+  public static void constructPersonsJson(Connection connection,
+      int sampleId,
+      JsonBuilder jsonArray) throws SQLException {
     List<Integer> ids = getPersonIds(connection, sampleId);
 
     // JsonArray personsJSON = new JsonArray();
@@ -924,7 +889,8 @@ public abstract class DatabaseServlet {
 
       // personJSON.add(Application.HEADING_ID,
       // personTable.getDataAsInt(j, 1));
-      // fileJSON.add(Application.HEADING_NAME, filestable.getDataAsString(j, 1));
+      // fileJSON.add(Application.HEADING_NAME, filestable.getDataAsString(j,
+      // 1));
       // fileJSON.add(Application.HEADING_TYPE_ID, new
       // JsonString(filestable.getDataAsString(j, 2)));
 
@@ -937,18 +903,15 @@ public abstract class DatabaseServlet {
   /**
    * List persons associated with samples.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param sampleIds
-   *          the sample ids
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param userId the user id
+   * @param sampleIds the sample ids
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processSamplesPersons(Connection connection, int userId, Collection<Integer> sampleIds,
+  protected static void processSamplesPersons(Connection connection,
+      int userId,
+      Collection<Integer> sampleIds,
       JsonBuilder jsonArray) throws SQLException {
 
     for (int sampleId : sampleIds) {
@@ -976,27 +939,23 @@ public abstract class DatabaseServlet {
   /**
    * Process sample.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param userId
-   *          the user id
-   * @param tags
-   *          the tags
-   * @param views
-   *          the views
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
-   * @throws ParseException
-   *           the parse exception
+   * @param connection the connection
+   * @param context the context
+   * @param userId the user id
+   * @param tags the tags
+   * @param views the views
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
+   * @throws ParseException the parse exception
    */
-  protected static void processSample(Connection connection, ServletContext context, int userId, Set<Integer> tags,
-      Set<String> views, DatabaseResultsTable table, JsonBuilder jsonArray) throws SQLException, ParseException {
+  protected static void processSample(Connection connection,
+      ServletContext context,
+      int userId,
+      Set<Integer> tags,
+      Set<String> views,
+      DatabaseResultsTable table,
+      JsonBuilder jsonArray) throws SQLException, ParseException {
 
     // boolean isAdmin =
     // WebAuthentication.getIsAdminOrSuper(connection, userId);
@@ -1038,7 +997,8 @@ public abstract class DatabaseServlet {
       jsonArray.add(EDB.HEADING_EXPERIMENT, experimentId);
       jsonArray.add(EDB.HEADING_TYPE, table.getInt(i, 2));
       jsonArray.add(EDB.HEADING_NAME, table.getString(i, 3));
-      // sampleJSON.add(Application.HEADING_DESCRIPTION, table.getDataAsString(i, 4));
+      // sampleJSON.add(Application.HEADING_DESCRIPTION,
+      // table.getDataAsString(i, 4));
       jsonArray.add(EDB.HEADING_SPECIES, table.getInt(i, 4));
       jsonArray.add(EDB.HEADING_DATE, table.getString(i, 5));
 
@@ -1048,7 +1008,8 @@ public abstract class DatabaseServlet {
       // }
 
       if (tagView) {
-        jsonArray.add(EDB.HEADING_TAGS, getTagsJson(connection, sampleId, tags));
+        jsonArray.add(EDB.HEADING_TAGS,
+            getTagsJson(connection, sampleId, tags));
       }
 
       if (personView) {
@@ -1077,32 +1038,28 @@ public abstract class DatabaseServlet {
   /**
    * Add all the tags for a sample to the json array.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the tags json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String getTagsJson(Connection connection, int sampleId) throws SQLException {
+  public static String getTagsJson(Connection connection, int sampleId)
+      throws SQLException {
     return getTagsJson(connection, sampleId, ALL_TAGS);
   }
 
   /**
    * Gets the tags json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param jsonArray
-   *          the json array
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param jsonArray the json array
    * @return the tags json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static void getTagsJson(Connection connection, int sampleId, JsonBuilder jsonArray) throws SQLException {
+  public static void getTagsJson(Connection connection,
+      int sampleId,
+      JsonBuilder jsonArray) throws SQLException {
     // getTagsJson(connection, sampleId, jsonArray);
 
     constructTagsJson(connection, sampleId, jsonArray);
@@ -1111,18 +1068,15 @@ public abstract class DatabaseServlet {
   /**
    * Gets the tags json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
    * @return the tags json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static String getTagsJson(Connection connection, int sampleId, final Set<Integer> tags)
-      throws SQLException {
+  protected static String getTagsJson(Connection connection,
+      int sampleId,
+      final Set<Integer> tags) throws SQLException {
     JsonBuilder jsonArray = JsonBuilder.create().startArray();
 
     getTagsJson(connection, sampleId, tags, jsonArray);
@@ -1135,20 +1089,17 @@ public abstract class DatabaseServlet {
   /**
    * Returns the tags associated with a sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
-   * @param jsonArray
-   *          the json array
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
+   * @param jsonArray the json array
    * @return the tags json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static void getTagsJson(Connection connection, int sampleId, final Set<Integer> tags, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void getTagsJson(Connection connection,
+      int sampleId,
+      final Set<Integer> tags,
+      JsonBuilder jsonArray) throws SQLException {
 
     constructTagsJson(connection, sampleId, tags, jsonArray);
   }
@@ -1156,20 +1107,17 @@ public abstract class DatabaseServlet {
   /**
    * Create the JSON for a specific sample tag.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tag
-   *          the tag
-   * @param jsonArray
-   *          the json array
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tag the tag
+   * @param jsonArray the json array
    * @return the tag json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static void getTagJson(Connection connection, int sampleId, int tag, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void getTagJson(Connection connection,
+      int sampleId,
+      int tag,
+      JsonBuilder jsonArray) throws SQLException {
 
     constructTagJson(connection, sampleId, tag, jsonArray);
   }
@@ -1177,16 +1125,14 @@ public abstract class DatabaseServlet {
   /**
    * Create the JSON for a specific sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param array
-   *          the array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param array the array
+   * @throws SQLException the SQL exception
    */
-  public static void constructTagsJson(Connection connection, int sampleId, JsonBuilder array) throws SQLException {
+  public static void constructTagsJson(Connection connection,
+      int sampleId,
+      JsonBuilder array) throws SQLException {
 
     ResultsSetTable table = getTextTagsTable(connection, sampleId);
 
@@ -1219,19 +1165,16 @@ public abstract class DatabaseServlet {
   /**
    * Construct tag json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tag
-   *          the tag
-   * @param array
-   *          the array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tag the tag
+   * @param array the array
+   * @throws SQLException the SQL exception
    */
-  public static void constructTagJson(Connection connection, int sampleId, int tag, JsonBuilder array)
-      throws SQLException {
+  public static void constructTagJson(Connection connection,
+      int sampleId,
+      int tag,
+      JsonBuilder array) throws SQLException {
 
     ResultsSetTable table = getTextTagTable(connection, sampleId, tag);
 
@@ -1278,19 +1221,16 @@ public abstract class DatabaseServlet {
   /**
    * Construct tags json.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param tags
-   *          the tags
-   * @param array
-   *          the array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param tags the tags
+   * @param array the array
+   * @throws SQLException the SQL exception
    */
-  public static void constructTagsJson(Connection connection, int sampleId, Collection<Integer> tags, JsonBuilder array)
-      throws SQLException {
+  public static void constructTagsJson(Connection connection,
+      int sampleId,
+      Collection<Integer> tags,
+      JsonBuilder array) throws SQLException {
 
     ResultsSetTable table = getTextTagsTable(connection, sampleId, tags);
 
@@ -1323,16 +1263,15 @@ public abstract class DatabaseServlet {
   /**
    * Returns the json available in the cached table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample fields json
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static String getSampleFieldsJson(Connection connection, int sampleId) throws SQLException {
-    PreparedStatement statement = connection.prepareStatement(JSON_SAMPLE_FIELDS_SQL);
+  protected static String getSampleFieldsJson(Connection connection,
+      int sampleId) throws SQLException {
+    PreparedStatement statement = connection
+        .prepareStatement(JSON_SAMPLE_FIELDS_SQL);
 
     String ret = null;
 
@@ -1357,8 +1296,8 @@ public abstract class DatabaseServlet {
 
   /*
    * protected static void processSamples(Connection connection, ResultsSetTable
-   * table, JsonBuilder jsonArray) throws SQLException, ParseException { if (table
-   * == null) { return; }
+   * table, JsonBuilder jsonArray) throws SQLException, ParseException { if
+   * (table == null) { return; }
    * 
    * while (table.next()) { int sampleId = table.getInt(0);
    * 
@@ -1446,18 +1385,15 @@ public abstract class DatabaseServlet {
   /**
    * Process experiments.
    *
-   * @param connection
-   *          the connection
-   * @param personId
-   *          the person id
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param personId the person id
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processExperiments(Connection connection, int personId, ResultsSetTable table,
+  protected static void processExperiments(Connection connection,
+      int personId,
+      ResultsSetTable table,
       JsonBuilder jsonArray) throws SQLException {
     processExperiments(connection, personId, table, ALL_VIEW, jsonArray);
   }
@@ -1465,21 +1401,18 @@ public abstract class DatabaseServlet {
   /**
    * Process experiments.
    *
-   * @param connection
-   *          the connection
-   * @param personId
-   *          the person id
-   * @param table
-   *          the table
-   * @param views
-   *          the views
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param personId the person id
+   * @param table the table
+   * @param views the views
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processExperiments(Connection connection, int personId, ResultsSetTable table,
-      Set<String> views, JsonBuilder jsonArray) throws SQLException {
+  protected static void processExperiments(Connection connection,
+      int personId,
+      ResultsSetTable table,
+      Set<String> views,
+      JsonBuilder jsonArray) throws SQLException {
 
     while (table.next()) {
       int experimentId = table.getInt(0);
@@ -1504,14 +1437,13 @@ public abstract class DatabaseServlet {
   /**
    * Process types.
    *
-   * @param connection
-   *          the connection
-   * @param types
-   *          the types
-   * @param jsonArray
-   *          the json array
+   * @param connection the connection
+   * @param types the types
+   * @param jsonArray the json array
    */
-  protected static void processTypes(Connection connection, List<Type> types, JsonArray jsonArray) {
+  protected static void processTypes(Connection connection,
+      List<Type> types,
+      JsonArray jsonArray) {
 
     for (Type type : types) {
       JsonObject fieldJSON = new JsonObject();
@@ -1528,12 +1460,11 @@ public abstract class DatabaseServlet {
   /**
    * Process types.
    *
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
+   * @param table the table
+   * @param jsonArray the json array
    */
-  protected static void processTypes(DatabaseResultsTable table, JsonBuilder jsonArray) {
+  protected static void processTypes(DatabaseResultsTable table,
+      JsonBuilder jsonArray) {
 
     for (int i = 0; i < table.getRowCount(); ++i) {
       // JsonObject fieldJSON = new JsonObject();
@@ -1551,17 +1482,14 @@ public abstract class DatabaseServlet {
   /**
    * Process sample files.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processSampleFiles(Connection connection, int sampleId, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void processSampleFiles(Connection connection,
+      int sampleId,
+      JsonBuilder jsonArray) throws SQLException {
 
     List<Integer> ids = Vfs.getSampleFiles(connection, sampleId);
 
@@ -1573,19 +1501,17 @@ public abstract class DatabaseServlet {
   /**
    * Process experiment files.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param experimentId the experiment id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processExperimentFiles(Connection connection, int experimentId, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void processExperimentFiles(Connection connection,
+      int experimentId,
+      JsonBuilder jsonArray) throws SQLException {
 
-    ResultsSetTable table = Vfs.getExperimentFilesTable(connection, experimentId);
+    ResultsSetTable table = Vfs.getExperimentFilesTable(connection,
+        experimentId);
 
     processFiles(connection, table, jsonArray);
   }
@@ -1593,19 +1519,17 @@ public abstract class DatabaseServlet {
   /**
    * Process experiment files dir.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param experimentId the experiment id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processExperimentFilesDir(Connection connection, int experimentId, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void processExperimentFilesDir(Connection connection,
+      int experimentId,
+      JsonBuilder jsonArray) throws SQLException {
 
-    ResultsSetTable table = Vfs.getExperimentFilesDirTable(connection, experimentId);
+    ResultsSetTable table = Vfs.getExperimentFilesDirTable(connection,
+        experimentId);
 
     processFiles(connection, table, jsonArray);
   }
@@ -1613,17 +1537,14 @@ public abstract class DatabaseServlet {
   /**
    * Process files.
    *
-   * @param connection
-   *          the connection
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processFiles(Connection connection, ResultsSetTable table, JsonBuilder jsonArray)
-      throws SQLException {
+  protected static void processFiles(Connection connection,
+      ResultsSetTable table,
+      JsonBuilder jsonArray) throws SQLException {
     while (table.next()) {
       int vfsId = table.getInt(0);
 
@@ -1647,16 +1568,14 @@ public abstract class DatabaseServlet {
   /**
    * Return the info for a particular file.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param vfsId the vfs id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processFile(Connection connection, int vfsId, JsonBuilder jsonArray) throws SQLException {
+  protected static void processFile(Connection connection,
+      int vfsId,
+      JsonBuilder jsonArray) throws SQLException {
     ResultsSetTable table = Vfs.getFileTable(connection, vfsId);
 
     processFiles(connection, table, jsonArray);
@@ -1665,25 +1584,23 @@ public abstract class DatabaseServlet {
   /**
    * Process files.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param personId
-   *          the person id
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param context the context
+   * @param personId the person id
+   * @param table the table
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processFiles(Connection connection, ServletContext context, int personId, ResultsSetTable table,
+  protected static void processFiles(Connection connection,
+      ServletContext context,
+      int personId,
+      ResultsSetTable table,
       JsonArray jsonArray) throws SQLException {
     while (table.next()) {
       int vfsId = table.getInt(0);
 
-      if (WebAuthentication.getCanViewFile(connection, context, personId, vfsId)) {
+      if (WebAuthentication
+          .getCanViewFile(connection, context, personId, vfsId)) {
         table.next();
 
         JsonObject fileJSON = new JsonObject();
@@ -1701,14 +1618,12 @@ public abstract class DatabaseServlet {
   /**
    * Process vfs tags.
    *
-   * @param connection
-   *          the connection
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processVfsTags(Connection connection, JsonBuilder jsonArray) throws SQLException {
+  protected static void processVfsTags(Connection connection,
+      JsonBuilder jsonArray) throws SQLException {
 
     List<Integer> ids = Vfs.getVfsTags(connection);
 
@@ -1720,16 +1635,14 @@ public abstract class DatabaseServlet {
   /**
    * Process vfs tags.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
-   * @param jsonArray
-   *          the json array
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param vfsId the vfs id
+   * @param jsonArray the json array
+   * @throws SQLException the SQL exception
    */
-  protected static void processVfsTags(Connection connection, int vfsId, JsonBuilder jsonArray) throws SQLException {
+  protected static void processVfsTags(Connection connection,
+      int vfsId,
+      JsonBuilder jsonArray) throws SQLException {
 
     List<Integer> ids = Vfs.getVfsTags(connection, vfsId);
 
@@ -1741,15 +1654,13 @@ public abstract class DatabaseServlet {
   /**
    * Gets the tags table.
    *
-   * @param connection
-   *          the connection
-   * @param ids
-   *          the ids
+   * @param connection the connection
+   * @param ids the ids
    * @return the tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static DatabaseResultsTable getTagsTable(Connection connection, List<Integer> ids) throws SQLException {
+  protected static DatabaseResultsTable getTagsTable(Connection connection,
+      List<Integer> ids) throws SQLException {
 
     PreparedStatement statement = connection.prepareStatement(TAGS_SQL);
 
@@ -1771,12 +1682,11 @@ public abstract class DatabaseServlet {
   /**
    * Process tags.
    *
-   * @param table
-   *          the table
-   * @param jsonArray
-   *          the json array
+   * @param table the table
+   * @param jsonArray the json array
    */
-  protected static void processTags(DatabaseResultsTable table, JsonBuilder jsonArray) {
+  protected static void processTags(DatabaseResultsTable table,
+      JsonBuilder jsonArray) {
     processTypes(table, jsonArray);
   }
 
@@ -1784,17 +1694,14 @@ public abstract class DatabaseServlet {
    * Returns the attribute name for a given attribute id. This method takes care
    * of caching results to reduce database access.
    *
-   * @param connection
-   *          the connection
-   * @param path
-   *          the path
+   * @param connection the connection
+   * @param path the path
    * @return the tag id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   /*
-   * protected String getAttribute(ServletContext context, Connection connection,
-   * int attributeId) throws SQLException {
+   * protected String getAttribute(ServletContext context, Connection
+   * connection, int attributeId) throws SQLException {
    * 
    * ConcurrentIdTextStore map =
    * (ConcurrentIdTextStore)context.getAttribute(Application.
@@ -1818,7 +1725,8 @@ public abstract class DatabaseServlet {
    * return ret; }
    */
 
-  protected static int getTagId(Connection connection, Path path) throws SQLException {
+  protected static int getTagId(Connection connection, Path path)
+      throws SQLException {
     return getTagId(connection, path.toString());
   }
 
@@ -1826,15 +1734,13 @@ public abstract class DatabaseServlet {
    * Returns the search field id for a keyword, or -1 if the keyword does not
    * exist in the database.
    *
-   * @param connection
-   *          the connection
-   * @param name
-   *          the name
+   * @param connection the connection
+   * @param name the name
    * @return the tag id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static int getTagId(Connection connection, String name) throws SQLException {
+  protected static int getTagId(Connection connection, String name)
+      throws SQLException {
 
     PreparedStatement statement = connection.prepareStatement(TAG_ID_SQL);
 
@@ -1851,22 +1757,21 @@ public abstract class DatabaseServlet {
     return id;
   }
 
-  public static int getTagId(JdbcTemplate jdbcTemplate, String name) throws SQLException {
+  public static int getTagId(JdbcTemplate jdbcTemplate, String name)
+      throws SQLException {
     return Database.getId(jdbcTemplate, TAG_ID_SQL, name);
   }
 
   /**
    * Gets the sample id from geo accession.
    *
-   * @param connection
-   *          the connection
-   * @param accession
-   *          the accession
+   * @param connection the connection
+   * @param accession the accession
    * @return the sample id from geo accession
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  protected static int getSampleIdFromGeoAccession(Connection connection, String accession) throws SQLException {
+  protected static int getSampleIdFromGeoAccession(Connection connection,
+      String accession) throws SQLException {
 
     PreparedStatement statement = connection.prepareStatement(GEO_SAMPLE_SQL);
 
@@ -1887,8 +1792,7 @@ public abstract class DatabaseServlet {
    * Returns a pooled database connection.
    *
    * @return the connection
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   public Connection getConnection() throws SQLException {
     if (mDs == null) {
@@ -1902,8 +1806,7 @@ public abstract class DatabaseServlet {
    * Parses a string as a number returning -1 if the string is a badly formed
    * number.
    *
-   * @param id
-   *          the id
+   * @param id the id
    * @return the int
    */
   public int parseId(String id) {
@@ -1921,77 +1824,77 @@ public abstract class DatabaseServlet {
   /**
    * Authenticate key.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param key
-   *          the key
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param key the key
    * @return the int
    */
-  protected int authenticateKey(ServletContext context, HttpServletRequest request, Connection connection, String key) {
+  protected int authenticateKey(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      String key) {
     return 6;
   }
 
   /**
    * Process samples.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param person
-   *          the person
-   * @param table
-   *          the table
-   * @param samples
-   *          the samples
-   * @param organisms
-   *          the organisms
-   * @param experiments
-   *          the experiments
-   * @param expressionTypes
-   *          the expression types
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param context the context
+   * @param person the person
+   * @param table the table
+   * @param samples the samples
+   * @param organisms the organisms
+   * @param experiments the experiments
+   * @param expressionTypes the expression types
+   * @throws SQLException the SQL exception
    */
-  public static void processSamples(Connection connection, ServletContext context, Person person, ResultsSetTable table,
-      Collection<Sample> samples, Map<Integer, Species> organisms, Map<Integer, Experiment> experiments,
+  public static void processSamples(Connection connection,
+      ServletContext context,
+      Person person,
+      ResultsSetTable table,
+      Collection<Sample> samples,
+      Map<Integer, Species> organisms,
+      Map<Integer, Experiment> experiments,
       TypeMap expressionTypes) throws SQLException {
-    processSamples(connection, context, person.getId(), table, samples, organisms, experiments, expressionTypes);
+    processSamples(connection,
+        context,
+        person.getId(),
+        table,
+        samples,
+        organisms,
+        experiments,
+        expressionTypes);
   }
 
   /**
    * Process samples.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param userId
-   *          the user id
-   * @param table
-   *          the table
-   * @param samples
-   *          the samples
-   * @param organisms
-   *          the organisms
-   * @param experiments
-   *          the experiments
-   * @param expressionTypes
-   *          the expression types
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param context the context
+   * @param userId the user id
+   * @param table the table
+   * @param samples the samples
+   * @param organisms the organisms
+   * @param experiments the experiments
+   * @param expressionTypes the expression types
+   * @throws SQLException the SQL exception
    */
-  public static void processSamples(Connection connection, ServletContext context, int userId, ResultsSetTable table,
-      Collection<Sample> samples, Map<Integer, Species> organisms, Map<Integer, Experiment> experiments,
+  public static void processSamples(Connection connection,
+      ServletContext context,
+      int userId,
+      ResultsSetTable table,
+      Collection<Sample> samples,
+      Map<Integer, Species> organisms,
+      Map<Integer, Experiment> experiments,
       TypeMap expressionTypes) throws SQLException {
 
     // Map<Integer, Organism> organisms = Database.getOrganisms(connection);
-    // Map<Integer, Experiment> experiments = Database.getExperiments(connection);
-    // Map<Integer, Type> expressionTypes = Database.getExpressionTypes(connection);
+    // Map<Integer, Experiment> experiments =
+    // Database.getExperiments(connection);
+    // Map<Integer, Type> expressionTypes =
+    // Database.getExpressionTypes(connection);
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -2010,8 +1913,9 @@ public abstract class DatabaseServlet {
         e.printStackTrace();
       }
 
-      Sample sample = new Sample(sampleId, experiments.get(table.getInt(1)), expressionTypes.get(table.getInt(2)),
-          table.getString(3), organisms.get(table.getInt(4)), date);
+      Sample sample = new Sample(sampleId, experiments.get(table.getInt(1)),
+          expressionTypes.get(table.getInt(2)), table.getString(3),
+          organisms.get(table.getInt(4)), date);
 
       samples.add(sample);
     }
@@ -2024,8 +1928,8 @@ public abstract class DatabaseServlet {
    * 
    * List<FileRecord> files = new ArrayList<FileRecord>();
    * 
-   * for (Integer id : ids) { FileRecord file = getFile(connection, personId, id,
-   * dataDirectory);
+   * for (Integer id : ids) { FileRecord file = getFile(connection, personId,
+   * id, dataDirectory);
    * 
    * if (file == null) { continue; }
    * 
@@ -2033,8 +1937,8 @@ public abstract class DatabaseServlet {
    * 
    * return files; }
    * 
-   * protected static FileRecord getFile(Connection connection, int personId, int
-   * fileId, File dataDirectory) throws SQLException {
+   * protected static FileRecord getFile(Connection connection, int personId,
+   * int fileId, File dataDirectory) throws SQLException {
    * 
    * FileRecord fileRecord = null;
    * 

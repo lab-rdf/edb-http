@@ -20,6 +20,7 @@ package edu.columbia.rdf.edb.http;
  *
  * @author Antony Holmes Holmes
  */
-public class ConcurrentIdIdStore extends ConcurrentKeyValueStore<Integer, Integer> {
+public class ConcurrentIdIdStore
+    extends ConcurrentKeyValueStore<Integer, Integer> {
   // do nothing
 }

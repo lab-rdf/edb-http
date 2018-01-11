@@ -17,7 +17,8 @@ public class VfsFileBean implements IdProperty, NameProperty {
   private String mDate;
   private String mPath;
 
-  public VfsFileBean(int id, int pid, String name, int type, String path, String date) {
+  public VfsFileBean(int id, int pid, String name, int type, String path,
+      String date) {
     mId = id;
     mPid = pid;
     mName = name;

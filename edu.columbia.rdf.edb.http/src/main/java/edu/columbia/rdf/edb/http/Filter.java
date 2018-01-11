@@ -39,7 +39,8 @@ public class Filter {
    * @param types
    * @return
    */
-  public static List<SampleBean> filterByTypes(List<SampleBean> samples, Collection<Integer> types) {
+  public static List<SampleBean> filterByTypes(List<SampleBean> samples,
+      Collection<Integer> types) {
     if (CollectionUtils.isNullOrEmpty(types)) {
       return samples;
     }
@@ -57,7 +58,8 @@ public class Filter {
     return ret;
   }
 
-  public static List<SampleBean> filterByOrganisms(List<SampleBean> samples, Collection<Integer> organisms) {
+  public static List<SampleBean> filterByOrganisms(List<SampleBean> samples,
+      Collection<Integer> organisms) {
     if (CollectionUtils.isNullOrEmpty(organisms)) {
       return samples;
     }
@@ -75,9 +77,16 @@ public class Filter {
     return ret;
   }
 
-  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate, Auth auth, List<SampleBean> samples,
-      List<Integer> gids, boolean allMode) {
-    return filterByGroups(jdbcTemplate, auth, samples, CollectionUtils.toSet(gids), allMode);
+  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
+      Auth auth,
+      List<SampleBean> samples,
+      List<Integer> gids,
+      boolean allMode) {
+    return filterByGroups(jdbcTemplate,
+        auth,
+        samples,
+        CollectionUtils.toSet(gids),
+        allMode);
   }
 
   /**
@@ -87,8 +96,11 @@ public class Filter {
    * @param gids
    * @return
    */
-  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate, Auth auth, List<SampleBean> samples,
-      Collection<Integer> gids, boolean allMode) {
+  public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
+      Auth auth,
+      List<SampleBean> samples,
+      Collection<Integer> gids,
+      boolean allMode) {
 
     List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
 

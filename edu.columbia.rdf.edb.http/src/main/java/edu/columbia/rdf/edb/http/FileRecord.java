@@ -31,12 +31,9 @@ public class FileRecord extends Type {
   /**
    * Instantiates a new file record.
    *
-   * @param id
-   *          the id
-   * @param name
-   *          the name
-   * @param path
-   *          the path
+   * @param id the id
+   * @param name the name
+   * @param path the path
    */
   public FileRecord(int id, String name, Path path) {
     super(id, name);

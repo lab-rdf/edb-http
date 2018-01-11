@@ -22,10 +22,8 @@ import java.util.Map;
 /**
  * The Class ConcurrentKeyValueStore.
  *
- * @param <T>
- *          the generic type
- * @param <V>
- *          the value type
+ * @param <T> the generic type
+ * @param <V> the value type
  */
 public class ConcurrentKeyValueStore<T, V> implements ConcurrentStore {
 
@@ -35,10 +33,8 @@ public class ConcurrentKeyValueStore<T, V> implements ConcurrentStore {
   /**
    * Put.
    *
-   * @param id
-   *          the id
-   * @param value
-   *          the value
+   * @param id the id
+   * @param value the value
    */
   public synchronized void put(T id, V value) {
     if (value == null) {
@@ -51,8 +47,7 @@ public class ConcurrentKeyValueStore<T, V> implements ConcurrentStore {
   /**
    * Contains.
    *
-   * @param id
-   *          the id
+   * @param id the id
    * @return true, if successful
    */
   public synchronized boolean contains(T id) {
@@ -62,8 +57,7 @@ public class ConcurrentKeyValueStore<T, V> implements ConcurrentStore {
   /**
    * Gets the.
    *
-   * @param id
-   *          the id
+   * @param id the id
    * @return the v
    */
   public synchronized V get(T id) {

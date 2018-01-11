@@ -70,11 +70,13 @@ public class WebAuthentication {
 
   // private final static String EXPERIMENT_PERMISSIONS_SQL =
   // "SELECT experiment_permissions.id FROM experiment_permissions WHERE
-  // experiment_permissions.experiment_id = ? AND experiment_permissions.person_id
+  // experiment_permissions.experiment_id = ? AND
+  // experiment_permissions.person_id
   // = ?";
 
   // private final static String VFS_PERMISSIONS_SQL =
-  // "SELECT vfs_permissions.id FROM vfs_permissions WHERE vfs_permissions.vfs_id
+  // "SELECT vfs_permissions.id FROM vfs_permissions WHERE
+  // vfs_permissions.vfs_id
   // = ? AND vfs_permissions.person_id = ?";
 
   /** The Constant PERSON_SQL. */
@@ -99,19 +101,22 @@ public class WebAuthentication {
   private static final String USER_TYPE_SQL = "SELECT persons.user_type_id FROM persons WHERE persons.id = ?";
 
   /** The Constant JSON_AUTH_FAILED_USER. */
-  public static final Json JSON_AUTH_FAILED_USER = new JsonAuthFailed("user-id");
+  public static final Json JSON_AUTH_FAILED_USER = new JsonAuthFailed(
+      "user-id");
 
   /** The Constant JSON_AUTH_FAILED_OTK. */
   public static final Json JSON_AUTH_FAILED_OTK = new JsonAuthFailed("totp");
 
   /** The Constant JSON_AUTH_FAILED_SAMPLE. */
-  public static final Json JSON_AUTH_FAILED_SAMPLE = new JsonAuthFailed("sample");
+  public static final Json JSON_AUTH_FAILED_SAMPLE = new JsonAuthFailed(
+      "sample");
 
   /** The Constant JSON_AUTH_FAILED_FIELD. */
   public static final Json JSON_AUTH_FAILED_FIELD = new JsonAuthFailed("field");
 
   /** The Constant JSON_AUTH_FAILED_EXPERIMENT. */
-  public static final Json JSON_AUTH_FAILED_EXPERIMENT = new JsonAuthFailed("experiment");
+  public static final Json JSON_AUTH_FAILED_EXPERIMENT = new JsonAuthFailed(
+      "experiment");
 
   /** The Constant JSON_AUTH_FAILED_PATH. */
   public static final Json JSON_AUTH_FAILED_PATH = new JsonAuthFailed("path");
@@ -119,17 +124,14 @@ public class WebAuthentication {
   /**
    * Validate purely by ip address and negate users having to login.
    *
-   * @param connection
-   *          the connection
-   * @param ipAddress
-   *          the ip address
+   * @param connection the connection
+   * @param ipAddress the ip address
    * @return the int
-   * @throws SQLException
-   *           the SQL exception
-   * @throws ParseException
-   *           the parse exception
+   * @throws SQLException the SQL exception
+   * @throws ParseException the parse exception
    */
-  public static int validateIpLogin(Connection connection, String ipAddress) throws SQLException, ParseException {
+  public static int validateIpLogin(Connection connection, String ipAddress)
+      throws SQLException, ParseException {
 
     int userId = -1;
 
@@ -161,21 +163,17 @@ public class WebAuthentication {
   /**
    * Standard validation of user password combination.
    *
-   * @param connection
-   *          the connection
-   * @param user
-   *          the user
-   * @param password
-   *          the password
+   * @param connection the connection
+   * @param user the user
+   * @param password the password
    * @return the int
-   * @throws SQLException
-   *           the SQL exception
-   * @throws CryptographyException
-   *           the cryptography exception
-   * @throws ParseException
-   *           the parse exception
+   * @throws SQLException the SQL exception
+   * @throws CryptographyException the cryptography exception
+   * @throws ParseException the parse exception
    */
-  public static int validateLogin(Connection connection, String user, String password)
+  public static int validateLogin(Connection connection,
+      String user,
+      String password)
       throws SQLException, CryptographyException, ParseException {
 
     if (user == null || password == null) {
@@ -222,17 +220,14 @@ public class WebAuthentication {
   /**
    * Gets the person.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the person
-   * @throws SQLException
-   *           the SQL exception
-   * @throws ParseException
-   *           the parse exception
+   * @throws SQLException the SQL exception
+   * @throws ParseException the parse exception
    */
-  public static Person getPerson(Connection connection, int userId) throws SQLException, ParseException {
+  public static Person getPerson(Connection connection, int userId)
+      throws SQLException, ParseException {
     if (userId == -1) {
       return null;
     }
@@ -247,7 +242,8 @@ public class WebAuthentication {
       DatabaseResultsTable table = JDBCConnection.getTable(statement);
 
       if (table.getRowCount() == 1) {
-        person = new Person(table.getInt(0, 0), table.getString(0, 1), table.getString(0, 2), table.getString(0, 3));
+        person = new Person(table.getInt(0, 0), table.getString(0, 1),
+            table.getString(0, 2), table.getString(0, 3));
       }
     } finally {
       statement.close();
@@ -259,20 +255,19 @@ public class WebAuthentication {
   /**
    * Creates the login session.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the string
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String createLoginSession(Connection connection, int userId) throws SQLException {
+  public static String createLoginSession(Connection connection, int userId)
+      throws SQLException {
     if (userId == -1) {
       return null;
     }
 
-    PreparedStatement statement = connection.prepareStatement(SQL_DELETE_SESSION);
+    PreparedStatement statement = connection
+        .prepareStatement(SQL_DELETE_SESSION);
 
     try {
       statement.setInt(1, userId);
@@ -302,17 +297,15 @@ public class WebAuthentication {
   /**
    * Can view sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param person
-   *          the person
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param person the person
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean canViewSample(Connection connection, int sampleId, Person person) throws SQLException {
+  public static boolean canViewSample(Connection connection,
+      int sampleId,
+      Person person) throws SQLException {
     return canViewSample(connection, sampleId, person.getId());
   }
 
@@ -320,43 +313,41 @@ public class WebAuthentication {
    * Determines whether a user can view a sample by either its experiment being
    * viewable, or else the sample.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
-   * @param sampleId
-   *          the sample id
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param experimentId the experiment id
+   * @param sampleId the sample id
+   * @param userId the user id
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean canViewSample(Connection connection, int experimentId, int sampleId, int userId)
-      throws SQLException {
+  public static boolean canViewSample(Connection connection,
+      int experimentId,
+      int sampleId,
+      int userId) throws SQLException {
 
-    return canViewSample(connection, experimentId, sampleId, userId, getIsAdminOrSuper(connection, userId));
+    return canViewSample(connection,
+        experimentId,
+        sampleId,
+        userId,
+        getIsAdminOrSuper(connection, userId));
   }
 
   /**
-   * Determines whether a user can view a sample based on either the experiment id
-   * or the sample id.
+   * Determines whether a user can view a sample based on either the experiment
+   * id or the sample id.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
-   * @param sampleId
-   *          the sample id
-   * @param userId
-   *          the user id
-   * @param isAdmin
-   *          the is admin
+   * @param connection the connection
+   * @param experimentId the experiment id
+   * @param sampleId the sample id
+   * @param userId the user id
+   * @param isAdmin the is admin
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean canViewSample(Connection connection, int experimentId, int sampleId, int userId,
+  public static boolean canViewSample(Connection connection,
+      int experimentId,
+      int sampleId,
+      int userId,
       boolean isAdmin) throws SQLException {
 
     // return isAdmin ||
@@ -369,18 +360,15 @@ public class WebAuthentication {
   /**
    * Returns true if the user can view one of the given sample ids.
    *
-   * @param connection
-   *          the connection
-   * @param sampleIds
-   *          the sample ids
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param sampleIds the sample ids
+   * @param userId the user id
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean canViewSample(Connection connection, final Collection<Integer> sampleIds, int userId)
-      throws SQLException {
+  public static boolean canViewSample(Connection connection,
+      final Collection<Integer> sampleIds,
+      int userId) throws SQLException {
     for (int sampleId : sampleIds) {
       if (canViewSample(connection, sampleId, userId)) {
         return true;
@@ -393,18 +381,16 @@ public class WebAuthentication {
   /**
    * Can view sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param sampleId the sample id
+   * @param userId the user id
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   @SuppressWarnings("unchecked")
-  public static boolean canViewSample(Connection connection, int sampleId, int userId) throws SQLException {
+  public static boolean canViewSample(Connection connection,
+      int sampleId,
+      int userId) throws SQLException {
 
     /*
      * return canViewObject(connection, sampleId, userId,
@@ -446,35 +432,29 @@ public class WebAuthentication {
 
   /*
    * public static boolean canViewExperiment(Connection connection, final
-   * Collection<Integer> experimentIds, int userId) throws SQLException { for (int
-   * experimentId : experimentIds) { if (canViewExperiment(connection,
+   * Collection<Integer> experimentIds, int userId) throws SQLException { for
+   * (int experimentId : experimentIds) { if (canViewExperiment(connection,
    * experimentId, userId)) { return true; } }
    * 
    * return false; }
    */
 
   /**
-   * Returns true if the person is allowed to view a particular experiment, false
-   * otherwise.
+   * Returns true if the person is allowed to view a particular experiment,
+   * false otherwise.
    *
-   * @param connection
-   *          the connection
-   * @param objectId
-   *          the object id
-   * @param userId
-   *          the user id
-   * @param cache
-   *          the cache
-   * @param sql
-   *          the sql
+   * @param connection the connection
+   * @param objectId the object id
+   * @param userId the user id
+   * @param cache the cache
+   * @param sql the sql
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   /*
    * @SuppressWarnings("unchecked") public static synchronized boolean
-   * canViewExperiment(Connection connection, int experimentId, int userId) throws
-   * SQLException {
+   * canViewExperiment(Connection connection, int experimentId, int userId)
+   * throws SQLException {
    * 
    * return canViewObject(connection, experimentId, userId,
    * CacheManager.getInstance().getCache("experiment-view-cache"),
@@ -496,8 +476,11 @@ public class WebAuthentication {
    * @throws SQLException
    */
   @SuppressWarnings("unchecked")
-  public static boolean canViewObject(Connection connection, int objectId, int userId, Cache cache, String sql)
-      throws SQLException {
+  public static boolean canViewObject(Connection connection,
+      int objectId,
+      int userId,
+      Cache cache,
+      String sql) throws SQLException {
 
     // if (!checkViewPermissionsEnabled(context)) {
     // return true;
@@ -521,7 +504,8 @@ public class WebAuthentication {
         cache.put(ce);
       }
 
-      Map<Integer, Boolean> viewSet = (Map<Integer, Boolean>) ce.getObjectValue();
+      Map<Integer, Boolean> viewSet = (Map<Integer, Boolean>) ce
+          .getObjectValue();
 
       // If we have already tested that we can view the sample, return true
       if (viewSet.containsKey(objectId)) {
@@ -556,20 +540,17 @@ public class WebAuthentication {
   /**
    * Gets the can view file.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param vfsId
-   *          the vfs id
-   * @param person
-   *          the person
+   * @param connection the connection
+   * @param context the context
+   * @param vfsId the vfs id
+   * @param person the person
    * @return the can view file
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean getCanViewFile(Connection connection, ServletContext context, int vfsId, Person person)
-      throws SQLException {
+  public static boolean getCanViewFile(Connection connection,
+      ServletContext context,
+      int vfsId,
+      Person person) throws SQLException {
     return getCanViewFile(connection, context, vfsId, person.getId());
   }
 
@@ -577,24 +558,22 @@ public class WebAuthentication {
    * Returns true if user can get access to sample data based on being able to
    * view a sample or experiment this file belongs to.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param vfsId
-   *          the vfs id
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param context the context
+   * @param vfsId the vfs id
+   * @param userId the user id
    * @return the can view file
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean getCanViewFile(Connection connection, ServletContext context, int vfsId, int userId)
-      throws SQLException {
+  public static boolean getCanViewFile(Connection connection,
+      ServletContext context,
+      int vfsId,
+      int userId) throws SQLException {
 
     /*
      * return canViewObject(connection, context, vfsId, userId,
-     * CacheManager.getInstance().getCache("file-view-cache"), VFS_PERMISSIONS_SQL);
+     * CacheManager.getInstance().getCache("file-view-cache"),
+     * VFS_PERMISSIONS_SQL);
      */
 
     // At given privileges you can look at anything
@@ -655,24 +634,19 @@ public class WebAuthentication {
   }
 
   /**
-   * Returns if the user is a global user or admin since this means they can view
-   * any samples.
+   * Returns if the user is a global user or admin since this means they can
+   * view any samples.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the checks if is admin or super
-   * @throws SQLException
-   *           the SQL exception
-   * @throws IllegalArgumentException
-   *           the illegal argument exception
-   * @throws IllegalStateException
-   *           the illegal state exception
-   * @throws CacheException
-   *           the cache exception
+   * @throws SQLException the SQL exception
+   * @throws IllegalArgumentException the illegal argument exception
+   * @throws IllegalStateException the illegal state exception
+   * @throws CacheException the cache exception
    */
-  public static boolean getIsAdminOrSuper(Connection connection, int userId) throws SQLException {
+  public static boolean getIsAdminOrSuper(Connection connection, int userId)
+      throws SQLException {
     UserType type = getUserType(connection, userId);
 
     return type == UserType.ADMINISTRATOR || type == UserType.SUPERUSER;
@@ -681,45 +655,39 @@ public class WebAuthentication {
   /**
    * Gets the checks if is administrator.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the checks if is administrator
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean getIsAdministrator(Connection connection, int userId) throws SQLException {
+  public static boolean getIsAdministrator(Connection connection, int userId)
+      throws SQLException {
     return getUserType(connection, userId) == UserType.ADMINISTRATOR;
   }
 
   /**
    * Returns true if the user is an admin.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the checks if is superuser
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean getIsSuperuser(Connection connection, int userId) throws SQLException {
+  public static boolean getIsSuperuser(Connection connection, int userId)
+      throws SQLException {
     return getUserType(connection, userId) == UserType.SUPERUSER;
   }
 
   /**
    * Returns the user type using a cache to speed up the check.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param connection the connection
+   * @param userId the user id
    * @return the user type
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static UserType getUserType(Connection connection, int userId) throws SQLException {
+  public static UserType getUserType(Connection connection, int userId)
+      throws SQLException {
     Cache cache = CacheManager.getInstance().getCache("user-type-cache");
 
     Element ce = cache.get(userId);
@@ -757,50 +725,54 @@ public class WebAuthentication {
    * Authenicate a user based on an user id, their ip address and a one time
    * random key.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param userId the user id
+   * @param totp the totp
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, Connection connection,
-      int userId, int totp) throws SQLException {
+  public static boolean totpAuthUser(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      int userId,
+      int totp) throws SQLException {
 
-    return totpAuthUser(context, request, connection, userId, totp, (long) context.getAttribute("totp-step"));
+    return totpAuthUser(context,
+        request,
+        connection,
+        userId,
+        totp,
+        (long) context.getAttribute("totp-step"));
   }
 
   /**
    * Totp auth user.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param userId the user id
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, Connection connection,
-      int userId, int totp, long step) throws SQLException {
+  public static boolean totpAuthUser(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      int userId,
+      int totp,
+      long step) throws SQLException {
 
     if (checkAuthEnabled(context)) {
-      return strictTOTPAuthUser(context, request, connection, userId, totp, step);
+      return strictTOTPAuthUser(context,
+          request,
+          connection,
+          userId,
+          totp,
+          step);
     } else {
       return true;
     }
@@ -809,53 +781,55 @@ public class WebAuthentication {
   /**
    * Strict TOTP auth user. Always authenticate.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param userId the user id
+   * @param totp the totp
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean strictTOTPAuthUser(ServletContext context, HttpServletRequest request, Connection connection,
-      int userId, int totp) throws SQLException {
-    return strictTOTPAuthUser(context, request, connection, userId, totp, (long) context.getAttribute("totp-step"));
+  public static boolean strictTOTPAuthUser(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      int userId,
+      int totp) throws SQLException {
+    return strictTOTPAuthUser(context,
+        request,
+        connection,
+        userId,
+        totp,
+        (long) context.getAttribute("totp-step"));
   }
 
   /**
    * Strict TOTP auth user.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param userId the user id
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean strictTOTPAuthUser(ServletContext context, HttpServletRequest request, Connection connection,
-      int userId, int totp, long step) throws SQLException {
+  public static boolean strictTOTPAuthUser(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      int userId,
+      int totp,
+      long step) throws SQLException {
 
     if (userId == -1) {
       return false;
     }
 
     // First validate the ip address
-    boolean validIp = validateIPAddress(connection, context, userId, request.getRemoteAddr());
+    boolean validIp = validateIPAddress(connection,
+        context,
+        userId,
+        request.getRemoteAddr());
 
     if (!validIp) {
       return false;
@@ -877,14 +851,10 @@ public class WebAuthentication {
   /**
    * Totp auth.
    *
-   * @param userId
-   *          the user id
-   * @param key
-   *          the key
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param userId the user id
+   * @param key the key
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
    */
   private static boolean totpAuth(int userId, String key, int totp, long step) {
@@ -894,21 +864,20 @@ public class WebAuthentication {
   /**
    * Totp auth.
    *
-   * @param userId
-   *          the user id
-   * @param key
-   *          the key
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
-   * @param time
-   *          the time
-   * @param epoch
-   *          the epoch
+   * @param userId the user id
+   * @param key the key
+   * @param totp the totp
+   * @param step the step
+   * @param time the time
+   * @param epoch the epoch
    * @return true, if successful
    */
-  private static boolean totpAuth(int userId, String key, int totp, long step, long time, long epoch) {
+  private static boolean totpAuth(int userId,
+      String key,
+      int totp,
+      long step,
+      long time,
+      long epoch) {
 
     long counter = TOTP.getCounter(time, epoch, step);
 
@@ -952,11 +921,9 @@ public class WebAuthentication {
   /**
    * Returns true if authentication has been enabled.
    *
-   * @param context
-   *          the context
+   * @param context the context
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   public static boolean checkAuthEnabled(ServletContext context) {
     return context.getAttribute("auth-enabled") != null;
@@ -965,11 +932,9 @@ public class WebAuthentication {
   /**
    * Returns true if view permission checking is enabled.
    *
-   * @param context
-   *          the context
+   * @param context the context
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
   public static boolean checkViewPermissionsEnabled(ServletContext context) {
     return context.getAttribute("view-permissions-enabled") != null;
@@ -978,21 +943,19 @@ public class WebAuthentication {
   /**
    * Logs that the user made an attempt to login and how successful it was.
    *
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
-   * @param ipAddress
-   *          the ip address
-   * @param success
-   *          the success
-   * @throws SQLException
-   *           the SQL exception
+   * @param connection the connection
+   * @param userId the user id
+   * @param ipAddress the ip address
+   * @param success the success
+   * @throws SQLException the SQL exception
    */
-  public static void logAttempt(Connection connection, int userId, String ipAddress, boolean success)
-      throws SQLException {
+  public static void logAttempt(Connection connection,
+      int userId,
+      String ipAddress,
+      boolean success) throws SQLException {
 
-    PreparedStatement statement = connection.prepareStatement(SQL_LOGIN_ATTEMPT);
+    PreparedStatement statement = connection
+        .prepareStatement(SQL_LOGIN_ATTEMPT);
 
     try {
       statement.setInt(1, userId);
@@ -1008,17 +971,15 @@ public class WebAuthentication {
   /**
    * Get a user's key for validating login.
    *
-   * @param context
-   *          the context
-   * @param connection
-   *          the connection
-   * @param userId
-   *          the user id
+   * @param context the context
+   * @param connection the connection
+   * @param userId the user id
    * @return the key
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static String getKey(ServletContext context, Connection connection, int userId) throws SQLException {
+  public static String getKey(ServletContext context,
+      Connection connection,
+      int userId) throws SQLException {
     Cache cache = CacheManager.getInstance().getCache("key-cache");
 
     Element ce = cache.get(userId);
@@ -1047,20 +1008,17 @@ public class WebAuthentication {
   /**
    * Validate that the reported user is accessing from a valid ip address.
    *
-   * @param connection
-   *          the connection
-   * @param context
-   *          the context
-   * @param person
-   *          the person
-   * @param ipAddress
-   *          the ip address
+   * @param connection the connection
+   * @param context the context
+   * @param person the person
+   * @param ipAddress the ip address
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean validateIPAddress(Connection connection, ServletContext context, int person, String ipAddress)
-      throws SQLException {
+  public static boolean validateIPAddress(Connection connection,
+      ServletContext context,
+      int person,
+      String ipAddress) throws SQLException {
     Cache cache = CacheManager.getInstance().getCache("ip_add_cache");
 
     Element ce = cache.get(person);
@@ -1108,22 +1066,19 @@ public class WebAuthentication {
   /**
    * Validate topt.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param connection
-   *          the connection
-   * @param person
-   *          the person
-   * @param totp
-   *          the totp
+   * @param context the context
+   * @param request the request
+   * @param connection the connection
+   * @param person the person
+   * @param totp the totp
    * @return true, if successful
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static boolean validateTopt(ServletContext context, HttpServletRequest request, Connection connection,
-      int person, int totp) throws SQLException {
+  public static boolean validateTopt(ServletContext context,
+      HttpServletRequest request,
+      Connection connection,
+      int person,
+      int totp) throws SQLException {
     String key = getKey(context, connection, person);
 
     if (key == null) {
@@ -1155,21 +1110,18 @@ public class WebAuthentication {
   }
 
   /**
-   * Returns the person id given their public id (which is used for authentication
-   * purposes via the api).
+   * Returns the person id given their public id (which is used for
+   * authentication purposes via the api).
    *
-   * @param context
-   *          the context
-   * @param connection
-   *          the connection
-   * @param publicId
-   *          the public id
+   * @param context the context
+   * @param connection the connection
+   * @param publicId the public id
    * @return the user id
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static synchronized int getUserId(ServletContext context, Connection connection, String publicId)
-      throws SQLException {
+  public static synchronized int getUserId(ServletContext context,
+      Connection connection,
+      String publicId) throws SQLException {
     Cache cache = CacheManager.getInstance().getCache("user-id-cache");
 
     Element ce = cache.get(publicId);
@@ -1198,10 +1150,8 @@ public class WebAuthentication {
   /**
    * Auth error.
    *
-   * @param reason
-   *          the reason
-   * @param json
-   *          the json
+   * @param reason the reason
+   * @param json the json
    */
   public static void authError(String reason, JsonBuilder json) {
     error("auth-fail", reason, json);
@@ -1210,12 +1160,9 @@ public class WebAuthentication {
   /**
    * Error.
    *
-   * @param error
-   *          the error
-   * @param reason
-   *          the reason
-   * @param json
-   *          the json
+   * @param error the error
+   * @param reason the reason
+   * @param json the json
    */
   public static void error(String error, String reason, JsonBuilder json) {
     json.startObject();
@@ -1226,8 +1173,7 @@ public class WebAuthentication {
   /**
    * totp auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void otkAuthError(JsonBuilder json) {
     authError("totp", json);
@@ -1236,8 +1182,7 @@ public class WebAuthentication {
   /**
    * Sample auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void sampleAuthError(JsonBuilder json) {
     authError("sample", json);
@@ -1246,8 +1191,7 @@ public class WebAuthentication {
   /**
    * User auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void userAuthError(JsonBuilder json) {
     authError("user", json);
@@ -1256,8 +1200,7 @@ public class WebAuthentication {
   /**
    * Exp auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void expAuthError(JsonBuilder json) {
     authError("experiment", json);
@@ -1266,8 +1209,7 @@ public class WebAuthentication {
   /**
    * Path auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void pathAuthError(JsonBuilder json) {
     authError("path", json);
@@ -1276,8 +1218,7 @@ public class WebAuthentication {
   /**
    * Field auth error.
    *
-   * @param json
-   *          the json
+   * @param json the json
    */
   public static void fieldAuthError(JsonBuilder json) {
     authError("field", json);

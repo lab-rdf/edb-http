@@ -46,7 +46,8 @@ public class Search {
   private static final String KEYWORD_NOT_SQL = "SELECT DISTINCT keywords.id FROM keywords WHERE keywords.name NOT LIKE ?";
 
   // private static final String TAG_KEYWORD_SQL =
-  // "SELECT DISTINCT search_fields_keywords.id FROM search_fields_keywords WHERE
+  // "SELECT DISTINCT search_fields_keywords.id FROM search_fields_keywords
+  // WHERE
   // search_fields_keywords.field_id = ? AND search_fields_keywords.keyword_id =
   // ?";
 
@@ -74,20 +75,24 @@ public class Search {
   private static final String ALL_TAG_SAMPLES_SQL = "SELECT DISTINCT tags_samples_search.sample_id FROM tags_samples_search, tags_keywords_search, keywords WHERE tags_samples_search.tag_keyword_search_id = tags_keywords_search.id AND tags_keywords_search.keyword_id = keywords.id AND tags_keywords_search.tag_id = ?";
 
   /** The Constant SAMPLE_KEYWORD_SEARCH_CORE_SQL. */
-  private static final String SAMPLE_KEYWORD_SEARCH_CORE_SQL = ALL_TAG_SAMPLES_SQL + " AND keywords.name ";
+  private static final String SAMPLE_KEYWORD_SEARCH_CORE_SQL = ALL_TAG_SAMPLES_SQL
+      + " AND keywords.name ";
 
   /** The Constant SAMPLE_KEYWORD_SEARCH_SQL. */
-  private static final String SAMPLE_KEYWORD_SEARCH_SQL = SAMPLE_KEYWORD_SEARCH_CORE_SQL + "LIKE ?";
+  private static final String SAMPLE_KEYWORD_SEARCH_SQL = SAMPLE_KEYWORD_SEARCH_CORE_SQL
+      + "LIKE ?";
 
   /** The Constant SAMPLE_KEYWORD_SEARCH_NOT_SQL. */
   // private static final String SAMPLE_KEYWORD_SEARCH_NOT_SQL =
   // SAMPLE_KEYWORD_SEARCH_CORE_SQL + "NOT LIKE ?";
 
   /** The Constant SAMPLE_KEYWORD_EXACT_SEARCH_CORE_SQL. */
-  private static final String SAMPLE_KEYWORD_EXACT_SEARCH_CORE_SQL = ALL_TAG_SAMPLES_SQL + " AND LOWER(keywords.name) ";
+  private static final String SAMPLE_KEYWORD_EXACT_SEARCH_CORE_SQL = ALL_TAG_SAMPLES_SQL
+      + " AND LOWER(keywords.name) ";
 
   /** The Constant SAMPLE_KEYWORD_EXACT_SEARCH_SQL. */
-  private static final String SAMPLE_KEYWORD_EXACT_SEARCH_SQL = SAMPLE_KEYWORD_EXACT_SEARCH_CORE_SQL + "= ?";
+  private static final String SAMPLE_KEYWORD_EXACT_SEARCH_SQL = SAMPLE_KEYWORD_EXACT_SEARCH_CORE_SQL
+      + "= ?";
 
   /** The Constant SAMPLE_KEYWORD_EXACT_SEARCH_NOT_SQL. */
   // private static final String SAMPLE_KEYWORD_EXACT_SEARCH_NOT_SQL =
@@ -116,19 +121,16 @@ public class Search {
   /**
    * Search.
    *
-   * @param connection
-   *          the connection
-   * @param tagId
-   *          the tag id
-   * @param searchQueue
-   *          the search queue
-   * @param maxCount
-   *          the max count
+   * @param connection the connection
+   * @param tagId the tag id
+   * @param searchQueue the search queue
+   * @param maxCount the max count
    * @return the results set table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable search(Connection connection, int tagId, List<SearchStackElement<Integer>> searchQueue,
+  public static ResultsSetTable search(Connection connection,
+      int tagId,
+      List<SearchStackElement<Integer>> searchQueue,
       int maxCount) throws SQLException {
 
     if (searchQueue.size() == 0) {
@@ -137,7 +139,8 @@ public class Search {
       // Get all the key word ids for the tag
       // List<Integer> tagKeywordIds = getTagKeywordIds(connection, tagId);
 
-      List<Integer> ids = getSampleIds(connection, tagId); // getSampleIds(connection, tagKeywordIds);
+      List<Integer> ids = getSampleIds(connection, tagId); // getSampleIds(connection,
+                                                           // tagKeywordIds);
 
       return Samples.getSamplesTable(connection, ids, maxCount);
     }
@@ -164,9 +167,10 @@ public class Search {
         boolean include = include(keyword);
 
         // Get all samples matched to those keywords for the tag.
-        tempStack.push(new SearchResults(getSampleIds(connection, tagId, e.mText, include), include)); // tagKeywordIds);
-                                                                                                       // //getSampleIds(connection,
-                                                                                                       // tagKeywordIds));
+        tempStack.push(new SearchResults(
+            getSampleIds(connection, tagId, e.mText, include), include)); // tagKeywordIds);
+                                                                          // //getSampleIds(connection,
+                                                                          // tagKeywordIds));
 
         break;
       case AND:
@@ -194,12 +198,15 @@ public class Search {
       samples = Collections.emptySet();
     }
 
-    return Samples.getSamplesTable(connection, samples, maxCount); // Database.getSamplesTable(connection, sampleIds,
+    return Samples.getSamplesTable(connection, samples, maxCount); // Database.getSamplesTable(connection,
+                                                                   // sampleIds,
                                                                    // maxCount);
   }
 
-  public static List<SampleBean> searchSamples(JdbcTemplate jdbcTemplate, int tagId,
-      List<SearchStackElement<Integer>> searchQueue, int maxCount) throws SQLException {
+  public static List<SampleBean> searchSamples(JdbcTemplate jdbcTemplate,
+      int tagId,
+      List<SearchStackElement<Integer>> searchQueue,
+      int maxCount) throws SQLException {
 
     if (searchQueue.size() == 0) {
       // Return all samples without doing a search
@@ -231,9 +238,10 @@ public class Search {
         boolean include = include(keyword);
 
         // Get all samples matched to those keywords for the tag.
-        tempStack.push(new SearchResults(getSampleIds(jdbcTemplate, tagId, e.mText, include), include)); // tagKeywordIds);
-                                                                                                         // //getSampleIds(connection,
-                                                                                                         // tagKeywordIds));
+        tempStack.push(new SearchResults(
+            getSampleIds(jdbcTemplate, tagId, e.mText, include), include)); // tagKeywordIds);
+                                                                            // //getSampleIds(connection,
+                                                                            // tagKeywordIds));
 
         break;
       case AND:
@@ -261,7 +269,8 @@ public class Search {
       samples = Collections.emptySet();
     }
 
-    return Samples.getSamples(jdbcTemplate, samples, maxCount); // Database.getSamplesTable(connection, sampleIds,
+    return Samples.getSamples(jdbcTemplate, samples, maxCount); // Database.getSamplesTable(connection,
+                                                                // sampleIds,
                                                                 // maxCount);
   }
 
@@ -272,10 +281,8 @@ public class Search {
    * non-inclusive.
    * 
    *
-   * @param sr1
-   *          Results 1.
-   * @param sr2
-   *          Results 2.
+   * @param sr1 Results 1.
+   * @param sr2 Results 2.
    * @return The intersection of results 1 and results 2.
    */
   private static SearchResults and(SearchResults sr1, SearchResults sr2) {
@@ -284,24 +291,25 @@ public class Search {
       // Return nothing
       return new SearchResults();
     } else if (!sr1.getInclude() && sr2.getInclude()) {
-      return new SearchResults(CollectionUtils.notIn(sr2.getValues(), sr1.getValues()));
+      return new SearchResults(
+          CollectionUtils.notIn(sr2.getValues(), sr1.getValues()));
     } else if (sr1.getInclude() && !sr2.getInclude()) {
-      return new SearchResults(CollectionUtils.notIn(sr1.getValues(), sr2.getValues()));
+      return new SearchResults(
+          CollectionUtils.notIn(sr1.getValues(), sr2.getValues()));
     } else {
       // Normal
-      return new SearchResults(CollectionUtils.intersect(sr1.getValues(), sr2.getValues()));
+      return new SearchResults(
+          CollectionUtils.intersect(sr1.getValues(), sr2.getValues()));
     }
   }
 
   /**
    * Perform a union operation on two sets of samples. If either of the results
-   * sets are non-inclusive (find samples without word) we simply return the other
-   * set.
+   * sets are non-inclusive (find samples without word) we simply return the
+   * other set.
    *
-   * @param sr1
-   *          the sr 1
-   * @param sr2
-   *          the sr 2
+   * @param sr1 the sr 1
+   * @param sr2 the sr 2
    * @return The union of two results.
    */
   private static SearchResults or(SearchResults sr1, SearchResults sr2) {
@@ -312,49 +320,48 @@ public class Search {
       return sr1;
     } else {
       // Normal
-      return new SearchResults(CollectionUtils.union(sr1.getValues(), sr2.getValues()));
+      return new SearchResults(
+          CollectionUtils.union(sr1.getValues(), sr2.getValues()));
     }
   }
 
   /*
    * private static List<Integer> getSampleIds(Connection connection, int
    * tagKeywordId, int maxCount) throws SQLException { if (maxCount != -1) {
-   * return Database.getIds(connection, SEARCH_LIMIT_SQL, tagKeywordId, maxCount);
-   * } else { return Database.getIds(connection, SEARCH_SQL, tagKeywordId); } }
+   * return Database.getIds(connection, SEARCH_LIMIT_SQL, tagKeywordId,
+   * maxCount); } else { return Database.getIds(connection, SEARCH_SQL,
+   * tagKeywordId); } }
    */
 
   /**
    * Return the samples associated with search keyword ids.
    *
-   * @param connection
-   *          the connection
-   * @param tagKeywordIds
-   *          the tag keyword ids
+   * @param connection the connection
+   * @param tagKeywordIds the tag keyword ids
    * @return the sample ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static List<Integer> getSampleIds(Connection connection, List<Integer> tagKeywordIds) throws SQLException {
+  private static List<Integer> getSampleIds(Connection connection,
+      List<Integer> tagKeywordIds) throws SQLException {
     return Database.getIds(connection, ALL_SEARCH_SQL, tagKeywordIds);
   }
 
   /**
    * Return all of the samples associated with a given tag.
    *
-   * @param connection
-   *          the connection
-   * @param tagId
-   *          the tag id
+   * @param connection the connection
+   * @param tagId the tag id
    * @return the sample ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static List<Integer> getSampleIds(Connection connection, int tagId) throws SQLException {
+  private static List<Integer> getSampleIds(Connection connection, int tagId)
+      throws SQLException {
 
     return Database.getIds(connection, ALL_TAG_SAMPLES_SQL, tagId);
   }
 
-  public static List<Integer> getSampleIds(JdbcTemplate connection, int tagId) throws SQLException {
+  public static List<Integer> getSampleIds(JdbcTemplate connection, int tagId)
+      throws SQLException {
 
     return Query.queryForIds(connection, ALL_TAG_SAMPLES_SQL, tagId);
   }
@@ -364,20 +371,17 @@ public class Search {
    * Words beginning with '-' will find samples not containg the word or prefix
    * (similar to a google search).
    *
-   * @param connection
-   *          the connection
-   * @param tagId
-   *          the tag id
-   * @param keyword
-   *          the keyword
-   * @param include
-   *          the include
+   * @param connection the connection
+   * @param tagId the tag id
+   * @param keyword the keyword
+   * @param include the include
    * @return the sample ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static Set<Integer> getSampleIds(Connection connection, int tagId, String keyword, boolean include)
-      throws SQLException {
+  private static Set<Integer> getSampleIds(Connection connection,
+      int tagId,
+      String keyword,
+      boolean include) throws SQLException {
 
     boolean exact = quoted(keyword);
 
@@ -398,10 +402,14 @@ public class Search {
       // exact but is designed for cases where a word in the value
       // should be included or excluded.
 
-      // System.err.println("keyword4 " + SAMPLE_KEYWORD_EXACT_SEARCH_SQL + " " +
+      // System.err.println("keyword4 " + SAMPLE_KEYWORD_EXACT_SEARCH_SQL + " "
+      // +
       // tagId + " " + keyword);
 
-      return getIds(connection, SAMPLE_KEYWORD_EXACT_SEARCH_SQL, tagId, keyword);
+      return getIds(connection,
+          SAMPLE_KEYWORD_EXACT_SEARCH_SQL,
+          tagId,
+          keyword);
     } else {
       // In the non-exact match we match on indexed keywords. Note
       // that this can make excluding samples difficult since if they
@@ -409,15 +417,18 @@ public class Search {
       // matches based on the keyword, but keep all others making this
       // function effectively useless
 
-      // System.err.println("keyword5 " + SAMPLE_KEYWORD_SEARCH_SQL + " " + tagId + "
+      // System.err.println("keyword5 " + SAMPLE_KEYWORD_SEARCH_SQL + " " +
+      // tagId + "
       // " + keyword);
 
       return getIds(connection, SAMPLE_KEYWORD_SEARCH_SQL, tagId, keyword);
     }
   }
 
-  private static List<Integer> getSampleIds(JdbcTemplate connection, int tagId, String keyword, boolean include)
-      throws SQLException {
+  private static List<Integer> getSampleIds(JdbcTemplate connection,
+      int tagId,
+      String keyword,
+      boolean include) throws SQLException {
 
     boolean quoted = quoted(keyword);
 
@@ -438,10 +449,14 @@ public class Search {
       // exact but is designed for cases where a word in the value
       // should be included or excluded.
 
-      // System.err.println("keyword4 " + SAMPLE_KEYWORD_EXACT_SEARCH_SQL + " " +
+      // System.err.println("keyword4 " + SAMPLE_KEYWORD_EXACT_SEARCH_SQL + " "
+      // +
       // tagId + " " + keyword);
 
-      return getIds(connection, SAMPLE_KEYWORD_EXACT_SEARCH_SQL, tagId, keyword);
+      return getIds(connection,
+          SAMPLE_KEYWORD_EXACT_SEARCH_SQL,
+          tagId,
+          keyword);
     } else {
       // In the non-exact match we match on indexed keywords. Note
       // that this can make excluding samples difficult since if they
@@ -449,7 +464,8 @@ public class Search {
       // matches based on the keyword, but keep all others making this
       // function effectively useless
 
-      // System.err.println("keyword5 " + SAMPLE_KEYWORD_SEARCH_SQL + " " + tagId + "
+      // System.err.println("keyword5 " + SAMPLE_KEYWORD_SEARCH_SQL + " " +
+      // tagId + "
       // " + keyword);
 
       return getIds(connection, SAMPLE_KEYWORD_SEARCH_SQL, tagId, keyword);
@@ -460,19 +476,17 @@ public class Search {
    * Return the ids from a query where the first parameter is an integer (e.g. a
    * tag id) and the second is a string (e.g. a keyword).
    *
-   * @param connection
-   *          the connection
-   * @param sql
-   *          the sql
-   * @param id1
-   *          the id 1
-   * @param id2
-   *          the id 2
+   * @param connection the connection
+   * @param sql the sql
+   * @param id1 the id 1
+   * @param id2 the id 2
    * @return the ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static Set<Integer> getIds(Connection connection, final String sql, int id1, String id2) throws SQLException {
+  public static Set<Integer> getIds(Connection connection,
+      final String sql,
+      int id1,
+      String id2) throws SQLException {
     Set<Integer> ret = null;
 
     PreparedStatement statement = connection.prepareStatement(sql);
@@ -493,13 +507,16 @@ public class Search {
     return ret;
   }
 
-  public static List<Integer> getIds(JdbcTemplate connection, final String sql, int id1, String id2)
-      throws SQLException {
-    return connection.query(sql, new Object[] { id1, id2 }, new RowMapper<Integer>() {
-      public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return rs.getInt(1);
-      }
-    });
+  public static List<Integer> getIds(JdbcTemplate connection,
+      final String sql,
+      int id1,
+      String id2) throws SQLException {
+    return connection
+        .query(sql, new Object[] { id1, id2 }, new RowMapper<Integer>() {
+          public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return rs.getInt(1);
+          }
+        });
   }
 
   /*
@@ -511,74 +528,64 @@ public class Search {
   /**
    * Gets the tag keyword ids.
    *
-   * @param connection
-   *          the connection
-   * @param tagId
-   *          the tag id
-   * @param keywordIds
-   *          the keyword ids
+   * @param connection the connection
+   * @param tagId the tag id
+   * @param keywordIds the keyword ids
    * @return the tag keyword ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static List<Integer> getTagKeywordIds(Connection connection, int tagId, List<Integer> keywordIds)
-      throws SQLException {
+  private static List<Integer> getTagKeywordIds(Connection connection,
+      int tagId,
+      List<Integer> keywordIds) throws SQLException {
     return Database.getIds(connection, TAG_KEYWORD_ID_SQL, tagId, keywordIds);
   }
 
   /**
    * Get all keyword ids associated with a tag.
    *
-   * @param connection
-   *          the connection
-   * @param tagId
-   *          the tag id
+   * @param connection the connection
+   * @param tagId the tag id
    * @return the tag keyword ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  private static List<Integer> getTagKeywordIds(Connection connection, int tagId) throws SQLException {
+  private static List<Integer> getTagKeywordIds(Connection connection,
+      int tagId) throws SQLException {
     return Database.getIds(connection, ALL_TAG_KEYWORD_ID_SQL, tagId);
   }
 
   /**
    * Gets the keyword ids.
    *
-   * @param connection
-   *          the connection
-   * @param keyword
-   *          the keyword
+   * @param connection the connection
+   * @param keyword the keyword
    * @return the keyword ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getKeywordIds(Connection connection, String keyword) throws SQLException {
+  public static List<Integer> getKeywordIds(Connection connection,
+      String keyword) throws SQLException {
     return getKeywordIds(connection, keyword, true);
   }
 
   /**
    * Gets the keyword ids.
    *
-   * @param connection
-   *          the connection
-   * @param keyword
-   *          the keyword
-   * @param include
-   *          the include
+   * @param connection the connection
+   * @param keyword the keyword
+   * @param include the include
    * @return the keyword ids
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getKeywordIds(Connection connection, String keyword, boolean include)
-      throws SQLException {
-    return Database.getIds(connection, include ? KEYWORD_SQL : KEYWORD_NOT_SQL, keyword);
+  public static List<Integer> getKeywordIds(Connection connection,
+      String keyword,
+      boolean include) throws SQLException {
+    return Database
+        .getIds(connection, include ? KEYWORD_SQL : KEYWORD_NOT_SQL, keyword);
   }
 
   /**
    * Returns true if the string is in quotations.
    *
-   * @param keyword
-   *          the keyword
+   * @param keyword the keyword
    * @return true, if successful
    */
   private static boolean quoted(String keyword) {
@@ -589,8 +596,7 @@ public class Search {
    * Returns true if the word does not start with a dash '-'. A dash
    * representations negation of the statement.
    *
-   * @param keyword
-   *          the keyword
+   * @param keyword the keyword
    * @return true, if successful
    */
   private static boolean include(String keyword) {

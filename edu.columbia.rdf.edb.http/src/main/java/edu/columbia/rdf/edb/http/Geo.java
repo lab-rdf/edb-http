@@ -31,19 +31,19 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import edu.columbia.rdf.edb.http.Query;
-
 public class Geo {
 
   public static final String SERIES_SQL = "SELECT geo_series.name FROM geo_series WHERE geo_series.id = ?";
 
   public static final String PLATFORM_SQL = "SELECT geo_platforms.name FROM geo_platforms WHERE geo_platforms.id = ?";
 
-  public static String getSeries(JdbcTemplate jdbcTemplate, int seriesId) throws SQLException {
+  public static String getSeries(JdbcTemplate jdbcTemplate, int seriesId)
+      throws SQLException {
     return Query.queryForString(jdbcTemplate, SERIES_SQL, seriesId);
   }
 
-  public static String getPlatform(JdbcTemplate jdbcTemplate, int platformId) throws SQLException {
+  public static String getPlatform(JdbcTemplate jdbcTemplate, int platformId)
+      throws SQLException {
     return Query.queryForString(jdbcTemplate, PLATFORM_SQL, platformId);
   }
 }

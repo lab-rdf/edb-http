@@ -39,8 +39,7 @@ public class SearchResults {
   /**
    * Instantiates a new search results.
    *
-   * @param values
-   *          the values
+   * @param values the values
    */
   public SearchResults(Collection<Integer> values) {
     this(values, true);
@@ -49,10 +48,8 @@ public class SearchResults {
   /**
    * Instantiates a new search results.
    *
-   * @param values
-   *          the values
-   * @param include
-   *          the include
+   * @param values the values
+   * @param include the include
    */
   public SearchResults(Collection<Integer> values, boolean include) {
     mValues = values;

@@ -13,7 +13,8 @@ public class ExperimentBean extends Type {
   private String mDescription;
   private String mDate;
 
-  public ExperimentBean(int id, String publicId, String name, String description, String date) {
+  public ExperimentBean(int id, String publicId, String name,
+      String description, String date) {
     super(id, name);
 
     mPublicId = publicId;

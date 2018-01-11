@@ -17,7 +17,8 @@ public class PersonBean extends Type {
     super(-1, "");
   }
 
-  public PersonBean(int id, String firstName, String lastName, String address, String email) {
+  public PersonBean(int id, String firstName, String lastName, String address,
+      String email) {
     super(id, firstName);
 
     mLastName = lastName;

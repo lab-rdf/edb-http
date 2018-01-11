@@ -33,8 +33,7 @@ public enum UserType {
   /**
    * Gets the from id.
    *
-   * @param userTypeId
-   *          the user type id
+   * @param userTypeId the user type id
    * @return the from id
    */
   public static UserType getFromId(int userTypeId) {

@@ -26,8 +26,7 @@ public class JsonAuthFailed extends JsonObject {
   /**
    * Instantiates a new json auth failed.
    *
-   * @param message
-   *          the message
+   * @param message the message
    */
   public JsonAuthFailed(String message) {
     add("auth-failed", message);

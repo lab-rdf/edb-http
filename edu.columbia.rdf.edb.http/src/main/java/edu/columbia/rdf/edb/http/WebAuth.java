@@ -45,17 +45,15 @@ public class WebAuth {
   /**
    * Validate that the reported user is accessing from a valid ip address.
    *
-   * @param context
-   *          the context
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param person
-   *          the person
-   * @param ipAddress
-   *          the ip address
+   * @param context the context
+   * @param jdbcTemplate the jdbc template
+   * @param person the person
+   * @param ipAddress the ip address
    * @return true, if successful
    */
-  public static boolean validateIPAddress(ServletContext context, JdbcTemplate jdbcTemplate, int person,
+  public static boolean validateIPAddress(ServletContext context,
+      JdbcTemplate jdbcTemplate,
+      int person,
       String ipAddress) {
     Cache cache = CacheManager.getInstance().getCache("ip_add_cache");
 
@@ -81,7 +79,8 @@ public class WebAuth {
 
     boolean valid = false;
 
-    int count = Query.queryForId(jdbcTemplate, VALIDATE_IP_SQL, person, ipAddress);
+    int count = Query
+        .queryForId(jdbcTemplate, VALIDATE_IP_SQL, person, ipAddress);
 
     if (count > 0) {
       cache.put(new Element(person, ipAddress));
@@ -95,10 +94,8 @@ public class WebAuth {
   /**
    * Gets the user id.
    *
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param user
-   *          the user
+   * @param jdbcTemplate the jdbc template
+   * @param user the user
    * @return the user id
    */
   public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
@@ -111,46 +108,52 @@ public class WebAuth {
    * Authenicate a user based on an user id, their ip address and a one time
    * random key.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
+   * @param context the context
+   * @param request the request
+   * @param jdbcTemplate the jdbc template
+   * @param userId the user id
+   * @param totp the totp
    * @return true, if successful
    */
-  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, JdbcTemplate jdbcTemplate,
-      int userId, int totp) {
+  public static boolean totpAuthUser(ServletContext context,
+      HttpServletRequest request,
+      JdbcTemplate jdbcTemplate,
+      int userId,
+      int totp) {
 
-    return totpAuthUser(context, request, jdbcTemplate, userId, totp, (long) context.getAttribute("totp-step"));
+    return totpAuthUser(context,
+        request,
+        jdbcTemplate,
+        userId,
+        totp,
+        (long) context.getAttribute("totp-step"));
   }
 
   /**
    * Totp auth user.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param context the context
+   * @param request the request
+   * @param jdbcTemplate the jdbc template
+   * @param userId the user id
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
    */
-  public static boolean totpAuthUser(ServletContext context, HttpServletRequest request, JdbcTemplate jdbcTemplate,
-      int userId, int totp, long step) {
+  public static boolean totpAuthUser(ServletContext context,
+      HttpServletRequest request,
+      JdbcTemplate jdbcTemplate,
+      int userId,
+      int totp,
+      long step) {
 
     if (WebAuthentication.checkAuthEnabled(context)) {
-      return strictTotpAuthUser(context, request, jdbcTemplate, userId, totp, step);
+      return strictTotpAuthUser(context,
+          request,
+          jdbcTemplate,
+          userId,
+          totp,
+          step);
     } else {
       return true;
     }
@@ -159,49 +162,53 @@ public class WebAuth {
   /**
    * Strict TOTP auth user. Always authenticate.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
+   * @param context the context
+   * @param request the request
+   * @param jdbcTemplate the jdbc template
+   * @param userId the user id
+   * @param totp the totp
    * @return true, if successful
    */
-  public static boolean strictTOTPAuthUser(ServletContext context, HttpServletRequest request,
-      JdbcTemplate jdbcTemplate, int userId, int totp) {
-    return strictTotpAuthUser(context, request, jdbcTemplate, userId, totp, (long) context.getAttribute("totp-step"));
+  public static boolean strictTOTPAuthUser(ServletContext context,
+      HttpServletRequest request,
+      JdbcTemplate jdbcTemplate,
+      int userId,
+      int totp) {
+    return strictTotpAuthUser(context,
+        request,
+        jdbcTemplate,
+        userId,
+        totp,
+        (long) context.getAttribute("totp-step"));
   }
 
   /**
    * Strict TOTP auth user.
    *
-   * @param context
-   *          the context
-   * @param request
-   *          the request
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param userId
-   *          the user id
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param context the context
+   * @param request the request
+   * @param jdbcTemplate the jdbc template
+   * @param userId the user id
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
    */
-  public static boolean strictTotpAuthUser(ServletContext context, HttpServletRequest request,
-      JdbcTemplate jdbcTemplate, int userId, int totp, long step) {
+  public static boolean strictTotpAuthUser(ServletContext context,
+      HttpServletRequest request,
+      JdbcTemplate jdbcTemplate,
+      int userId,
+      int totp,
+      long step) {
 
     if (userId == -1) {
       return false;
     }
 
     // First validate the ip address
-    boolean validIp = validateIPAddress(context, jdbcTemplate, userId, request.getRemoteAddr());
+    boolean validIp = validateIPAddress(context,
+        jdbcTemplate,
+        userId,
+        request.getRemoteAddr());
 
     if (!validIp) {
       return false;
@@ -223,14 +230,10 @@ public class WebAuth {
   /**
    * Totp auth.
    *
-   * @param userId
-   *          the user id
-   * @param key
-   *          the key
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
+   * @param userId the user id
+   * @param key the key
+   * @param totp the totp
+   * @param step the step
    * @return true, if successful
    */
   private static boolean totpAuth(int userId, String key, int totp, long step) {
@@ -240,21 +243,20 @@ public class WebAuth {
   /**
    * Totp auth.
    *
-   * @param userId
-   *          the user id
-   * @param key
-   *          the key
-   * @param totp
-   *          the totp
-   * @param step
-   *          the step
-   * @param time
-   *          the time
-   * @param epoch
-   *          the epoch
+   * @param userId the user id
+   * @param key the key
+   * @param totp the totp
+   * @param step the step
+   * @param time the time
+   * @param epoch the epoch
    * @return true, if successful
    */
-  private static boolean totpAuth(int userId, String key, int totp, long step, long time, long epoch) {
+  private static boolean totpAuth(int userId,
+      String key,
+      int totp,
+      long step,
+      long time,
+      long epoch) {
 
     long counter = TOTP.getCounter(time, epoch, step);
 
@@ -298,12 +300,9 @@ public class WebAuth {
   /**
    * Gets the key.
    *
-   * @param context
-   *          the context
-   * @param jdbcTemplate
-   *          the jdbc template
-   * @param userId
-   *          the user id
+   * @param context the context
+   * @param jdbcTemplate the jdbc template
+   * @param userId the user id
    * @return the key
    */
   public static String getKey(JdbcTemplate jdbcTemplate, int userId) {
@@ -315,7 +314,8 @@ public class WebAuth {
       return (String) ce.getObjectValue();
     }
 
-    String key = Query.queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
+    String key = Query
+        .queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
 
     cache.put(new Element(userId, key));
 

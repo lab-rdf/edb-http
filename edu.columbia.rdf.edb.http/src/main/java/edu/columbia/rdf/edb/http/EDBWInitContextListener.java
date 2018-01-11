@@ -84,9 +84,11 @@ public class EDBWInitContextListener implements ServletContextListener {
       context.setAttribute(VIEW_PARAM, true);
     }
 
-    context.setAttribute(TOTP_PARAM, Long.parseLong(context.getInitParameter(TOTP_PARAM)));
+    context.setAttribute(TOTP_PARAM,
+        Long.parseLong(context.getInitParameter(TOTP_PARAM)));
 
-    Path dir = PathUtils.getPath(context.getInitParameter(DATA_DIR_PARAM)).toAbsolutePath();
+    Path dir = PathUtils.getPath(context.getInitParameter(DATA_DIR_PARAM))
+        .toAbsolutePath();
 
     context.setAttribute("dir", dir);
     context.setAttribute(DATA_DIR_PARAM, dir);

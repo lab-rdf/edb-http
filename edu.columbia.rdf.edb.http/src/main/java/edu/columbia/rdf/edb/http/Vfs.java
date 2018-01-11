@@ -44,7 +44,8 @@ public class Vfs {
   private static final String VFS_TAGS_SQL = "SELECT vfs_tags.id, vfs_tags.value FROM vfs_tags";
 
   /** The Constant VFS_TAG_SQL. */
-  private static final String VFS_TAG_SQL = VFS_TAGS_SQL + " WHERE vfs_tags.vfs_id = ?";
+  private static final String VFS_TAG_SQL = VFS_TAGS_SQL
+      + " WHERE vfs_tags.vfs_id = ?";
 
   /** The Constant EXPERIMENT_FILE_IDS_SQL. */
   private static final String EXPERIMENT_FILE_IDS_SQL = "SELECT experiment_files.vfs_id FROM experiment_files WHERE experiment_files.experiment_id = ? ORDER BY experiment_files.vfs_id";
@@ -65,114 +66,104 @@ public class Vfs {
   private static final String SAMPLE_FILE_DIR_SQL = "SELECT min(sample_files.vfs_id) FROM sample_files WHERE sample_files.sample_id = ? GROUP BY sample_files.sample_id";
 
   /** The Constant VFS_SAMPLE_DIR_SQL. */
-  private static final String VFS_SAMPLE_DIR_SQL = SAMPLE_FILE_IDS_SQL + " LIMIT 1";
+  private static final String VFS_SAMPLE_DIR_SQL = SAMPLE_FILE_IDS_SQL
+      + " LIMIT 1";
 
   /** The Constant VFS_PATH_SQL. */
   private static final String VFS_PATH_SQL = "SELECT vfs.path FROM vfs WHERE vfs.id = ?";
 
   /*
    * public static DatabaseResultsTable getExperimentFilesTable(Connection
-   * connection, int sampleId) { // TODO Auto-generated method stub return null; }
+   * connection, int sampleId) { // TODO Auto-generated method stub return null;
+   * }
    */
 
   /**
    * Gets the file table.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
+   * @param connection the connection
+   * @param vfsId the vfs id
    * @return the file table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getFileTable(Connection connection, int vfsId) throws SQLException {
+  public static ResultsSetTable getFileTable(Connection connection, int vfsId)
+      throws SQLException {
     return Database.getTable(connection, VFS_FILE_SQL, vfsId);
   }
 
   /**
    * Gets the files table.
    *
-   * @param connection
-   *          the connection
-   * @param vfsIds
-   *          the vfs ids
+   * @param connection the connection
+   * @param vfsIds the vfs ids
    * @return the files table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getFilesTable(Connection connection, final List<Integer> vfsIds) throws SQLException {
+  public static ResultsSetTable getFilesTable(Connection connection,
+      final List<Integer> vfsIds) throws SQLException {
     return Database.getTable(connection, VFS_FILES_SQL, vfsIds);
   }
 
   /**
    * Gets the vfs tags.
    *
-   * @param connection
-   *          the connection
+   * @param connection the connection
    * @return the vfs tags
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getVfsTags(Connection connection) throws SQLException {
+  public static List<Integer> getVfsTags(Connection connection)
+      throws SQLException {
     return Database.getIds(connection, VFS_TAGS_SQL);
   }
 
   /**
    * Gets the vfs tags table.
    *
-   * @param connection
-   *          the connection
+   * @param connection the connection
    * @return the vfs tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getVfsTagsTable(Connection connection) throws SQLException {
+  public static ResultsSetTable getVfsTagsTable(Connection connection)
+      throws SQLException {
     return Database.getTable(connection, VFS_TAGS_SQL);
   }
 
   /**
    * Gets the vfs tags.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
+   * @param connection the connection
+   * @param vfsId the vfs id
    * @return the vfs tags
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getVfsTags(Connection connection, int vfsId) throws SQLException {
+  public static List<Integer> getVfsTags(Connection connection, int vfsId)
+      throws SQLException {
     return Database.getIds(connection, VFS_TAG_SQL, vfsId);
   }
 
   /**
    * Gets the vfs tags table.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
+   * @param connection the connection
+   * @param vfsId the vfs id
    * @return the vfs tags table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getVfsTagsTable(Connection connection, int vfsId) throws SQLException {
+  public static List<Integer> getVfsTagsTable(Connection connection, int vfsId)
+      throws SQLException {
     return Database.getIds(connection, VFS_TAG_SQL, vfsId);
   }
 
   /**
    * Gets the experiment files table.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the experiment files table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getExperimentFilesTable(Connection connection, int experimentId) throws SQLException {
+  public static ResultsSetTable getExperimentFilesTable(Connection connection,
+      int experimentId) throws SQLException {
     List<Integer> vfsIds = getExperimentFiles(connection, experimentId);
 
     return getFilesTable(connection, vfsIds);
@@ -181,46 +172,40 @@ public class Vfs {
   /**
    * Gets the experiment files.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the experiment files
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getExperimentFiles(Connection connection, int experimentId) throws SQLException {
+  public static List<Integer> getExperimentFiles(Connection connection,
+      int experimentId) throws SQLException {
     return Database.getIds(connection, EXPERIMENT_FILE_IDS_SQL, experimentId);
   }
 
   /**
    * Returns the experiments associated with a sample.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
+   * @param connection the connection
+   * @param vfsId the vfs id
    * @return the experiments
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getExperiments(Connection connection, int vfsId) throws SQLException {
+  public static List<Integer> getExperiments(Connection connection, int vfsId)
+      throws SQLException {
     return Database.getIds(connection, EXPERIMENT_IDS_SQL, vfsId);
   }
 
   /**
    * Gets the experiment files dir table.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the experiment files dir table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getExperimentFilesDirTable(Connection connection, int experimentId)
-      throws SQLException {
+  public static ResultsSetTable getExperimentFilesDirTable(
+      Connection connection,
+      int experimentId) throws SQLException {
     int vfsId = getExperimentFilesDir(connection, experimentId);
 
     return getFileTable(connection, vfsId);
@@ -229,30 +214,26 @@ public class Vfs {
   /**
    * Gets the experiment files dir.
    *
-   * @param connection
-   *          the connection
-   * @param experimentId
-   *          the experiment id
+   * @param connection the connection
+   * @param experimentId the experiment id
    * @return the experiment files dir
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getExperimentFilesDir(Connection connection, int experimentId) throws SQLException {
+  public static int getExperimentFilesDir(Connection connection,
+      int experimentId) throws SQLException {
     return Database.getId(connection, EXPERIMENT_FILE_DIR_SQL, experimentId);
   }
 
   /**
    * Gets the sample files table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample files table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getSampleFilesTable(Connection connection, int sampleId) throws SQLException {
+  public static ResultsSetTable getSampleFilesTable(Connection connection,
+      int sampleId) throws SQLException {
     List<Integer> vfsIds = getSampleFiles(connection, sampleId);
 
     return getFilesTable(connection, vfsIds);
@@ -261,55 +242,51 @@ public class Vfs {
   /**
    * Gets the sample files.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample files
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getSampleFiles(Connection connection, int sampleId) throws SQLException {
+  public static List<Integer> getSampleFiles(Connection connection,
+      int sampleId) throws SQLException {
     return Database.getIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
   }
 
-  public static List<Integer> getSampleFiles(JdbcTemplate connection, int sampleId) throws SQLException {
+  public static List<Integer> getSampleFiles(JdbcTemplate connection,
+      int sampleId) throws SQLException {
     return Query.queryForIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
   }
 
   /**
    * Returns the samples associated with a vfs id.
    *
-   * @param connection
-   *          the connection
-   * @param vfsId
-   *          the vfs id
+   * @param connection the connection
+   * @param vfsId the vfs id
    * @return the samples
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static List<Integer> getSamples(Connection connection, int vfsId) throws SQLException {
+  public static List<Integer> getSamples(Connection connection, int vfsId)
+      throws SQLException {
     return Database.getIds(connection, VFS_SAMPLE_IDS_SQL, vfsId);
   }
 
   /**
    * Gets the sample files dir table.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample files dir table
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static ResultsSetTable getSampleFilesDirTable(Connection connection, int sampleId) throws SQLException {
+  public static ResultsSetTable getSampleFilesDirTable(Connection connection,
+      int sampleId) throws SQLException {
     int vfsId = getSampleFilesDir(connection, sampleId);
 
     return getFileTable(connection, vfsId);
   }
 
-  public static VfsFileBean getSampleFileDir(JdbcTemplate connection, int sampleId) throws SQLException {
+  public static VfsFileBean getSampleFileDir(JdbcTemplate connection,
+      int sampleId) throws SQLException {
     int vfsId = getSampleFilesDir(connection, sampleId);
 
     return getFile(connection, vfsId);
@@ -318,37 +295,35 @@ public class Vfs {
   /**
    * Gets the sample files dir.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample files dir
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static int getSampleFilesDir(Connection connection, int sampleId) throws SQLException {
+  public static int getSampleFilesDir(Connection connection, int sampleId)
+      throws SQLException {
     return Database.getId(connection, SAMPLE_FILE_DIR_SQL, sampleId);
   }
 
-  public static int getSampleFilesDir(JdbcTemplate connection, int sampleId) throws SQLException {
+  public static int getSampleFilesDir(JdbcTemplate connection, int sampleId)
+      throws SQLException {
     return Database.getId(connection, SAMPLE_FILE_DIR_SQL, sampleId);
   }
 
   /**
    * Returns the directory path associated with a sample.
    *
-   * @param connection
-   *          the connection
-   * @param sampleId
-   *          the sample id
+   * @param connection the connection
+   * @param sampleId the sample id
    * @return the sample dir path
-   * @throws SQLException
-   *           the SQL exception
+   * @throws SQLException the SQL exception
    */
-  public static Path getSampleDirPath(Connection connection, int sampleId) throws SQLException {
+  public static Path getSampleDirPath(Connection connection, int sampleId)
+      throws SQLException {
     int vfsId = Database.getId(connection, VFS_SAMPLE_DIR_SQL, sampleId);
 
-    Path path = PathUtils.getPath(Database.getString(connection, VFS_PATH_SQL, vfsId));
+    Path path = PathUtils
+        .getPath(Database.getString(connection, VFS_PATH_SQL, vfsId));
 
     return path;
   }
@@ -356,12 +331,14 @@ public class Vfs {
   public static Path getSampleDirPath(JdbcTemplate jdbcTemplate, int sampleId) {
     int vfsId = Database.getId(jdbcTemplate, VFS_SAMPLE_DIR_SQL, sampleId);
 
-    Path path = PathUtils.getPath(Database.getString(jdbcTemplate, VFS_PATH_SQL, vfsId));
+    Path path = PathUtils
+        .getPath(Database.getString(jdbcTemplate, VFS_PATH_SQL, vfsId));
 
     return path;
   }
 
-  public static List<VfsFileBean> getFiles(JdbcTemplate connection, Collection<Integer> ids) throws SQLException {
+  public static List<VfsFileBean> getFiles(JdbcTemplate connection,
+      Collection<Integer> ids) throws SQLException {
     List<VfsFileBean> ret = new ArrayList<VfsFileBean>(1000);
 
     for (int id : ids) {
@@ -379,15 +356,19 @@ public class Vfs {
    * @return
    * @throws SQLException
    */
-  public static VfsFileBean getFile(JdbcTemplate jdbcTemplate, int fid) throws SQLException {
-    List<VfsFileBean> files = jdbcTemplate.query(Vfs.VFS_FILE_SQL, new Object[] { fid }, new RowMapper<VfsFileBean>() {
-      @Override
-      public VfsFileBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new VfsFileBean(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getInt(4), rs.getString(5),
-            rs.getString(6));
-      }
+  public static VfsFileBean getFile(JdbcTemplate jdbcTemplate, int fid)
+      throws SQLException {
+    List<VfsFileBean> files = jdbcTemplate.query(Vfs.VFS_FILE_SQL,
+        new Object[] { fid },
+        new RowMapper<VfsFileBean>() {
+          @Override
+          public VfsFileBean mapRow(ResultSet rs, int rowNum)
+              throws SQLException {
+            return new VfsFileBean(rs.getInt(1), rs.getInt(2), rs.getString(3),
+                rs.getInt(4), rs.getString(5), rs.getString(6));
+          }
 
-    });
+        });
 
     if (files.size() > 0) {
       return files.get(0);

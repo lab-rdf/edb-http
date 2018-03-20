@@ -62,6 +62,7 @@ public class Groups {
     }
   }
 
+  /** Convert resultset into bean object. */
   public static final GroupBeanMapper GROUP_BEAN_MAPPER = new GroupBeanMapper();
 
   /**

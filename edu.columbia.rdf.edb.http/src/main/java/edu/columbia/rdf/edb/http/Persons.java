@@ -23,6 +23,19 @@ public class Persons {
 
   private static String GROUP_IDS_SQL = "SELECT groups_persons.group_id FROM groups_persons WHERE groups_persons.person_id= ?";
 
+  
+  private static class PersonBeanMapper implements RowMapper<PersonBean> {
+    @Override
+    public PersonBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return new PersonBean(rs.getInt(1), rs.getString(2), rs.getString(3),
+          rs.getString(4), rs.getString(5));
+    }
+  }
+
+  /** Convert resultset into person bean object. */
+  public static final PersonBeanMapper PERSON_BEAN_MAPPER = new PersonBeanMapper();
+
+  
   private Persons() {
     // Do nothing
   }
@@ -41,41 +54,18 @@ public class Persons {
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate, int id)
       throws SQLException {
     return Query
-        .query(jdbcTemplate, PERSON_SQL, id, new RowMapper<PersonBean>() {
-          @Override
-          public PersonBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-
-            return new PersonBean(rs.getInt(1), rs.getString(2),
-                rs.getString(3), rs.getString(4), rs.getString(5));
-          }
-        });
+        .query(jdbcTemplate, PERSON_SQL, id, PERSON_BEAN_MAPPER);
   }
 
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate,
       Collection<Integer> ids) throws SQLException {
     return Query
-        .query(jdbcTemplate, PERSON_SQL, ids, new RowMapper<PersonBean>() {
-          @Override
-          public PersonBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-
-            return new PersonBean(rs.getInt(1), rs.getString(2),
-                rs.getString(3), rs.getString(4), rs.getString(5));
-          }
-        });
+        .query(jdbcTemplate, PERSON_SQL, ids, PERSON_BEAN_MAPPER);
   }
 
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate)
       throws SQLException {
-    return Query.query(jdbcTemplate, PERSONS_SQL, new RowMapper<PersonBean>() {
-      @Override
-      public PersonBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-        return new PersonBean(rs.getInt(1), rs.getString(2), rs.getString(3),
-            rs.getString(4), rs.getString(5));
-      }
-    });
+    return Query.query(jdbcTemplate, PERSONS_SQL, PERSON_BEAN_MAPPER);
   }
 
   /**
@@ -112,7 +102,7 @@ public class Persons {
   }
 
   /**
-   * Get the groups for a person.
+   * Get the groups a person belongs to.
    * 
    * @param jdbcTemplate
    * @param pid

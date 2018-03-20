@@ -72,11 +72,17 @@ public class Vfs {
   /** The Constant VFS_PATH_SQL. */
   private static final String VFS_PATH_SQL = "SELECT vfs.path FROM vfs WHERE vfs.id = ?";
 
-  /*
-   * public static DatabaseResultsTable getExperimentFilesTable(Connection
-   * connection, int sampleId) { // TODO Auto-generated method stub return null;
-   * }
-   */
+  private static class VfsBeanMapper implements RowMapper<VfsFileBean> {
+    @Override
+    public VfsFileBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return new VfsFileBean(rs.getInt(1), rs.getInt(2), rs.getString(3),
+          rs.getInt(4), rs.getString(5), rs.getString(6));
+    }
+  }
+
+  /** Convert resultset into bean object. */
+  public static final VfsBeanMapper VFS_BEAN_MAPPER = new VfsBeanMapper();
+
 
   /**
    * Gets the file table.
@@ -358,17 +364,11 @@ public class Vfs {
    */
   public static VfsFileBean getFile(JdbcTemplate jdbcTemplate, int fid)
       throws SQLException {
-    List<VfsFileBean> files = jdbcTemplate.query(Vfs.VFS_FILE_SQL,
-        new Object[] { fid },
-        new RowMapper<VfsFileBean>() {
-          @Override
-          public VfsFileBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-            return new VfsFileBean(rs.getInt(1), rs.getInt(2), rs.getString(3),
-                rs.getInt(4), rs.getString(5), rs.getString(6));
-          }
-
-        });
+    //List<VfsFileBean> files = jdbcTemplate.query(Vfs.VFS_FILE_SQL,
+    //    new Object[] { fid },
+    //    VFS_BEAN_MAPPER);
+    
+    List<VfsFileBean> files = Query.query(jdbcTemplate, VFS_FILE_SQL, fid, VFS_BEAN_MAPPER);
 
     if (files.size() > 0) {
       return files.get(0);

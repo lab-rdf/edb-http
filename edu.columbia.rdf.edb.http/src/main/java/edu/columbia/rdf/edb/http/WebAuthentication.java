@@ -93,6 +93,8 @@ public class WebAuthentication {
 
   /** The Constant KEY_SQL. */
   public static final String KEY_SQL = "SELECT persons.api_key FROM persons WHERE persons.id = ?";
+  
+  public static final String TOTP_PHRASE_SQL = "SELECT persons.totp_phrase FROM persons WHERE persons.id = ?";
 
   /** The Constant SQL_LOGIN_ATTEMPT. */
   private static final String SQL_LOGIN_ATTEMPT = "INSERT INTO login_attempts (person_id, ip_address, success) VALUES (?, ?, ?)";
@@ -835,8 +837,7 @@ public class WebAuthentication {
       return false;
     }
 
-    // Now check the one time key is valid
-
+    // Now check the api key is valid
     String key = getKey(context, connection, userId);
 
     if (TextUtils.isNullOrEmpty(key)) {

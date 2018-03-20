@@ -40,7 +40,9 @@ public class WebAuth {
 
   private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
 
-  private static final String USER_ID_SQL = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
+  private static final String USER_ID_FROM_PUBLIC_UUID_SQL = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
+
+  private static final String USER_ID_FROM_APK_KEY_SQL = "SELECT persons.id FROM persons WHERE persons.api_key = ?";
 
   /**
    * Validate that the reported user is accessing from a valid ip address.
@@ -95,13 +97,19 @@ public class WebAuth {
    * Gets the user id.
    *
    * @param jdbcTemplate the jdbc template
-   * @param user the user
+   * @param key the user
    * @return the user id
    */
-  public static int getUserId(JdbcTemplate jdbcTemplate, String user) {
-    user = santizeUser(user);
+  public static int getUserIdFromUUID(JdbcTemplate jdbcTemplate, String key) {
+    key = santizeUser(key);
 
-    return Query.queryForId(jdbcTemplate, USER_ID_SQL, user);
+    return Query.queryForId(jdbcTemplate, USER_ID_FROM_PUBLIC_UUID_SQL, key);
+  }
+  
+  public static int getUserIdFromAPIKey(JdbcTemplate jdbcTemplate, String key) {
+    key = santizeUser(key);
+
+    return Query.queryForId(jdbcTemplate, USER_ID_FROM_APK_KEY_SQL, key);
   }
 
   /**
@@ -216,35 +224,35 @@ public class WebAuth {
 
     // Now check the one time key is valid
 
-    String key = getKey(jdbcTemplate, userId);
+    String phrase = getTOTPPhrase(jdbcTemplate, userId);
 
-    if (TextUtils.isNullOrEmpty(key)) {
+    if (TextUtils.isNullOrEmpty(phrase)) {
       return false;
     }
 
     // return TOTP.totpAuth(key, totp, step);
 
-    return totpAuth(userId, key, totp, step);
+    return totpAuth(userId, phrase, totp, step);
   }
 
   /**
    * Totp auth.
    *
    * @param userId the user id
-   * @param key the key
+   * @param phrase the key
    * @param totp the totp
    * @param step the step
    * @return true, if successful
    */
-  private static boolean totpAuth(int userId, String key, int totp, long step) {
-    return totpAuth(userId, key, totp, step, System.currentTimeMillis(), 0);
+  private static boolean totpAuth(int userId, String phrase, int totp, long step) {
+    return totpAuth(userId, phrase, totp, step, System.currentTimeMillis(), 0);
   }
 
   /**
    * Totp auth.
    *
    * @param userId the user id
-   * @param key the key
+   * @param phrase the key
    * @param totp the totp
    * @param step the step
    * @param time the time
@@ -252,7 +260,7 @@ public class WebAuth {
    * @return true, if successful
    */
   private static boolean totpAuth(int userId,
-      String key,
+      String phrase,
       int totp,
       long step,
       long time,
@@ -287,7 +295,7 @@ public class WebAuth {
       return true;
     }
 
-    boolean auth = TOTP.totpAuth(key, totp, time, epoch, step);
+    boolean auth = TOTP.totpAuth(phrase, totp, time, epoch, step);
 
     if (auth) {
       tcCache.put(new Element(userId, counter));
@@ -305,8 +313,8 @@ public class WebAuth {
    * @param userId the user id
    * @return the key
    */
-  public static String getKey(JdbcTemplate jdbcTemplate, int userId) {
-    Cache cache = CacheManager.getInstance().getCache("key-cache");
+  public static String getTOTPPhrase(JdbcTemplate jdbcTemplate, int userId) {
+    Cache cache = CacheManager.getInstance().getCache("totp-phrase-cache");
 
     Element ce = cache.get(userId);
 
@@ -315,7 +323,7 @@ public class WebAuth {
     }
 
     String key = Query
-        .queryForString(jdbcTemplate, WebAuthentication.KEY_SQL, userId);
+        .queryForString(jdbcTemplate, WebAuthentication.TOTP_PHRASE_SQL, userId);
 
     cache.put(new Element(userId, key));
 

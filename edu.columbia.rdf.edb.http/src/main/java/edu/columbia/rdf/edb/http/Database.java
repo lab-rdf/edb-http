@@ -79,7 +79,10 @@ public class Database {
   /** The Constant ALIAS_SQL. */
   private static final String ALIAS_SQL = "SELECT DISTINCT sample_aliases.sample_id FROM sample_aliases WHERE sample_aliases.name = ? LIMIT 1";
 
-  private static class IntExtractor implements ResultSetExtractor<Integer> {
+  /**
+   * Extracts ids from a database.
+   */
+  private static final ResultSetExtractor<Integer> ID_EXTRACTOR = new ResultSetExtractor<Integer>() {
     @Override
     public Integer extractData(ResultSet rs)
         throws SQLException, DataAccessException {
@@ -88,7 +91,10 @@ public class Database {
     }
   };
 
-  private static class StringExtractor implements ResultSetExtractor<String> {
+  /**
+   * Extracts strings from a database.
+   */
+  private static final ResultSetExtractor<String> STRING_EXTRACTOR = new ResultSetExtractor<String>() {
     @Override
     public String extractData(ResultSet rs)
         throws SQLException, DataAccessException {
@@ -97,15 +103,26 @@ public class Database {
     }
   };
 
-  /**
-   * Extracts ids from a database.
-   */
-  private static final ResultSetExtractor<Integer> ID_EXTRACTOR = new IntExtractor();
+  public static final RowMapper<TypeBean> TYPE_BEAN_MAPPER = new RowMapper<TypeBean>() {
+    @Override
+    public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return new TypeBean(rs.getInt(1), rs.getString(2));
+    }
+  };
 
-  /**
-   * Extracts strings from a database.
-   */
-  private static final ResultSetExtractor<String> STRING_EXTRACTOR = new StringExtractor();
+  public static final RowMapper<Integer> INT_MAPPER = new RowMapper<Integer>() {
+    @Override
+    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return rs.getInt(1);
+    }
+  };
+
+  public static final RowMapper<String> STRING_MAPPER = new RowMapper<String>() {
+    @Override
+    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return rs.getString(1);
+    }
+  };
 
   /**
    * Instantiates a new database.
@@ -796,23 +813,13 @@ public class Database {
 
   public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate, String type)
       throws SQLException {
-    return jdbcTemplate.query(getTypesSql(type), new RowMapper<TypeBean>() {
-      @Override
-      public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new TypeBean(rs.getInt(1), rs.getString(2));
-      }
-    });
+    return jdbcTemplate.query(getTypesSql(type), TYPE_BEAN_MAPPER);
   }
 
   public static List<TypeBean> getTypes(JdbcTemplate jdbcTemplate,
       String type,
       int id) {
-    return jdbcTemplate.query(getTypeSql(type, id), new RowMapper<TypeBean>() {
-      @Override
-      public TypeBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return new TypeBean(rs.getInt(1), rs.getString(2));
-      }
-    });
+    return jdbcTemplate.query(getTypeSql(type, id), TYPE_BEAN_MAPPER);
   }
 
   public static TypeBean getType(JdbcTemplate jdbcTemplate,

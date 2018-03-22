@@ -20,7 +20,6 @@ package edu.columbia.rdf.edb.http;
  * The Enum UserType.
  */
 public enum UserType {
-
   /** The normal. */
   NORMAL,
 
@@ -29,6 +28,8 @@ public enum UserType {
 
   /** The superuser. */
   SUPERUSER;
+  
+
 
   /**
    * Gets the from id.
@@ -45,5 +46,16 @@ public enum UserType {
     default:
       return NORMAL;
     }
+  }
+  
+  /**
+   * Returns true if the rank of t2 is at least that of t1.
+   * 
+   * @param t1
+   * @param t2
+   * @return
+   */
+  public static boolean geRank(UserType t1, UserType t2) {
+    return t2.compareTo(t1) >= 0;
   }
 }

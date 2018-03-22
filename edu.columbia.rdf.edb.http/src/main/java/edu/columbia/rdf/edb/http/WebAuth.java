@@ -38,7 +38,8 @@ public class WebAuth {
   /** The Constant VALIDATE_IP_SQL. */
   public static final String VALIDATE_IP_SQL = "SELECT COUNT(login_ip_address.id) FROM login_ip_address WHERE login_ip_address.person_id = ? AND (login_ip_address.ip_address = '*' OR login_ip_address.ip_address LIKE ?)";
 
-  private static final Pattern USER_REGEX = Pattern.compile("[a-z0-9]+");
+  /** Keys and phrases are 48 character random letters and numbers */
+  private static final Pattern KEY_REGEX = Pattern.compile("[a-zA-Z0-9]{48}");
 
   private static final String USER_ID_FROM_PUBLIC_UUID_SQL = "SELECT persons.id FROM persons WHERE persons.public_uuid = ?";
 
@@ -101,14 +102,19 @@ public class WebAuth {
    * @return the user id
    */
   public static int getUserIdFromUUID(JdbcTemplate jdbcTemplate, String key) {
-    key = santizeUser(key);
+    key = santizeKey(key);
 
     return Query.queryForId(jdbcTemplate, USER_ID_FROM_PUBLIC_UUID_SQL, key);
   }
-  
-  public static int getUserIdFromAPIKey(JdbcTemplate jdbcTemplate, String key) {
-    key = santizeUser(key);
 
+  /**
+   * Map an API key to a user.
+   * 
+   * @param jdbcTemplate
+   * @param key
+   * @return
+   */
+  public static int getUserIdFromAPIKey(JdbcTemplate jdbcTemplate, String key) {
     return Query.queryForId(jdbcTemplate, USER_ID_FROM_APK_KEY_SQL, key);
   }
 
@@ -333,14 +339,26 @@ public class WebAuth {
   /**
    * Ensure the user contains only lowercase letters or numbers.
    * 
-   * @param user
+   * @param key
    * @return
    */
-  public static String santizeUser(String user) {
-    if (USER_REGEX.matcher(user).matches()) {
-      return user;
+  public static String santizeKey(String key) {
+    if (isKey(key)) {
+      return key;
     } else {
       return TextUtils.EMPTY_STRING;
     }
+  }
+
+  /**
+   * Validates if a key is 48 character key. This only validates structure
+   * and does not check if the key maps to a user in the database. This
+   * is to reject users injecting garbage into the key.
+   * 
+   * @param key
+   * @return
+   */
+  public static boolean isKey(String key) {
+    return KEY_REGEX.matcher(key).matches();
   }
 }

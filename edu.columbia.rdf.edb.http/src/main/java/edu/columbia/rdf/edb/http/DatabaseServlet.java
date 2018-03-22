@@ -117,13 +117,13 @@ public abstract class DatabaseServlet {
       + " AND tags_sample_float.tag_id = ANY(?::int[])";
 
   /** The Constant JSON_SAMPLE_FIELDS_SQL. */
-  private static final String JSON_SAMPLE_FIELDS_SQL = "SELECT json_sample_fields.json FROM json_sample_fields WHERE json_sample_fields.sample_id = ?";
+  //private static final String JSON_SAMPLE_FIELDS_SQL = "SELECT json_sample_fields.json FROM json_sample_fields WHERE json_sample_fields.sample_id = ?";
 
   /** The Constant JSON_SAMPLE_GEO_SQL. */
-  private static final String JSON_SAMPLE_GEO_SQL = "SELECT json_sample_geo.json FROM json_sample_geo WHERE json_sample_geo.sample_id = ?";
+  //private static final String JSON_SAMPLE_GEO_SQL = "SELECT json_sample_geo.json FROM json_sample_geo WHERE json_sample_geo.sample_id = ?";
 
   /** The Constant JSON_SAMPLE_PERSONS_SQL. */
-  private static final String JSON_SAMPLE_PERSONS_SQL = "SELECT json_sample_persons.json FROM json_sample_persons WHERE json_sample_persons.sample_id = ?";
+  //private static final String JSON_SAMPLE_PERSONS_SQL = "SELECT json_sample_persons.json FROM json_sample_persons WHERE json_sample_persons.sample_id = ?";
 
   /** The Constant SAMPLE_PERSONS_SQL. */
   public final static String SAMPLE_PERSONS_SQL = "SELECT sample_persons.id, sample_persons.person_id FROM sample_persons WHERE sample_persons.sample_id = ?";
@@ -563,14 +563,7 @@ public abstract class DatabaseServlet {
     }
   }
 
-  /**
-   * Gets the sample geo json.
-   *
-   * @param connection the connection
-   * @param sampleId the sample id
-   * @return the sample geo json
-   * @throws SQLException the SQL exception
-   */
+  /*
   protected static String getSampleGeoJson(Connection connection, int sampleId)
       throws SQLException {
     PreparedStatement statement = connection
@@ -590,6 +583,7 @@ public abstract class DatabaseServlet {
 
     return ret;
   }
+  */
 
   /**
    * Returns the sample ids associated with an experiment.
@@ -797,15 +791,7 @@ public abstract class DatabaseServlet {
 
   }
 
-  /**
-   * Gets the persons json.
-   *
-   * @param connection the connection
-   * @param sampleId the sample id
-   * @param sampleJSON the sample JSON
-   * @return the persons json
-   * @throws SQLException the SQL exception
-   */
+  /*
   private static void getPersonsJson(Connection connection,
       int sampleId,
       JsonBuilder sampleJSON) throws SQLException {
@@ -821,15 +807,9 @@ public abstract class DatabaseServlet {
     // sampleJSON.add("geo", constructPersonsJson(connection, sampleId));
     // }
   }
+  */
 
-  /**
-   * Gets the sample persons json.
-   *
-   * @param connection the connection
-   * @param sampleId the sample id
-   * @return the sample persons json
-   * @throws SQLException the SQL exception
-   */
+  /*
   protected static String getSamplePersonsJson(Connection connection,
       int sampleId) throws SQLException {
     PreparedStatement statement = connection
@@ -849,6 +829,7 @@ public abstract class DatabaseServlet {
 
     return ret;
   }
+  */
 
   /**
    * Construct persons json.
@@ -900,15 +881,7 @@ public abstract class DatabaseServlet {
     // return personsJSON;
   }
 
-  /**
-   * List persons associated with samples.
-   *
-   * @param connection the connection
-   * @param userId the user id
-   * @param sampleIds the sample ids
-   * @param jsonArray the json array
-   * @throws SQLException the SQL exception
-   */
+  /*
   protected static void processSamplesPersons(Connection connection,
       int userId,
       Collection<Integer> sampleIds,
@@ -935,6 +908,7 @@ public abstract class DatabaseServlet {
       jsonArray.endObject(); //// jsonArray.add(sampleJSON);
     }
   }
+  */
 
   /**
    * Process sample.
@@ -1260,14 +1234,7 @@ public abstract class DatabaseServlet {
     }
   }
 
-  /**
-   * Returns the json available in the cached table.
-   *
-   * @param connection the connection
-   * @param sampleId the sample id
-   * @return the sample fields json
-   * @throws SQLException the SQL exception
-   */
+  /*
   protected static String getSampleFieldsJson(Connection connection,
       int sampleId) throws SQLException {
     PreparedStatement statement = connection
@@ -1285,14 +1252,9 @@ public abstract class DatabaseServlet {
       statement.close();
     }
 
-    // System.err.println("ret " + ret);
-
-    // if (ret != null) {
-    // array.insert(ret);
-    // }
-
     return ret;
   }
+  */
 
   /*
    * protected static void processSamples(Connection connection, ResultsSetTable

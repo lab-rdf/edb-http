@@ -72,16 +72,14 @@ public class Vfs {
   /** The Constant VFS_PATH_SQL. */
   private static final String VFS_PATH_SQL = "SELECT vfs.path FROM vfs WHERE vfs.id = ?";
 
-  private static class VfsBeanMapper implements RowMapper<VfsFileBean> {
+  /** Convert resultset into bean object. */
+  public static final RowMapper<VfsFileBean> VFS_BEAN_MAPPER = new RowMapper<VfsFileBean> () {
     @Override
     public VfsFileBean mapRow(ResultSet rs, int rowNum) throws SQLException {
       return new VfsFileBean(rs.getInt(1), rs.getInt(2), rs.getString(3),
           rs.getInt(4), rs.getString(5), rs.getString(6));
     }
-  }
-
-  /** Convert resultset into bean object. */
-  public static final VfsBeanMapper VFS_BEAN_MAPPER = new VfsBeanMapper();
+  };
 
 
   /**

@@ -15,8 +15,6 @@
  */
 package edu.columbia.rdf.edb.http;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,24 +29,7 @@ import org.springframework.jdbc.core.RowMapper;
  * The Class Query.
  */
 public class Query {
-
-  private static class IdMapper implements RowMapper<Integer> {
-    @Override
-    public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-      return rs.getInt(1);
-    }
-  }
-
-  private static class StringMapper implements RowMapper<String> {
-    @Override
-    public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-      return rs.getString(1);
-    }
-  }
-
-  private static final IdMapper ID_MAPPER = new IdMapper();
-
-  private static final StringMapper STRING_MAPPER = new StringMapper();
+  
 
   /**
    * Instantiates a new query.
@@ -262,7 +243,7 @@ public class Query {
   public static String queryForString(JdbcTemplate jdbcTemplate,
       String sql,
       int id) {
-    String ret = querySingle(jdbcTemplate, sql, id, STRING_MAPPER);
+    String ret = querySingle(jdbcTemplate, sql, id, Database.STRING_MAPPER);
 
     // Return an empty string if the object is null
     return TextUtils.nonNull(ret);
@@ -296,7 +277,8 @@ public class Query {
   }
 
   /**
-   * Query for id.
+   * Query for a numerical id and return either the id or -1 if the query
+   * returns no results.
    *
    * @param jdbcTemplate the jdbc template
    * @param sql the sql
@@ -355,7 +337,7 @@ public class Query {
    */
   public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate,
       String sql) {
-    return query(jdbcTemplate, sql, ID_MAPPER);
+    return query(jdbcTemplate, sql, Database.INT_MAPPER);
   }
 
   /**
@@ -369,7 +351,7 @@ public class Query {
   public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate,
       String sql,
       int id) {
-    return query(jdbcTemplate, sql, id, ID_MAPPER);
+    return query(jdbcTemplate, sql, id, Database.INT_MAPPER);
   }
 
   /**
@@ -383,7 +365,7 @@ public class Query {
   public static List<Integer> queryForIds(JdbcTemplate jdbcTemplate,
       String sql,
       Object id) {
-    return query(jdbcTemplate, sql, id, ID_MAPPER);
+    return query(jdbcTemplate, sql, id, Database.INT_MAPPER);
   }
 
   /**
@@ -399,7 +381,7 @@ public class Query {
       String sql,
       Object id,
       Object... ids) {
-    return query(jdbcTemplate, sql, ID_MAPPER, id, ids);
+    return query(jdbcTemplate, sql, Database.INT_MAPPER, id, ids);
   }
 
   /**

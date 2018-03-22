@@ -13,6 +13,14 @@ import edu.columbia.rdf.edb.Experiment;
 
 public class Experiments {
 
+  private static final RowMapper<ExperimentBean> EXPERIMENT_BEAN_MAPPER = new RowMapper<ExperimentBean> () {
+    @Override
+    public ExperimentBean mapRow(ResultSet rs, int rowNum) throws SQLException {
+      return new ExperimentBean(rs.getInt(1), rs.getString(2),
+          rs.getString(4), rs.getString(3), rs.getString(5));
+    }
+  };
+  
   private Experiments() {
     // Do nothing
   }
@@ -31,57 +39,17 @@ public class Experiments {
   public static List<ExperimentBean> getExperiment(JdbcTemplate jdbcTemplate,
       int id) throws SQLException {
     return jdbcTemplate.query(Database.EXPERIMENT_SQL,
-        new Object[] { id },
-        new RowMapper<ExperimentBean>() {
-          @Override
-          public ExperimentBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-
-            /// samples.id,
-            // samples.experiment_id,
-            // samples.expression_type_id,
-            // samples.name,
-            // samples.organism_id,
-            // TO_CHAR(samples.created, 'YYYY-MM-DD')
-
-            return new ExperimentBean(rs.getInt(1), rs.getString(2),
-                rs.getString(4), rs.getString(3), rs.getString(5));
-          }
-        });
+        new Object[] { id }, EXPERIMENT_BEAN_MAPPER);
   }
 
   public static List<ExperimentBean> getExperiment(JdbcTemplate jdbcTemplate,
       String publicId) throws SQLException {
     return jdbcTemplate.query(Database.EXPERIMENT_PUBLIC_ID_SQL,
-        new Object[] { publicId },
-        new RowMapper<ExperimentBean>() {
-          @Override
-          public ExperimentBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-
-            /// samples.id,
-            // samples.experiment_id,
-            // samples.expression_type_id,
-            // samples.name,
-            // samples.organism_id,
-            // TO_CHAR(samples.created, 'YYYY-MM-DD')
-
-            return new ExperimentBean(rs.getInt(1), rs.getString(2),
-                rs.getString(4), rs.getString(3), rs.getString(5));
-          }
-        });
+        new Object[] { publicId }, EXPERIMENT_BEAN_MAPPER);
   }
 
   public static List<ExperimentBean> getExperiments(JdbcTemplate jdbcTemplate)
       throws SQLException {
-    return jdbcTemplate.query(Database.EXPERIMENTS_SQL,
-        new RowMapper<ExperimentBean>() {
-          @Override
-          public ExperimentBean mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-            return new ExperimentBean(rs.getInt(1), rs.getString(2),
-                rs.getString(4), rs.getString(3), rs.getString(5));
-          }
-        });
+    return jdbcTemplate.query(Database.EXPERIMENTS_SQL, EXPERIMENT_BEAN_MAPPER);
   }
 }

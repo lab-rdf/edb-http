@@ -78,7 +78,7 @@ public class Filter {
   }
 
   public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
-      Auth auth,
+      AuthBean auth,
       List<SampleBean> samples,
       List<Integer> gids,
       boolean allMode) {
@@ -90,14 +90,17 @@ public class Filter {
   }
 
   /**
-   * Filter samples by which groups a user belongs to.
-   * 
+   * Filter samples by which groups it belongs to.
+   * @param jdbcTemplate
+   * @param auth
    * @param samples
-   * @param gids
+   * @param gids          Group ids to search
+   * @param allMode       Whether sample must belong to all groups to be 
+   *                      returned.
    * @return
    */
   public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
-      Auth auth,
+      AuthBean auth,
       List<SampleBean> samples,
       Collection<Integer> gids,
       boolean allMode) {
@@ -109,7 +112,7 @@ public class Filter {
 
       if (gids.size() == 0) {
         // If there are no group ids specified, then match to all
-        gids = Persons.groupIds(jdbcTemplate, auth.getUserId());
+        gids = Persons.groupIds(jdbcTemplate, auth.getId());
       }
 
       for (SampleBean sample : samples) {

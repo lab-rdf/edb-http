@@ -512,11 +512,7 @@ public class Search {
       int id1,
       String id2) throws SQLException {
     return connection
-        .query(sql, new Object[] { id1, id2 }, new RowMapper<Integer>() {
-          public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return rs.getInt(1);
-          }
-        });
+        .query(sql, new Object[] { id1, id2 }, Database.INT_MAPPER);
   }
 
   /*

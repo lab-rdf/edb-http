@@ -40,24 +40,25 @@ public class Samples {
   /** Return the ids of the groups associated with a sample. */
   private static final String SAMPLE_GROUPS_SQL = "SELECT groups_samples.group_id FROM groups_samples WHERE groups_samples.sample_id = ?";
 
-  
   public static List<SampleBean> getSamples(final JdbcTemplate jdbcTemplate)
       throws SQLException {
-    return Query.query(jdbcTemplate, ALL_SAMPLES_SQL, new RowMapper<SampleBean>() {
-      @Override
-      public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-        int id = rs.getInt(1);
+    return Query
+        .asList(jdbcTemplate, ALL_SAMPLES_SQL, new RowMapper<SampleBean>() {
+          @Override
+          public SampleBean mapRow(ResultSet rs, int rowNum)
+              throws SQLException {
+            int id = rs.getInt(1);
 
-        Collection<Integer> sampleGroupIds = getGroups(jdbcTemplate, id);
+            Collection<Integer> sampleGroupIds = getGroups(jdbcTemplate, id);
 
-        return new SampleBean(id, rs.getInt(2), rs.getString(4), rs.getInt(3),
-            rs.getInt(5), rs.getString(6), sampleGroupIds);
+            return new SampleBean(id, rs.getInt(2), rs.getString(4),
+                rs.getInt(3), rs.getInt(5), rs.getString(6), sampleGroupIds);
 
-        // return getSample(jdbcTemplate, id);
-      }
-    });
+            // return getSample(jdbcTemplate, id);
+          }
+        });
   }
-  
+
   /**
    * Return the samples associated with a group.
    * 
@@ -66,19 +67,24 @@ public class Samples {
    * @return
    * @throws SQLException
    */
-  public static List<SampleBean> getGroupSamples(final JdbcTemplate jdbcTemplate, int gid)
-      throws SQLException {
-    return Query.query(jdbcTemplate, ALL_SAMPLES_WITHIN_GROUP_SQL, gid, new RowMapper<SampleBean>() {
-      @Override
-      public SampleBean mapRow(ResultSet rs, int rowNum) throws SQLException {
-        int id = rs.getInt(1);
+  public static List<SampleBean> getGroupSamples(
+      final JdbcTemplate jdbcTemplate,
+      int gid) throws SQLException {
+    return Query.asList(jdbcTemplate,
+        ALL_SAMPLES_WITHIN_GROUP_SQL,
+        new RowMapper<SampleBean>() {
+          @Override
+          public SampleBean mapRow(ResultSet rs, int rowNum)
+              throws SQLException {
+            int id = rs.getInt(1);
 
-        Collection<Integer> sampleGroupIds = getGroups(jdbcTemplate, id);
+            Collection<Integer> sampleGroupIds = getGroups(jdbcTemplate, id);
 
-        return new SampleBean(id, rs.getInt(2), rs.getString(4), rs.getInt(3),
-            rs.getInt(5), rs.getString(6), sampleGroupIds);
-      }
-    });
+            return new SampleBean(id, rs.getInt(2), rs.getString(4),
+                rs.getInt(3), rs.getInt(5), rs.getString(6), sampleGroupIds);
+          }
+        },
+        gid);
   }
 
   public static List<SampleBean> getSamples(JdbcTemplate connection,
@@ -123,10 +129,8 @@ public class Samples {
    */
   public static List<SampleBean> getSamples(final JdbcTemplate jdbcTemplate,
       final int id) throws SQLException {
-    return Query.query(jdbcTemplate,
-        Database.SAMPLE_SQL,
-        id,
-        new RowMapper<SampleBean>() {
+    return Query
+        .asList(jdbcTemplate, Database.SAMPLE_SQL, new RowMapper<SampleBean>() {
           @Override
           public SampleBean mapRow(ResultSet rs, int rowNum)
               throws SQLException {
@@ -137,7 +141,7 @@ public class Samples {
                 rs.getInt(3), rs.getInt(5), rs.getString(6), sampleGroupIds);
 
           }
-        });
+        }, id);
   }
 
   public static SampleBean getSample(final JdbcTemplate jdbcTemplate,
@@ -193,15 +197,14 @@ public class Samples {
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate, int sid)
       throws SQLException {
     List<Integer> pids = Query
-        .queryForIds(jdbcTemplate, SAMPLE_PERSON_IDS_SQL, sid);
+        .asIntList(jdbcTemplate, SAMPLE_PERSON_IDS_SQL, sid);
 
     return Persons.getPersons(jdbcTemplate, pids);
   }
 
-  
   public static List<GeoBean> getGeo(final JdbcTemplate jdbcTemplate, int sid) {
     return Query
-        .query(jdbcTemplate, SAMPLE_GEO_SQL, sid, new RowMapper<GeoBean>() {
+        .asList(jdbcTemplate, SAMPLE_GEO_SQL, new RowMapper<GeoBean>() {
           @Override
           public GeoBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -212,7 +215,7 @@ public class Samples {
                 Geo.getSeries(jdbcTemplate, seriesId), rs.getString(2),
                 Geo.getPlatform(jdbcTemplate, platformId));
           }
-        });
+        }, sid);
   }
 
   /**
@@ -225,7 +228,7 @@ public class Samples {
    */
   public static Collection<Integer> getGroups(JdbcTemplate jdbcTemplate,
       int sampleId) throws SQLException {
-    return Query.queryForIds(jdbcTemplate, SAMPLE_GROUPS_SQL, sampleId);
+    return Query.asIntList(jdbcTemplate, SAMPLE_GROUPS_SQL, sampleId);
   }
 
   /**

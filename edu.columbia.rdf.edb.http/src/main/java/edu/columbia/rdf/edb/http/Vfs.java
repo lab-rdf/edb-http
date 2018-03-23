@@ -258,7 +258,7 @@ public class Vfs {
 
   public static List<Integer> getSampleFiles(JdbcTemplate connection,
       int sampleId) throws SQLException {
-    return Query.queryForIds(connection, SAMPLE_FILE_IDS_SQL, sampleId);
+    return Query.asIntList(connection, SAMPLE_FILE_IDS_SQL, sampleId);
   }
 
   /**
@@ -366,13 +366,7 @@ public class Vfs {
     //    new Object[] { fid },
     //    VFS_BEAN_MAPPER);
     
-    List<VfsFileBean> files = Query.query(jdbcTemplate, VFS_FILE_SQL, fid, VFS_BEAN_MAPPER);
-
-    if (files.size() > 0) {
-      return files.get(0);
-    } else {
-      return null;
-    }
+    return Query.query(jdbcTemplate, VFS_FILE_SQL, VFS_BEAN_MAPPER, fid);
   }
 
 }

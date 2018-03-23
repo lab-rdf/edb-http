@@ -121,7 +121,7 @@ public class Groups {
       return (Collection<Integer>) ce.getObjectValue();
     }
 
-    List<Integer> ids = Query.queryForIds(connection, GROUP_IDS_SQL, userId);
+    List<Integer> ids = Query.asIntList(connection, GROUP_IDS_SQL, userId);
 
     ce = new Element(userId, ids);
 
@@ -226,12 +226,12 @@ public class Groups {
 
   public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate)
       throws SQLException {
-    return Query.query(jdbcTemplate, GROUPS_SQL, GROUP_BEAN_MAPPER);
+    return Query.asList(jdbcTemplate, GROUPS_SQL, GROUP_BEAN_MAPPER);
   }
 
   public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate,
       Collection<Integer> gids) throws SQLException {
-    return Query.query(jdbcTemplate, GROUP_SQL, gids, GROUP_BEAN_MAPPER);
+    return Query.asList(jdbcTemplate, GROUP_SQL, GROUP_BEAN_MAPPER, gids);
   }
 
 }

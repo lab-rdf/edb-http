@@ -83,7 +83,7 @@ public class WebAuth {
     boolean valid = false;
 
     int count = Query
-        .queryForId(jdbcTemplate, VALIDATE_IP_SQL, person, ipAddress);
+        .asInt(jdbcTemplate, VALIDATE_IP_SQL, person, ipAddress);
 
     if (count > 0) {
       cache.put(new Element(person, ipAddress));
@@ -104,7 +104,7 @@ public class WebAuth {
   public static int getUserIdFromUUID(JdbcTemplate jdbcTemplate, String key) {
     key = santizeKey(key);
 
-    return Query.queryForId(jdbcTemplate, USER_ID_FROM_PUBLIC_UUID_SQL, key);
+    return Query.asInt(jdbcTemplate, USER_ID_FROM_PUBLIC_UUID_SQL, key);
   }
 
   /**
@@ -115,7 +115,7 @@ public class WebAuth {
    * @return
    */
   public static int getUserIdFromAPIKey(JdbcTemplate jdbcTemplate, String key) {
-    return Query.queryForId(jdbcTemplate, USER_ID_FROM_APK_KEY_SQL, key);
+    return Query.asInt(jdbcTemplate, USER_ID_FROM_APK_KEY_SQL, key);
   }
 
   /**
@@ -329,7 +329,7 @@ public class WebAuth {
     }
 
     String key = Query
-        .queryForString(jdbcTemplate, WebAuthentication.TOTP_PHRASE_SQL, userId);
+        .asString(jdbcTemplate, WebAuthentication.TOTP_PHRASE_SQL, userId);
 
     cache.put(new Element(userId, key));
 

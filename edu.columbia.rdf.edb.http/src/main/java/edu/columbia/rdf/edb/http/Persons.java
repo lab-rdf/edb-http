@@ -54,18 +54,18 @@ public class Persons {
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate, int id)
       throws SQLException {
     return Query
-        .query(jdbcTemplate, PERSON_SQL, id, PERSON_BEAN_MAPPER);
+        .asList(jdbcTemplate, PERSON_SQL, PERSON_BEAN_MAPPER, id);
   }
 
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate,
       Collection<Integer> ids) throws SQLException {
     return Query
-        .query(jdbcTemplate, PERSON_SQL, ids, PERSON_BEAN_MAPPER);
+        .asList(jdbcTemplate, PERSON_SQL, PERSON_BEAN_MAPPER, ids);
   }
 
   public static List<PersonBean> getPersons(JdbcTemplate jdbcTemplate)
       throws SQLException {
-    return Query.query(jdbcTemplate, PERSONS_SQL, PERSON_BEAN_MAPPER);
+    return Query.asList(jdbcTemplate, PERSONS_SQL, PERSON_BEAN_MAPPER);
   }
 
   /**
@@ -76,7 +76,7 @@ public class Persons {
    * @return
    */
   public static boolean isAdmin(JdbcTemplate jdbcTemplate, int pid) {
-    return Query.queryForId(jdbcTemplate, ADMIN_GROUP_SQL, pid) > 0;
+    return Query.asInt(jdbcTemplate, ADMIN_GROUP_SQL, pid) > 0;
   }
 
   /**
@@ -87,7 +87,7 @@ public class Persons {
    * @return
    */
   public static boolean isSuper(JdbcTemplate jdbcTemplate, int pid) {
-    return Query.queryForId(jdbcTemplate, SUPERUSER_GROUP_SQL, pid) > 0;
+    return Query.asInt(jdbcTemplate, SUPERUSER_GROUP_SQL, pid) > 0;
   }
 
   /**
@@ -98,7 +98,7 @@ public class Persons {
    * @return
    */
   public static List<Integer> groupIds(JdbcTemplate jdbcTemplate, int pid) {
-    return Query.queryForIds(jdbcTemplate, GROUP_IDS_SQL, pid);
+    return Query.asIntList(jdbcTemplate, GROUP_IDS_SQL, pid);
   }
 
   /**
@@ -109,6 +109,6 @@ public class Persons {
    * @return
    */
   public static List<GroupBean> getGroups(JdbcTemplate jdbcTemplate, int pid) {
-    return Query.query(jdbcTemplate, GROUPS_SQL, pid, Groups.GROUP_BEAN_MAPPER);
+    return Query.asList(jdbcTemplate, GROUPS_SQL, Groups.GROUP_BEAN_MAPPER, pid);
   }
 }

@@ -39,11 +39,11 @@ public class Geo {
 
   public static String getSeries(JdbcTemplate jdbcTemplate, int seriesId)
       throws SQLException {
-    return Query.queryForString(jdbcTemplate, SERIES_SQL, seriesId);
+    return Query.asString(jdbcTemplate, SERIES_SQL, seriesId);
   }
 
   public static String getPlatform(JdbcTemplate jdbcTemplate, int platformId)
       throws SQLException {
-    return Query.queryForString(jdbcTemplate, PLATFORM_SQL, platformId);
+    return Query.asString(jdbcTemplate, PLATFORM_SQL, platformId);
   }
 }

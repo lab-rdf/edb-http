@@ -363,7 +363,7 @@ public class Search {
   public static List<Integer> getSampleIds(JdbcTemplate connection, int tagId)
       throws SQLException {
 
-    return Query.queryForIds(connection, ALL_TAG_SAMPLES_SQL, tagId);
+    return Query.asIntList(connection, ALL_TAG_SAMPLES_SQL, tagId);
   }
 
   /**

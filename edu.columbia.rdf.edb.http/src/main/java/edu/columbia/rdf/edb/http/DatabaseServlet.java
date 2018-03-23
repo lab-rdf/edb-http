@@ -727,7 +727,7 @@ public abstract class DatabaseServlet {
       jsonArray.add(EDB.HEADING_ID, sampleId);
       jsonArray.add(EDB.HEADING_EXPERIMENT, experimentId);
       jsonArray.add(EDB.HEADING_TYPE, type);
-      jsonArray.add(EDB.HEADING_NAME, table.getString(3));
+      jsonArray.add(EDB.HEADING_NAME_SHORT, table.getString(3));
       // sampleJSON.add(Application.HEADING_DESCRIPTION,
       // table.getDataAsString(i, 4));
       jsonArray.add(EDB.HEADING_ORGANISM, organism);
@@ -970,7 +970,7 @@ public abstract class DatabaseServlet {
       jsonArray.add(EDB.HEADING_ID, sampleId);
       jsonArray.add(EDB.HEADING_EXPERIMENT, experimentId);
       jsonArray.add(EDB.HEADING_TYPE, table.getInt(i, 2));
-      jsonArray.add(EDB.HEADING_NAME, table.getString(i, 3));
+      jsonArray.add(EDB.HEADING_NAME_SHORT, table.getString(i, 3));
       // sampleJSON.add(Application.HEADING_DESCRIPTION,
       // table.getDataAsString(i, 4));
       jsonArray.add(EDB.HEADING_SPECIES, table.getInt(i, 4));
@@ -1387,7 +1387,7 @@ public abstract class DatabaseServlet {
 
       jsonArray.add(EDB.HEADING_ID, experimentId);
       jsonArray.add(EDB.HEADING_PUBLIC_ID, table.getString(1));
-      jsonArray.add(EDB.HEADING_NAME, table.getString(2));
+      jsonArray.add(EDB.HEADING_NAME_SHORT, table.getString(2));
       jsonArray.add(EDB.HEADING_DESCRIPTION, table.getString(3));
       jsonArray.add(EDB.HEADING_DATE, table.getString(4));
       // jsonArray.add(Application.HEADING_LOCKED, isLocked);
@@ -1413,7 +1413,7 @@ public abstract class DatabaseServlet {
       // attributesJSON.add(Application.HEADING_ID, new
       // JSONInteger(table.getDataAsInt(i, 0)));
       fieldJSON.add(EDB.HEADING_ID, type.getId());
-      fieldJSON.add(EDB.HEADING_NAME, type.getName());
+      fieldJSON.add(EDB.HEADING_NAME_SHORT, type.getName());
 
       jsonArray.add(fieldJSON);
     }
@@ -1435,7 +1435,7 @@ public abstract class DatabaseServlet {
       // attributesJSON.add(Application.HEADING_ID, new
       // JSONInteger(table.getDataAsInt(i, 0)));
       jsonArray.add(EDB.HEADING_ID, table.getInt(i, 0));
-      jsonArray.add(EDB.HEADING_NAME, table.getString(i, 1));
+      jsonArray.add(EDB.HEADING_NAME_SHORT, table.getString(i, 1));
 
       jsonArray.endObject();
     }
@@ -1515,7 +1515,7 @@ public abstract class DatabaseServlet {
 
       jsonArray.add(EDB.HEADING_ID, vfsId);
       jsonArray.add(EDB.HEADING_PID, table.getInt(1));
-      jsonArray.add(EDB.HEADING_NAME, table.getString(2));
+      jsonArray.add(EDB.HEADING_NAME_SHORT, table.getString(2));
       jsonArray.add(EDB.HEADING_TYPE, table.getInt(3));
       jsonArray.add(EDB.HEADING_DATE, table.getString(5));
 
@@ -1569,7 +1569,7 @@ public abstract class DatabaseServlet {
 
         fileJSON.add(EDB.HEADING_ID, vfsId);
         fileJSON.add(EDB.HEADING_PID, table.getInt(1));
-        fileJSON.add(EDB.HEADING_NAME, table.getString(2));
+        fileJSON.add(EDB.HEADING_NAME_SHORT, table.getString(2));
         fileJSON.add(EDB.HEADING_TYPE, table.getInt(3));
 
         jsonArray.add(fileJSON);

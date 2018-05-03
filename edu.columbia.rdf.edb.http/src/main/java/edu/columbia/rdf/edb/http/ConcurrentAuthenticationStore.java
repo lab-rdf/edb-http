@@ -18,7 +18,6 @@ package edu.columbia.rdf.edb.http;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * Stores mappings of keys, ip addresses and person ids to lower requests to the
  * database.

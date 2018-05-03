@@ -18,7 +18,6 @@ package edu.columbia.rdf.edb.http;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ConcurrentIdStore.
  */

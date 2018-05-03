@@ -39,7 +39,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import edu.columbia.rdf.edb.TypeMap;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Database.
  */

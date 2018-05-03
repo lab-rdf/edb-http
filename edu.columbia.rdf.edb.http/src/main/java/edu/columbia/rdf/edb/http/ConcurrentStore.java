@@ -15,7 +15,6 @@
  */
 package edu.columbia.rdf.edb.http;
 
-// TODO: Auto-generated Javadoc
 /**
  * Stores ids and their associated string value.
  *

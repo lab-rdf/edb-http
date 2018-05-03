@@ -18,7 +18,6 @@ package edu.columbia.rdf.edb.http;
 import java.util.Collection;
 import java.util.Collections;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SearchResults.
  */

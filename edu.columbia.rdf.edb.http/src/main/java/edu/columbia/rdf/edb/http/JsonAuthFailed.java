@@ -17,7 +17,6 @@ package edu.columbia.rdf.edb.http;
 
 import org.jebtk.core.json.JsonObject;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class JsonAuthFailed.
  */

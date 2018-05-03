@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
-// TODO: Auto-generated Javadoc
 /**
  * AuthCallBack is used to control what happens when a database authorization is
  * succesful.

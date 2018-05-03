@@ -23,7 +23,6 @@ import java.util.Set;
 import org.jebtk.core.collections.CollectionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Search.
  */

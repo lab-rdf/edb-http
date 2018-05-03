@@ -19,7 +19,6 @@ import java.nio.file.Path;
 
 import org.jebtk.bioinformatics.annotation.Type;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class FileRecord.
  */

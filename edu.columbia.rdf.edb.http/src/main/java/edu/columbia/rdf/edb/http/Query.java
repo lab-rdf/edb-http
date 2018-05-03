@@ -24,7 +24,6 @@ import org.jebtk.core.text.TextUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Query.
  */

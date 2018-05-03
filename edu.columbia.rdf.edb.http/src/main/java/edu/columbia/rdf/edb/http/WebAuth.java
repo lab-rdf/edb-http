@@ -28,7 +28,6 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class WebAuth provides authentication methods based on the Spring
  * Framework.

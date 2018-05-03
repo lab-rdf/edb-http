@@ -42,7 +42,6 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class WebAuthentication.
  */

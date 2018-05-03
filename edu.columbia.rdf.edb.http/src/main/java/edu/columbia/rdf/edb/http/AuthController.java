@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-public class AuthController extends Controller {
+public class AuthController extends DBController {
 
   /**
    * Return whether an API key is valid. This does not indicate  who

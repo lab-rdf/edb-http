@@ -59,6 +59,11 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
+      <groupId>org.jebtk</groupId>
+      <artifactId>org.jebtk.web</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+		<dependency>
 			<groupId>edu.columbia.rdf</groupId>
 			<artifactId>edu.columbia.rdf.edb</artifactId>
 			<version>1.0.0</version>

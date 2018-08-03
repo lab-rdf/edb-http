@@ -26,6 +26,7 @@ public class PersonBean extends Type {
     mEmail = email;
   }
 
+  /*
   public void setId(int id) {
     mId = id;
   }
@@ -45,6 +46,7 @@ public class PersonBean extends Type {
   public void setEmail(String name) {
     mEmail = name;
   }
+  */
 
   @Override
   @JsonIgnore

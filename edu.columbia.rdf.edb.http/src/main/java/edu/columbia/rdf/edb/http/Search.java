@@ -129,7 +129,7 @@ public class Search {
    */
   public static ResultsSetTable search(Connection connection,
       int tagId,
-      List<SearchStackElement<Integer>> searchQueue,
+      List<SearchStackElement> searchQueue,
       int maxCount) throws SQLException {
 
     if (searchQueue.size() == 0) {
@@ -144,14 +144,14 @@ public class Search {
       return Samples.getSamplesTable(connection, ids, maxCount);
     }
 
-    // SearchStackElement<Integer> e = null;
+    // SearchStackElement e = null;
 
     Deque<SearchResults> tempStack = new ArrayDeque<SearchResults>();
 
     // while (!searchStack.isEmpty()) {
     // e = searchStack.pop();
 
-    for (SearchStackElement<Integer> e : searchQueue) {
+    for (SearchStackElement e : searchQueue) {
       switch (e.mOp) {
       case MATCH:
         // First get a list of keywords matching the search
@@ -204,7 +204,7 @@ public class Search {
 
   public static List<SampleBean> searchSamples(JdbcTemplate jdbcTemplate,
       int tagId,
-      List<SearchStackElement<Integer>> searchQueue,
+      List<SearchStackElement> searchQueue,
       int maxCount) throws SQLException {
 
     if (searchQueue.size() == 0) {
@@ -215,14 +215,14 @@ public class Search {
       return Samples.getSamples(jdbcTemplate);
     }
 
-    // SearchStackElement<Integer> e = null;
+    // SearchStackElement e = null;
 
     Deque<SearchResults> tempStack = new ArrayDeque<SearchResults>();
 
     // while (!searchStack.isEmpty()) {
     // e = searchStack.pop();
 
-    for (SearchStackElement<Integer> e : searchQueue) {
+    for (SearchStackElement e : searchQueue) {
       switch (e.mOp) {
       case MATCH:
         // First get a list of keywords matching the search
@@ -285,7 +285,6 @@ public class Search {
    * @return The intersection of results 1 and results 2.
    */
   private static SearchResults and(SearchResults sr1, SearchResults sr2) {
-
     if (!sr1.getInclude() && !sr2.getInclude()) {
       // Return nothing
       return new SearchResults();

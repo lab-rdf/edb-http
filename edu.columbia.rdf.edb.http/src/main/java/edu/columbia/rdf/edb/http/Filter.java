@@ -15,6 +15,7 @@
  */
 package edu.columbia.rdf.edb.http;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -80,7 +81,7 @@ public class Filter {
       AuthBean auth,
       List<SampleBean> samples,
       List<Integer> gids,
-      boolean allMode) {
+      boolean allMode) throws SQLException {
     return filterByGroups(jdbcTemplate,
         auth,
         samples,
@@ -97,12 +98,13 @@ public class Filter {
    * @param allMode       Whether sample must belong to all groups to be 
    *                      returned.
    * @return
+   * @throws SQLException 
    */
   public static List<SampleBean> filterByGroups(JdbcTemplate jdbcTemplate,
       AuthBean auth,
       List<SampleBean> samples,
       Collection<Integer> gids,
-      boolean allMode) {
+      boolean allMode) throws SQLException {
 
     List<SampleBean> ret = new ArrayList<SampleBean>(samples.size());
 
@@ -117,7 +119,7 @@ public class Filter {
       for (SampleBean sample : samples) {
         boolean include = true;
 
-        Set<Integer> sgids = CollectionUtils.toSet(sample.getGroups());
+        Set<Integer> sgids = CollectionUtils.toSet(Samples.getGroups(jdbcTemplate, sample.getId())); //sample.getGroups());
 
         // Each sample must in all of the groups
         for (int gid : gids) {
@@ -139,7 +141,7 @@ public class Filter {
       }
 
       for (SampleBean sample : samples) {
-        for (int gid : sample.getGroups()) {
+        for (int gid : Samples.getGroups(jdbcTemplate, sample.getId())) {
           if (gids.contains(gid)) {
             ret.add(sample);
             break;

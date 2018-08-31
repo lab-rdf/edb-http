@@ -104,15 +104,17 @@ public class AuthController extends DBController {
       JdbcTemplate jdbcTemplate,
       String key,
       int totp,
-      AuthListCallBack<T> callBack) throws SQLException {
+      AuthListCallBack<T> callBack,
+      int... ids) throws SQLException {
 
-    return authenticate(context,
+   return authenticate(context,
         request,
         jdbcTemplate,
         key,
         totp,
         UserType.NORMAL,
-        callBack);
+        callBack,
+        ids);
   }
   
   /**
@@ -134,8 +136,13 @@ public class AuthController extends DBController {
       String key,
       int totp,
       UserType minUserType,
-      AuthListCallBack<T> callBack) throws SQLException {
+      AuthListCallBack<T> callBack,
+      int... ids) throws SQLException {
 
+    if (!authIds(ids)) {
+      return Collections.emptyList();
+    }
+    
     AuthBean auth = authenticate(context, request, jdbcTemplate, key, totp);
 
     if (auth.getStatus() == AuthStatus.SUCCESS && UserType.geRank(minUserType, auth.getUserType())) {
@@ -144,6 +151,22 @@ public class AuthController extends DBController {
       // If authentication fails, return an empty list.
       return Collections.emptyList();
     }
+  }
+
+  /**
+   * Test a set of ids to be valid (> 0).
+   * 
+   * @param ids
+   * @return
+   */
+  public static boolean authIds(int... ids) {
+    for (int id : ids) {
+      if (id < 1) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   public static <T> T authenticate(ServletContext context,
@@ -162,17 +185,43 @@ public class AuthController extends DBController {
         callBack);
   }
   
+  /**
+   * Authenticate a user and validate some of the input.
+   * 
+   * @param context
+   * @param request
+   * @param jdbcTemplate
+   * @param key
+   * @param totp
+   * @param minUserType
+   * @param callBack
+   * @param ids           Optionally provide a list of ids to validate before
+   *                      authenticating. This can be used to validate
+   *                      sample ids etc before running a query. Ids are 
+   *                      only validated for being greater than zero so that
+   *                      they are potentially in the database; they are not
+   *                      checked for actually being in the database.
+   *                      
+   * @return
+   * @throws SQLException
+   */
   public static <T> T authenticate(ServletContext context,
       HttpServletRequest request,
       JdbcTemplate jdbcTemplate,
       String key,
       int totp,
       UserType minUserType,
-      AuthCallBack<T> callBack) throws SQLException {
+      AuthCallBack<T> callBack,
+      int... ids) throws SQLException {
 
+    if (!authIds(ids)) {
+      return null;
+    }
+    
     AuthBean auth = authenticate(context, request, jdbcTemplate, key, totp);
 
-    if (auth.getStatus() == AuthStatus.SUCCESS && UserType.geRank(minUserType, auth.getUserType())) {
+    if (auth.getStatus() == AuthStatus.SUCCESS && 
+        UserType.geRank(minUserType, auth.getUserType())) {
       return callBack.success(context, request, jdbcTemplate, auth);
     } else {
       // If authentication fails, return an empty list.

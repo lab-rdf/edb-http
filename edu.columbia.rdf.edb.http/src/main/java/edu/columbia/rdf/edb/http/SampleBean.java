@@ -1,7 +1,5 @@
 package edu.columbia.rdf.edb.http;
 
-import java.util.Collection;
-
 import org.jebtk.bioinformatics.annotation.Type;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -15,17 +13,17 @@ public class SampleBean extends Type {
   private int mExperimentId;
   private int mTypeId;
   private int mOrganism;
-  private Collection<Integer> mGroups;
+  //private Collection<Integer> mGroups;
 
   public SampleBean(int id, int experimentId, String name, int typeId,
-      int organismId, String date, Collection<Integer> groups) {
+      int organismId, String date) {
     super(id, name);
 
     mExperimentId = experimentId;
     mTypeId = typeId;
     mOrganism = organismId;
     mDate = date;
-    mGroups = groups;
+    //mGroups = groups; , Collection<Integer> groups
 
     /// samples.id,
     // samples.experiment_id,
@@ -61,8 +59,8 @@ public class SampleBean extends Type {
     return mName;
   }
 
-  @JsonGetter("g")
-  public Collection<Integer> getGroups() {
-    return mGroups;
-  }
+  //@JsonGetter("g")
+  //public Collection<Integer> getGroups() {
+  //   return mGroups;
+  //}
 }

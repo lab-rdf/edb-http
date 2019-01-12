@@ -22,7 +22,7 @@ import java.util.Map;
  * Stores mappings of keys, ip addresses and person ids to lower requests to the
  * database.
  * 
- * @author Antony Holmes Holmes
+ * @author Antony Holmes
  *
  */
 public class ConcurrentAuthenticationStore implements ConcurrentStore {

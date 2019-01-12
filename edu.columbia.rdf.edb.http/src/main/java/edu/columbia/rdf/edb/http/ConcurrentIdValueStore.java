@@ -18,7 +18,7 @@ package edu.columbia.rdf.edb.http;
 /**
  * Stores ids and their associated string value.
  *
- * @author Antony Holmes Holmes
+ * @author Antony Holmes
  * @param <T> the generic type
  */
 public class ConcurrentIdValueStore<T>

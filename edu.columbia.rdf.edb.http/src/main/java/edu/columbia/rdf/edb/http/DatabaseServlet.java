@@ -62,7 +62,7 @@ import net.sf.ehcache.Element;
  * Provides a connection to the database for servlets and deals with closing the
  * connection.
  * 
- * @author Antony Holmes Holmes
+ * @author Antony Holmes
  *
  */
 public abstract class DatabaseServlet {

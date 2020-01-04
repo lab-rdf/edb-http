@@ -1,7 +1,7 @@
 package edu.columbia.rdf.edb.http;
 
 import org.jebtk.bioinformatics.annotation.Entity;
-import org.jebtk.core.NameProperty;
+import org.jebtk.core.NameGetter;
 import org.jebtk.core.json.JsonBuilder;
 import org.jebtk.core.text.TextUtils;
 
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 @JsonPropertyOrder({ "id", "name", "genome", "params", "locations" })
-public class PeaksBean extends Entity implements NameProperty {
+public class PeaksBean extends Entity implements NameGetter {
 
   private String mName;
   private String mGenome;

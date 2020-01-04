@@ -1,14 +1,14 @@
 package edu.columbia.rdf.edb.http;
 
 import org.jebtk.core.IdProperty;
-import org.jebtk.core.NameProperty;
+import org.jebtk.core.NameGetter;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "id", "pid", "n", "t", "d" })
-public class VfsFileBean implements IdProperty, NameProperty {
+public class VfsFileBean implements IdProperty, NameGetter {
 
   private int mId;
   private int mPid;

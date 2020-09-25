@@ -8,7 +8,7 @@ import org.jebtk.core.text.TextUtils;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
-@JsonPropertyOrder({ "id", "name", "genome", "params", "locations" })
+@JsonPropertyOrder({ "id", "name", "genome", "props", "locations" })
 public class PeaksBean extends Entity implements NameGetter {
 
   private String mName;
@@ -20,17 +20,17 @@ public class PeaksBean extends Entity implements NameGetter {
     this(id, name, genome, null);
   }
 
-  public PeaksBean(int id, String name, String genome, String params) {
-    this(id, name, genome, params, null);
+  public PeaksBean(int id, String name, String genome, String props) {
+    this(id, name, genome, props, null);
   }
 
-  public PeaksBean(int id, String name, String genome, String params,
+  public PeaksBean(int id, String name, String genome, String props,
       String peaks) {
     super(id);
 
     mName = name;
     mGenome = genome;
-    mParams = TextUtils.isNullOrEmpty(params, JsonBuilder.JSON_EMPTY_ARRAY);
+    mParams = TextUtils.isNullOrEmpty(props, JsonBuilder.JSON_EMPTY_ARRAY);
     mPeaksJson = TextUtils.isNullOrEmpty(peaks, JsonBuilder.JSON_EMPTY_ARRAY);
   }
 
